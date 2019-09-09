@@ -44,9 +44,11 @@ function bp(DATA::String = "data_33_14",
         xbp = runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
     end
     if ALGORITHM == "kahan"
-        xbp = runbpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
+        xbp = bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
     end
     errors(H, b, v, xbp, ERROR)
+
+    return xbp, H, b, v
 end
 
 end # SimplyGBP
