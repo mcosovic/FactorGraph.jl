@@ -38,9 +38,7 @@ function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
         xbp = nmarginal(md, vid, msc, vsc, evc, Ji, Nv)                                                                     # BeliefPropagation
     end
 
-    if TIME == "on"
-       bp_time(fgraph, init, infe, solu)
-    end
+    bp_time(fgraph, init, infe, solu, TIME)
 
     return xbp
 end

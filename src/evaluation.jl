@@ -20,7 +20,7 @@ end
 
 
 ################################################################################
-# Compute weighted residual sum of squares (WRSS) and  root mean square error
+# Compute weighted residual sum of squares (WRSS) and root mean square error
 # (RMSE) metrics
 #-------------------------------------------------------------------------------
 function wrss(H, b, v, xbp, xwls)
@@ -77,12 +77,14 @@ end
 # The time evolution of the belief propagation algorithm for the option
 # TIME = "on"
 #-------------------------------------------------------------------------------
-function bp_time(fg, it, ic, so)
-    print("Preprocesing: $(@sprintf("%.6f", fg * 1000)) ms \n")
-    print("Initialize:   $(@sprintf("%.6f", it * 1000)) ms \n")
-    print("Inference:    $(@sprintf("%.6f", ic * 1000)) ms \n")
-    print("Marginal:     $(@sprintf("%.6f", so * 1000)) ms \n")
-    println(" ")
-    print("BP:           $(@sprintf("%.6f", (fg + it + ic + so) * 1000)) ms \n")
+function bp_time(fg, it, ic, so, TIME)
+    if TIME == "on"
+        print("Preprocesing: $(@sprintf("%.6f", fg * 1000)) ms \n")
+        print("Initialize:   $(@sprintf("%.6f", it * 1000)) ms \n")
+        print("Inference:    $(@sprintf("%.6f", ic * 1000)) ms \n")
+        print("Marginal:     $(@sprintf("%.6f", so * 1000)) ms \n")
+        println(" ")
+        print("BP:           $(@sprintf("%.6f", (fg + it + ic + so) * 1000)) ms \n")
+    end
 end
 ################################################################################

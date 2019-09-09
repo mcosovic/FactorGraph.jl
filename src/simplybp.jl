@@ -38,9 +38,7 @@ function runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
         xbp = marginal(md, vid, msc, vsc, Ji, Nv)                                                                       # inference.jl
     end
 
-    if TIME == "on"
-       bp_time(fgraph, init, infe, solu)
-    end
+    bp_time(fgraph, init, infe, solu, TIME)
 
     return xbp
  end
