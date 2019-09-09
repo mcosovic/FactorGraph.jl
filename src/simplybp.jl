@@ -1,4 +1,4 @@
-function bp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; TIME = "off", ERROR = "off")
+function bp(data::String="data_33_14", MAXI::Int64=20, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; TIME::String = "off", ERROR::String = "off")
     H, b, v = model(data)                                                                                               # input.jl
 
     fgraph = @elapsed begin
