@@ -29,7 +29,7 @@ function rmse(H, b, v, xbp, xwls)
     return rmse_bp, rmse_wls
 end
 
-function errors(H, b, v, xbp)
+function errors(H, b, v, xbp, ERROR)
     if ERROR == "on"
         wls = @elapsed begin
             xwls = wlsMldivide(H, b, v)

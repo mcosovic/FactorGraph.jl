@@ -1,4 +1,4 @@
-function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MENA, VARI, TIME)
+function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
 
     fgraph = @elapsed begin

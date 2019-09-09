@@ -5,7 +5,7 @@ using SparseArrays
 using HDF5
 using Test
 
-bp("data_33_14", 20, 10, 0.6, 0.4, 0.0, 1e3; ALGORITHM = "sum", ERROR::String = "on", PATH::STRING = "test/")
+bp("SimpleTest", 20, 10, 0.6, 0.4, 0.0, 1e3, ALGORITHM = "sum", ERROR = "on", PATH = "test/")
 
 
 # function wlsMldivide(H, b, v)

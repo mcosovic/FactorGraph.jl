@@ -1,5 +1,5 @@
 
-function runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MENA, VARI, TIME)
+function runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
     fgraph = @elapsed begin
         Nf, Nv, T = graph(H)                                                                                            # factorgraph.jl
