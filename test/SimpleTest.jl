@@ -29,11 +29,16 @@ end
 
 H, b, v = model("SimpleTest", "test/")
 
-
-bp("SimpleTest", 1000, 10, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
-# println(@test xbp ≈ wlsMldivide(H, b, v))
+@testset "SimplyBP" begin
+    @test bp("SimpleTest", 1000, 10, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 50, 0.0, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 10, 0.6, 0.4, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
+end
 #
-# xbp, H, b, v = bp("SimpleTest", 1000, 10, 0.6, 0.4, 0.0, 1e60, ALGORITHM = "kahan", PATH = "test/")
-# println(@test xbp ≈ wlsMldivide(H, b, v))
+@testset "KahanBP" begin
+    @test bp("SimpleTest", 1000, 10, 0.6, 0.4, 0.0, 1e30, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 50, 0.0, 0.0, 0.0, 1e60, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 500, 10, 0.6, 0.4, 10.0, 1e80, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
+end
 
 end # SimpleTest
