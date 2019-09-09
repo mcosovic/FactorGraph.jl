@@ -28,3 +28,16 @@ function rmse(H, b, v, xbp, xwls)
 
     return rmse_bp, rmse_wls
 end
+
+function errors(H, b, v, xbp)
+    if ERROR == "on"
+        wls = @elapsed begin
+            xwls = wlsMldivide(H, b, v)
+        end
+
+        wrss_bp, wrss_wls = wrss(H, b, v, xbp, xwls)
+        rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
+
+        wls_vs_bp(wls, wrss_wls, wrss_bp, rmse_wls, rmse_bp, xbp, xwls)
+    end
+end
