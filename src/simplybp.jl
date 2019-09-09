@@ -1,4 +1,4 @@
-function bp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; time = "off", error = "off")
+function bp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; TIME = "off", ERROR = "off")
     H, b, v = model(data)                                                                                               # input.jl
 
     fgraph = @elapsed begin
@@ -38,11 +38,11 @@ function bp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Flo
         xbp = marginal(md, vid, msc, vsc, Ji, Nv)                                                                       # inference.jl
     end
 
-    if time == "on"
+    if TIME == "on"
        bp_time(fgraph, init, infe, solu)
     end
 
-    if error == "on"
+    if ERROR == "on"
         wls = @elapsed begin
             xwls = wlsMldivide(H, b, v)
         end
