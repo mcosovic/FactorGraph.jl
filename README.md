@@ -22,54 +22,53 @@ To install GaussianBP, you can run the following:
 (v1.2) pkg> add https://github.com/mcosovic/GaussianBP
 ```
 
-## Input Data
-MODEL.h5 file located in `\src\data\` with variables (`default setting: DATA::String = "data_33_14"`):
-- `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
-- `MODEL.h5/b` - observation values of type Array{Float64,1};
-- `MODEL.h5/v` - observation variances of type Array{Float64,1};
+## Syntax
+```
+bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
+```
+
+## Input Arguments:
+1. Input data `MODEL.h5` file located in `\src\data\` with variables:
+  - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
+  - `MODEL.h5/b` - observation values of type Array{Float64,1};
+  - `MODEL.h5/v` - observation variances of type Array{Float64,1};
 
 Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`
+Default setting: `DATA::String = "data_33_14"`
 
- ## User Options
-1. Design of Iteration Scheme:
-   - `MAXI` - the upper limit on BP iterations, `default setting: MAXI::Int64 = 20`;
-   - `DAMP` - applied randomized damping at the BP iteration, `default setting: MAXI::Int64 = 10`;
+2. Design of Iteration Scheme:
+   - `MAXI` - the upper limit on BP iterations, default setting: `MAXI::Int64 = 20`;
+   - `DAMP` - applied randomized damping at the BP iteration, default setting: `MAXI::Int64 = 10`;
 
-
-2. Convergence Parameters:
-   - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1, `default setting: PROB::Float64 = 0.6`;
-   - `ALPH` - the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights "ALPH" and 1 - "ALPH", where "ALPH" is between 0 and 1, `default setting: ALPH::Float64  =0.4`;
+3. Convergence Parameters:
+  - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1, default setting: `PROB::Float64 = 0.6`;
+  - `ALPH` - the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights "ALPH" and 1 - "ALPH", where "ALPH" is between 0 and 1, default setting: `ALPH::Float64 = 0.4`;
 
 Note: We use an improved BP algorithm that applies synchronous scheduling  with randomized damping. The randomized damping parameter pairs lead to a trade-off between the number of non-converging simulations and the rate of convergence. In general, for the selection of "prob" and "alph" for which only a small fraction of messages are combined with their values in a previous iteration, and that is a case for "prob" close to 0 or "alph" close to 1, we observe a large number of non-converging simulations.
 
-3. Virtual Factor Nodes
-   - `MEAN` - the mean value of virtual factor nodes, `default setting: MEAN::Float64 = 0.0`;
-   - `VARI` - the variance value of the virtual factor nodes, `default setting: VARI::Float64 = 1e3`;
+4. Virtual Factor Nodes
+   - `MEAN` - the mean value of virtual factor nodes, default setting: `MEAN::Float64 = 0.0`;
+   - `VARI` - the variance value of the virtual factor nodes, default setting: `VARI::Float64 = 1e3`;
 
 Note: The virtual factor node is a singly-connected factor node used if the variable node x is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity.
 
-4. Post-Processing Options:
-  - `TIME = "on"` - shows belief propagation time, `default setting: TIME::String = "off"`
-  - `error = "on"` - shows belief propagation evaluation vs. weighted least-squares, `default setting: ERROR::String = "off"`
+5. Algorithms
+  - `ALGORITHM = "sum"` - the belief propagation with simply summing messages;
+  - `ALGORITHM = "kahan"` - the belief propagation with Kahan-Babuska algorithm for summing variances;
 
-## Algorithms
-1. Belief propagation with simply summing messages
-```
-xbp = bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
-```
+Default setting: `ALGORITHM::String = "sum"`  
 
-2. Improved Kahan-Babuska algorithm for summing variance messages with executive function
-```
-xbp = bpn(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
-```
+5. Post-Processing Options:
+  - `TIME = "on"` - shows belief propagation time, default setting: `TIME::String = "off"`
+  - `error = "on"` - shows belief propagation evaluation vs. weighted least-squares, default setting: `ERROR::String = "off"`
 
 ## Quick Start
 ```
 julia> using GaussianBP
 julia> bp("data33_14", 100; TIME = "on")
 julia> bp("data33_14", 100; ERROR = "on")
-julia> bpn("data33_14", 100, 10)
-julia> bpn("data33_14", 100, 10; TIME = "on")
+julia> bp("data33_14", 100, 10; ALGORITHM = "kahan")
+julia> bp("data33_14", 100, 10; ALGORITHM = "kahan", TIME = "on")
 ```
 
 ## More information:
