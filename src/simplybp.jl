@@ -42,5 +42,16 @@ function bp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Flo
        bp_time(fgraph, init, infe, solu)
     end
 
+    if error == "on"
+        wls = @elapsed begin
+            xwls = wlsMldivide(H, b, v)
+        end
+
+        wrss_bp, wrss_wls = wrss(H, b, v, xbp, xwls)
+        rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
+
+        wls_vs_bp(wls, wrss_wls, wrss_bp, rmse_wls, rmse_bp, xbp, xwls)
+    end
+
     return xbp
  end

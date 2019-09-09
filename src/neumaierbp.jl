@@ -1,4 +1,4 @@
-function bpn(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; time = "off", error = "off"))
+function bpn(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3; time = "off", error = "off")
     GC.gc()
     GC.enable(false)
 
@@ -44,6 +44,18 @@ function bpn(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Fl
     if time == "on"
        bp_time(fgraph, init, infe, solu)
     end
+
+    if error == "on"
+        wls = @elapsed begin
+            xwls = wlsMldivide(H, b, v)
+        end
+
+        wrss_bp, wrss_wls = wrss(H, b, v, xbp, xwls)
+        rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
+
+        wls_vs_bp(wls, wrss_wls, wrss_bp, rmse_wls, rmse_bp, xbp, xwls)
+    end
+
 
     return xbp
 end
