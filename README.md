@@ -54,13 +54,13 @@ Note: The virtual factor node is a singly-connected factor node used if the vari
 1. Belief propagation with simply summing messages
 ```
 julia> using GaussianBP
-julia> xbp = function bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
+julia> xbp = bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
 ```
 
 2. Improved Kahan-Babuska algorithm for summing variance messages with executive function
 ```
 julia> using GaussianBP
-julia> xbp = function bpn(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
+julia> xbp = bpn(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
 ```
 
 ## Quick Start
