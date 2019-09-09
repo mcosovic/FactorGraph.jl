@@ -11,16 +11,16 @@ using Random
 # Default Parameters #
 ######################
 
-const data = "data_33_14"
+# const data = "data_33_14"
 
-const MAXI = 15
-const DAMP = 10
-
-const PROB = 0.6
-const ALPH = 0.4
-
-const MEAN = 0.0
-const VARI = 1e3
+# const MAXI = 15
+# const DAMP = 10
+#
+# const PROB = 0.6
+# const ALPH = 0.4
+#
+# const MEAN = 0.0
+# const VARI = 1e3
 
 
 ############
@@ -39,7 +39,7 @@ include("summation.jl")
 # Simply Gaussian BP #
 ######################
 
-function runbp(data, MAXI, DAMP, PROB, ALPH, MEAN, VARI)
+function runbp(data::String="data_33_14", MAXI::Int64=15, DAMP::Int64=10, PROB::Float64=0.6, ALPH::Float64=0.4, MEAN::Float64=0.0, VARI::Float64=1e3)
     H, b, v = model(data)                                                                                      # input.jl
 
     Nf, Nv, T = graph(H)                                                                                       # factorgraph.jl
