@@ -123,7 +123,7 @@ function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
             end
         end
         if vir[i[1]] !== 0
-            md[i[1]] = MEAN
+            md[i[1]] = MEAN / VARI
             vid[i[1]] = 1 / VARI
         end
     end
