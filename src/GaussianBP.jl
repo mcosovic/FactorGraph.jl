@@ -17,7 +17,6 @@ include("auxiliary.jl")
 include("initialize.jl")
 include("inference.jl")
 include("summation.jl")
-include("printdata.jl")
 include("evaluation.jl")
 
 ###############
@@ -37,7 +36,7 @@ function bp(DATA::String = "data_33_14",
             ALGORITHM::String = "sum",
             TIME::String = "off",
             ERROR::String = "off",
-            PATH::STRING = "src/data/")
+            PATH::String = "src/data/")
 
     H, b, v = model(DATA, PATH)
     if ALGORITHM == "sum"
