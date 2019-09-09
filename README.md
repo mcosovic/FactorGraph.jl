@@ -29,16 +29,19 @@ bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
 ## Input Arguments:
 1. Input data `MODEL.h5` file located in `\src\data\` with variables:
-  - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
-  - `MODEL.h5/b` - observation values of type Array{Float64,1};
-  - `MODEL.h5/v` - observation variances of type Array{Float64,1};
+    - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
+    - `MODEL.h5/b` - observation values of type Array{Float64,1};
+    - `MODEL.h5/v` - observation variances of type Array{Float64,1};
 
-Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`
-Default setting: `DATA::String = "data_33_14"`
+    Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`;
+
+    Default setting: `DATA::String = "data_33_14"`;
 
 2. Design of Iteration Scheme:
-   - `MAXI` - the upper limit on BP iterations, default setting: `MAXI::Int64 = 20`;
-   - `DAMP` - applied randomized damping at the BP iteration, default setting: `MAXI::Int64 = 10`;
+   - `MAXI` - the upper limit on BP iterations;
+   - `DAMP` - applied randomized damping at the BP iteration;
+
+   - Default settings: `MAXI::Int64 = 20`, `MAXI::Int64 = 10`   
 
 3. Convergence Parameters:
   - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1, default setting: `PROB::Float64 = 0.6`;
