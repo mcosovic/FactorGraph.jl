@@ -3,7 +3,7 @@
 
 #--------------------Load System Model from HDF5 File---------------------------
 function model(data::String)
-    system = string("GaussianBP\\src/data/", data, ".h5")
+    system = string("GaussianBP/data/", data, ".h5")
 
     Hlist = h5read(system, "/H")
     H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
