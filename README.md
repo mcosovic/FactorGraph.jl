@@ -23,11 +23,12 @@ To install GaussianBP, you can run the following:
 ```
 
 ## Input Data
-MODEL.h5 file located in `\src\data\` with variables (`default setting: data::String = "data_33_14"`):
+MODEL.h5 file located in `\src\data\` with variables (`default setting: DATA::String = "data_33_14"`):
 - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
 - `MODEL.h5/b` - observation values of type Array{Float64,1};
 - `MODEL.h5/v` - observation variances of type Array{Float64,1};
 
+Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`
 
  ## User Options
 1. Design of Iteration Scheme:
@@ -49,19 +50,17 @@ Note: The virtual factor node is a singly-connected factor node used if the vari
 
 4. Post-Processing Options:
   - `TIME = "on"` - shows belief propagation time, `default setting: TIME::String = "off"`
-  - `error = "on"` - shows belief propagation evaluation versus weighted least-squares, `default setting: ERROR::String = "off"`
+  - `error = "on"` - shows belief propagation evaluation vs. weighted least-squares, `default setting: ERROR::String = "off"`
 
 ## Algorithms
 1. Belief propagation with simply summing messages
 ```
-julia> using GaussianBP
-julia> xbp = bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
+xbp = bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
 ```
 
 2. Improved Kahan-Babuska algorithm for summing variance messages with executive function
 ```
-julia> using GaussianBP
-julia> xbp = bpn(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
+xbp = bpn(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; TIME, ERROR)
 ```
 
 ## Quick Start
