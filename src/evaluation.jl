@@ -60,7 +60,7 @@ function errors(H, b, v, xbp, ERROR)
         wrss_bp, wrss_wls = wrss(H, b, v, xbp, xwls)
         rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
 
-        print("WLS:          $(@sprintf("%.6f", wls*1000)) ms \n")
+        print("WLS:          $(@sprintf("%.6f", wls * 1000)) ms \n")
         println(" ")
         print("WRSS WLS:     $(@sprintf("%.6f", wrss_wls)) \n")
         print("WRSS BP:      $(@sprintf("%.6f", wrss_bp)) \n")
@@ -78,12 +78,12 @@ end
 # The time evolution of the belief propagation algorithm for the option
 # TIME = "on"
 #-------------------------------------------------------------------------------
-function bp_time(factorgraph, initialize, inference, solution)
-    print("Preprocesing: $(@sprintf("%.6f", factorgraph*1000)) ms \n")
-    print("Initialize:   $(@sprintf("%.6f", initialize*1000)) ms \n")
-    print("Inference:    $(@sprintf("%.6f", inference*1000)) ms \n")
-    print("Marginal:     $(@sprintf("%.6f", solution*1000)) ms \n")
+function bp_time(fg, it, ic, so)
+    print("Preprocesing: $(@sprintf("%.6f", fg * 1000)) ms \n")
+    print("Initialize:   $(@sprintf("%.6f", it * 1000)) ms \n")
+    print("Inference:    $(@sprintf("%.6f", ic * 1000)) ms \n")
+    print("Marginal:     $(@sprintf("%.6f", so * 1000)) ms \n")
     println(" ")
-    print("BP:           $(@sprintf("%.6f", (factorgraph+initialize+inference+solution)*1000)) ms \n")
+    print("BP:           $(@sprintf("%.6f", (fg + it + ic + so) * 1000)) ms \n")
 end
 ################################################################################
