@@ -23,7 +23,7 @@ To install GaussianBP, you can run the following:
 ```
 
 ## Input Data
-MODEL.h5 file located in `\src\data\` with variables:
+MODEL.h5 file located in `\src\data\` with variables (`default setting: data::String="data_33_14"`):
 - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
 - `MODEL.h5/b` - observation values of type Array{Float64,1};
 - `MODEL.h5/v` - observation variances of type Array{Float64,1};
@@ -31,24 +31,25 @@ MODEL.h5 file located in `\src\data\` with variables:
 
  ## User Options
 1. Design of Iteration Scheme:
-   - `DAMP` - applied randomized damping at the BP iteration;
-   - `MAXI` - the upper limit on BP iterations;
+   - `MAXI` - the upper limit on BP iterations, `default setting: MAXI::Int64=15`;
+   - `DAMP` - applied randomized damping at the BP iteration, `default setting: MAXI::Int64=10`;
+
 
 2. Convergence Parameters:
-   - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1;
-   - `ALPH` - the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights "ALPH" and 1 - "ALPH", where "ALPH" is between 0 and 1;
+   - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1, `default setting: PROB::Float64=0.6`;
+   - `ALPH` - the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights "ALPH" and 1 - "ALPH", where "ALPH" is between 0 and 1, `default setting: ALPH::Float64=0.4`;
 
 Note: We use an improved BP algorithm that applies synchronous scheduling  with randomized damping. The randomized damping parameter pairs lead to a trade-off between the number of non-converging simulations and the rate of convergence. In general, for the selection of "prob" and "alph" for which only a small fraction of messages are combined with their values in a previous iteration, and that is a case for "prob" close to 0 or "alph" close to 1, we observe a large number of non-converging simulations.
 
 3. Virtual Factor Nodes
-   - `MEAN` - the mean value of virtual factor nodes;
-   - `VARI` - the variance value of the virtual factor nodes;
+   - `MEAN` - the mean value of virtual factor nodes, `default setting: MEAN::Float64=0.0`;
+   - `VARI` - the variance value of the virtual factor nodes, `default setting: VARI::Float64=1e3`;
 
 Note: The virtual factor node is a singly-connected factor node used if the variable node x is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity.
 
 4. Post-Processing Options:
-  - `TIME = "on"` - shows belief propagation time
-  - `error = "on"` - shows belief propagation evaluation versus weighted least-squares  
+  - `TIME = "on"` - shows belief propagation time, `default setting: TIME = "off"`
+  - `error = "on"` - shows belief propagation evaluation versus weighted least-squares, `default setting: ERROR = "off"`
 
 ## Algorithms
 1. Belief propagation with simply summing messages
