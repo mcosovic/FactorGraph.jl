@@ -24,11 +24,11 @@ pkg> add https://github.com/mcosovic/GaussianBP
 
 ## Syntax
 ```
-bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
+bp(DATA, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 ```
 
 ## Input Arguments:
-1. Input data `MODEL.h5` file located in `\src\data\` with variables:
+1. Input data `model.h5` file located in `\src\data\` with variables:
     - `MODEL.h5/H` - coefficient data `H::Array{Float64,2} = [row column coefficient]`;
     - `MODEL.h5/b` - observation values `b::Array{Float64,1}`;
     - `MODEL.h5/v` - observation variances `v::Array{Float64,1}`;
