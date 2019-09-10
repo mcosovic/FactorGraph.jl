@@ -19,19 +19,19 @@ function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
         msr, vsr, evr, msc, vsc, evc = nload_sum(Nv, Ni)
         msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr)
-        m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)                      
+        m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
         msr, vsr, evr, msc, vsc, evc = nclear_sum(msr, vsr, evr, msc, vsc, evc)
     end
 
     infe = @elapsed begin
         for i = 1:MAXI
             msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc)
-            m_vf, v_vf = nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli)                      
+            m_vf, v_vf = nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli)
             msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr)
             if i < DAMP
-                m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)              
+                m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
             else
-                m_fv, vi_fv = ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2)   
+                m_fv, vi_fv = ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2)
             end
             msr, vsr, evr, msc, vsc, evc = nclear_sum(msr, vsr, evr, msc, vsc, evc)
         end
@@ -39,7 +39,7 @@ function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
     solu = @elapsed begin
         msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc)
-        xbp = nmarginal(md, vid, msc, vsc, evc, Ji, Nv)                                                                     
+        xbp = nmarginal(md, vid, msc, vsc, evc, Ji, Nv)
     end
 
     bp_time(fgraph, init, infe, solu, TIME)
