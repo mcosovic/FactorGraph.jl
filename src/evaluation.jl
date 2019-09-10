@@ -68,10 +68,10 @@ function errors(H, b, v, xbp, ERROR, TIME)
         end
 
         col0 = ["WRSS", "RMSE"]
-        col1 = [wrss_wls, rmse_wls]
-        col2 = [wrss_bp, rmse_bp]
+        col1 = [wrss_bp, rmse_bp]
+        col3 = [wrss_wls, rmse_wls]
         pretty_table([col0 col1 col2 abs.(col1 - col2)],
-                     ["Error" "WLS" "BP" "Distance"];
+                     ["Error" "BP" "WLS" "Distance"];
                      screen_size = (-1,-1),
                      alignment=[:r,:r,:r, :r],
                      formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
