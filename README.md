@@ -35,7 +35,7 @@ bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
     Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`;
 
-    Default setting: `DATA::String = "data_33_14"`;
+    Default setting: `DATA::String = "data33_14"`;
 
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
