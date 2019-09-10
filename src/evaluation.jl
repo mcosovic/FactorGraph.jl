@@ -75,7 +75,7 @@ function errors(H, b, v, xbp, ERROR, TIME)
         col0 = collect(1:length(xbp))
         col3 = abs.(xbp - xwls)
         A = [col0 xbp xwls col3]
-        A = A[sortperm(A[:, 4]), :]
+        A = A[reverse(sortperm(A[:, 4])),  :]
 
         pretty_table(A, ["State Variable" "BP Estimate" "WLS Estimate" "Max to Min Distance"],
                         alignment=[:r,:r,:r, :r],
