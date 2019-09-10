@@ -19,7 +19,7 @@ Further, the solution to the problem can be found via maximization of the likeli
 ## Installation
 The package requires Julia 1.1 and higher, to install `GaussianBP`, you can run the following:
 ```
-(v1.2) pkg> add https://github.com/mcosovic/GaussianBP
+pkg> add https://github.com/mcosovic/GaussianBP
 ```
 
 ## Syntax
