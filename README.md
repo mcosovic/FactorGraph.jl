@@ -17,7 +17,7 @@ where **A** is the Jacobian matrix of linear functions or the coefficient  matri
 Further, the solution to the problem can be found via maximization of the likelihood function which is defined via likelihoods of independent observations, and that can be efficiently solved utilizing factor graphs and the Gaussian belief propagation (BP) algorithm.
 
 ## Installation
-To install GaussianBP, you can run the following:
+The package requires Julia 1.1 and higher, to install `GaussianBP`, you can run the following:
 ```
 (v1.2) pkg> add https://github.com/mcosovic/GaussianBP
 ```
@@ -49,7 +49,7 @@ bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
     Default settings: `PROB::Float64 = 0.6`, `ALPH::Float64 = 0.4`;   
 
-    Note: We use an improved BP algorithm that applies synchronous scheduling  with randomized damping. The randomized damping parameter pairs lead to a trade-off between the number of non-converging simulations and the rate of convergence. In general, for the selection of "prob" and "alph" for which only a small fraction of messages are combined with their values in a previous iteration, and that is a case for "prob" close to 0 or "alph" close to 1, we observe a large number of non-converging simulations.
+    Note: We use an improved BP algorithm that applies synchronous scheduling  with randomized damping. The randomized damping parameter pairs lead to a trade-off between the number of non-converging simulations and the rate of convergence. In general, for the selection of "PROB" and "ALPH" for which only a small fraction of messages are combined with their values in a previous iteration, and that is a case for "PROB" close to 0 or "ALPH" close to 1, we observe a large number of non-converging simulations.
 
 4. Virtual Factor Nodes
     - `MEAN` - the mean value of virtual factor nodes;
@@ -67,7 +67,7 @@ bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
 5. Post-Processing Options:
     - `TIME = "on"` - shows belief propagation time;
-    - `error = "on"` - shows belief propagation evaluation vs. weighted least-squares;
+    - `ERROR = "on"` - shows belief propagation evaluation vs. weighted least-squares;
 
     Default settings: `TIME::String = "off"`, `ERROR::String = "off"`;
 
