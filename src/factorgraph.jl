@@ -1,10 +1,10 @@
-################################################################################
-# Produce the factor graph and define singly-connected, virtual and indirect
-# factor nodes
-################################################################################
+###########################################################
+#  Produce the factor graph and define singly-connected,  #
+#  virtual and indirect factor nodes                      #
+###########################################################
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Define the node numbers and the transpose system matrix
 # Input Data:
 #   - H: system model sparse matrix
@@ -12,26 +12,26 @@
 #   - Nf: number of factor nodes
 #   - Nv: number of variable nodes
 #   - T: system model transpose sparse matrix
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function graph(H)
     Nf, Nv = size(H)
     T = SparseMatrixCSC(H')
 
     return Nf, Nv, T
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Find number of links
 # Input Data:
 #   - Nf: number of factor nodes
 #   - T: system model transpose sparse matrix
 # Output Data:
-#   - Nld: number of links between singly-connected factor and variable nodes
-#   - Nli: number of links between indirect factor and variable nodes
-#   - dir: position of each singly-connected factor according to variable nodes
-#-------------------------------------------------------------------------------
+#   - Nld: number of links - singly-connected factor and variable nodes
+#   - Nli: number of links - indirect factor and variable nodes
+#   - dir: position of each singly-connected factor to variable nodes
+#------------------------------------------------------------------------
 function links(Nf, T)
     Nld = 0
     Nli = 0
@@ -51,17 +51,17 @@ function links(Nf, T)
 
     return Nld, Nli, dir
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Define position of virtual factor nodes
 # Input Data:
 #   - Nf: number of factor nodes
-#   - dir: position of each singly-connected factor according to variable nodes
+#   - dir: position of each singly-connected factor to variable nodes
 # Output Data:
 #   - vir: virtual factors according to variable nodes
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function virtuals(Nv, dir)
     idx = findall(!iszero, dir)
     vir = fill(1, Nv)
@@ -72,16 +72,16 @@ function virtuals(Nv, dir)
 
     return vir
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Define singly-connected, virtual and indirect factor nodes arrays
 # Input Data:
 #   - Nf: number of factor nodes
 #   - Nv: number of variable nodes
-#   - Nld: number of links between singly-connected factor and variable nodes
-#   - Nli: number of links between indirect factor and variable nodes
+#   - Nld: number of links - singly-connected factor and variable nodes
+#   - Nli: number of links - indirect factor and variable nodes
 #   - T: system model transpose sparse matrix
 #   - b: mean vector of measurements
 #   - v: variance vector of measurements
@@ -92,12 +92,12 @@ end
 #   - Hi: vector of coefficient of indirect factor nodes
 #   - bi: vector of measurement means of indecies factor nodes
 #   - vi: vector of measurement variances of indirect factor nodes
-#   - Ii: indices of indirect factors according to factor nodes (row indices)
-#   - Ji: indices of indirect factors according to variable nodes (column indices)
+#   - Ii: indices of indirect factors according to factor nodes (rows)
+#   - Ji: indices of indirect factors according to variable nodes (columns)
 #   - Ni: number of indirect factor nodes
-#   - md: total means from singly-connected factors to variable nodes
-#   - vid: total inverse variance from singly-connected factors to variable nodes
-#-------------------------------------------------------------------------------
+#   - md: like means from singly-connected factors
+#   - vid: inverse variance from singly-connected factors
+#------------------------------------------------------------------------
 function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
     Ni = Nf - Nld
 
@@ -137,4 +137,4 @@ function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
 
     return Ii, Ji, Ni, bi, vi, Hi, md, vid
 end
-################################################################################
+#------------------------------------------------------------------------

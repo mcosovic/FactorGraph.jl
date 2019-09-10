@@ -1,14 +1,14 @@
-################################################################################
-# Summarizing messages
-################################################################################
+##########################
+#  Summarizing messages  #
+##########################
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Summarizing messages from variable nodes to factor nodes using simply
 # summation, or using Kahan-Babuska algorithm
 # Input Data:
 #   - Hi: vector of coefficient of indirect factor nodes
-#   - Ii: indices of indirect factors according to factor nodes (row indices)
+#   - Ii: indices of indirect factors according to factor nodes (rows)
 #   - Nli: number of links between indirect factor and variable nodes
 #   - m_vf: mean messages from variable node to factor node
 #   - v_vf: variance messages from variable node to factor node
@@ -18,7 +18,7 @@
 # Output Data:
 #   - msr: sum vector of row mean messages
 #   - vsr: sum vector of row variance messages
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function sum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr)
     @inbounds for i = 1:Nli
         msr[Ii[i]] += (Hi[i] * m_vf[i])
@@ -44,14 +44,14 @@ function nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr)
 
    return msr, vsr, evr
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Summarizing messages from factor nodes to variable nodes using simply
 # summation, or using Kahan-Babuska algorithm
 # Input Data:
-#   - Ji: indices of indirect factors according to variable nodes (column indices)
+#   - Ji: indices of indirect factors according to variable nodes (columns)
 #   - Nli: number of links between indirect factor and variable nodes
 #   - m_fv: mean messages from factor node to variable node
 #   - vi_fv: inverse variance messages from factor node to variable node
@@ -61,7 +61,7 @@ end
 # Output Data:
 #   - msc: sum vector of column mean messages
 #   - vsc: sum vector of column variance messages
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function sum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc)
     @inbounds for i = 1:Nli
         msc[Ji[i]] += m_fv[i] * vi_fv[i]
@@ -86,4 +86,4 @@ function nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc)
 
    return msc, vsc, evc
 end
-################################################################################
+#------------------------------------------------------------------------

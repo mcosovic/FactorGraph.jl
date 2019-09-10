@@ -1,12 +1,12 @@
-################################################################################
-# Compare the accuracy of the belief propagation algorithm to that of the
-# weighted-least squares method and print results in the REPL
-################################################################################
+########################################################################
+#  Compare the accuracy of the belief propagation algorithm to that    #
+#  of the weighted-least squares method and print results in the REPL  #
+########################################################################
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Compute the weighted-least squares solution
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function wlsMldivide(H, b, v)
     W = spdiagm(0 =>  @. 1.0 / sqrt(v))
     Hti = W * H
@@ -16,13 +16,13 @@ function wlsMldivide(H, b, v)
 
     return xml
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
-# Compute weighted residual sum of squares (WRSS) and root mean square error
-# (RMSE) metrics
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# Compute weighted residual sum of squares (WRSS) and root mean square
+# error (RMSE) metrics
+#------------------------------------------------------------------------
 function wrss(H, b, v, xbp, xwls)
     fbp = H * xbp
     fwls = H * xwls
@@ -43,13 +43,13 @@ function rmse(H, b, v, xbp, xwls)
 
     return rmse_bp, rmse_wls
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
-# The belief propagation algorithm is evaluated for the option ERROR == "on"
-# and results are shown in the REPL
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# The belief propagation algorithm is evaluated for the option
+# ERROR == "on" and results are shown in the REPL
+#------------------------------------------------------------------------
 function errors(H, b, v, xbp, ERROR, TIME)
     if ERROR == "on"
         wls = @elapsed begin
@@ -63,7 +63,7 @@ function errors(H, b, v, xbp, ERROR, TIME)
             print("WLS:          $(@sprintf("%.6f", wls * 1000)) ms \n")
             println(" ")
         end
-        
+
         print("WRSS WLS:     $(@sprintf("%.6f", wrss_wls)) \n")
         print("WRSS BP:      $(@sprintf("%.6f", wrss_bp)) \n")
         println(" ")
@@ -73,13 +73,13 @@ function errors(H, b, v, xbp, ERROR, TIME)
         println("MAX DIFF: ", sort(abs.(xbp-xwls))[end])
     end
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # The time evolution of the belief propagation algorithm for the option
 # TIME = "on"
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function bp_time(fg, it, ic, so, TIME)
     if TIME == "on"
         print("Preprocesing: $(@sprintf("%.6f", fg * 1000)) ms \n")
@@ -90,4 +90,4 @@ function bp_time(fg, it, ic, so, TIME)
         print("BP:           $(@sprintf("%.6f", (fg + it + ic + so) * 1000)) ms \n")
     end
 end
-################################################################################
+#------------------------------------------------------------------------

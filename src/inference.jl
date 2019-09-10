@@ -1,12 +1,12 @@
-################################################################################
-# Compute messages and marginals
-################################################################################
+####################################
+#  Compute messages and marginals  #
+####################################
 
 
-################################################################################
-# Compute messages from factor nodes to variable nodes using state-of-the-art
-# equations, or damping equations, or using sum compensation without or with
-# damping
+#------------------------------------------------------------------------
+# Compute messages from factor nodes to variable nodes using
+# state-of-the-art equations, or damping equations, or using sum
+# compensation without or with damping
 # Input Data:
 #   - m_vf: mean messages from variable node to factor node
 #   - v_vf: variance messages from variable node to factor node
@@ -17,7 +17,7 @@
 #   - Hi: vector of coefficient of indirect factor nodes
 #   - bi: vector of measurement means of indecies factor nodes
 #   - vi: vector of measurement variances of indirect factor nodes
-#   - Ii: indices of indirect factors according to factor nodes (row indices)
+#   - Ii: indices of indirect factors according to factor nodes (rows)
 #   - Nli: number of links between indirect factor and variable nodes
 #   - ah1: current iteration message weights
 #   - ah2: previous iteration message weights
@@ -25,7 +25,7 @@
 # Output Data:
 #   - m_fv: mean messages from factor node to variable node
 #   - vi_fv: inverse variance messages from factor node to variable node
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
  function factor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli)
     @inbounds for i = 1:Nli
         m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]
@@ -61,28 +61,28 @@
 
      return m_fv, vi_fv
  end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
-# Compute messages from variable nodes to factor nodes using state-of-the-art
-# equations, or sum compensation
+#------------------------------------------------------------------------
+# Compute messages from variable nodes to factor nodes using
+# state-of-the-art equations, or sum compensation
 # Input Data:
 #   - m_vf: mean messages from variable node to factor node
 #   - v_vf: variance messages from variable node to factor node
 #   - m_fv: mean messages from factor node to variable node
 #   - vi_fv: inverse variance messages from factor node to variable node
-#   - md: total means from singly-connected factors to variable nodes
-#   - vid: total inverse variance from singly-connected factors to variable nodes
+#   - md: like means from singly-connected factors
+#   - vid: inverse variance from singly-connected factors
 #   - msc: sum vector of column mean messages
 #   - vsc: sum vector of column variance messages
-#   - Ji: indices of indirect factors according to variable nodes (column indices)
+#   - Ji: indices of indirect factors according to variable nodes (columns)
 #   - Nli: number of links between indirect factor and variable nodes
 #   - evc: error vector of variance summation
 # Output Data:
 #   - m_vf: mean messages from variable node to factor node
 #   - v_vf: variance messages from variable node to factor node
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function variable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, Ji, Nli)
     @inbounds for i = 1:Nli
         v_vf[i] = 1 / (vsc[Ji[i]] + vid[Ji[i]] - vi_fv[i])
@@ -100,22 +100,22 @@ function nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji
 
     return m_vf, v_vf
 end
-################################################################################
+#------------------------------------------------------------------------
 
 
-################################################################################
+#------------------------------------------------------------------------
 # Compute marginals using state-of-the-art equations, or sum compensation
 # Input Data:
 #   - md: total means from singly-connected factors to variable nodes
-#   - vid: total inverse variance from singly-connected factors to variable nodes
+#   - vid: inverse variance from singly-connected factors
 #   - msc: sum vector of column mean messages
 #   - vsc: sum vector of column variance messages
-#   - Ji: indices of indirect factors according to variable nodes (column indices)
+#   - Ji: indices of indirect factors according to variable nodes (columns)
 #   - Nv: number of variable nodes
 #   - evc: error vector of variance summation
 # Output Data:
 #   - xbp: estimate values
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------
 function marginal(md, vid, msc, vsc, Ji, Nv)
     xbp = fill(0.0, Nv)
 
@@ -135,4 +135,4 @@ function nmarginal(md, vid, msc, vsc, evc, Ji, Nv)
 
     return xbp
 end
-################################################################################
+#------------------------------------------------------------------------
