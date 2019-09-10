@@ -1,6 +1,6 @@
 ###########################################################
 #  Produce the factor graph and define singly-connected,  #
-#  virtual and indirect factor nodes					  #
+#  virtual and indirect factor nodes		              #
 ###########################################################
 
 
