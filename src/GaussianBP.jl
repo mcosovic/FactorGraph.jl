@@ -51,6 +51,4 @@ function bp(DATA::String = "data33_14",
     return xbp
 end
 
-bp("data33_14"; TIME = "on", ERROR = "on")
-
 end # SimplyGBP
