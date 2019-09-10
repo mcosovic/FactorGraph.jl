@@ -1,5 +1,10 @@
+################################################################################
+# Initialize the algorithm and produce damping parameters
+################################################################################
 
-#-------------------------------------------------------------------------------
+
+################################################################################
+# Pass messages from singly-connected factor nodes to all indirect links
 # Input Data:
 #   - Hi: vector of coefficient of indirect factor nodes
 #   - Ji: indices of indirect factors according to variable nodes (column indices)
@@ -20,10 +25,11 @@ function forward_directs(Hi, Ji, Nli, md, vid, v_vf, m_vf)
 
     return m_vf, v_vf
 end
-#-------------------------------------------------------------------------------
+################################################################################
 
 
-#-------------------------------------------------------------------------------
+################################################################################
+# Set damping parameters
 # Input Data:
 #   - Nli: number of links between indirect factor and variable node
 #   - ALPH: damping weights
@@ -43,4 +49,4 @@ function damping(Nli, ALPH, PROB)
 
     return ah1, ah2
 end
-#-------------------------------------------------------------------------------
+################################################################################

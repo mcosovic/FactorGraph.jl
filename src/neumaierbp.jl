@@ -1,5 +1,9 @@
-function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
+################################################################################
+# The belief propagation using Kahan-Babuska summation algorithm
+################################################################################
 
+
+function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
     fgraph = @elapsed begin
         Nf, Nv, T = graph(H)                                                                                                # FactorGraph

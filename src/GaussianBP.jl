@@ -8,10 +8,9 @@ using Random
 using Printf
 
 
-############
-# Includes #
-############
-
+################################################################################
+# Includes
+#-------------------------------------------------------------------------------
 include("input.jl")
 include("factorgraph.jl")
 include("auxiliary.jl")
@@ -19,14 +18,14 @@ include("initialize.jl")
 include("inference.jl")
 include("summation.jl")
 include("evaluation.jl")
-
-###############
-# Gaussian BP #
-###############
-
 include("simplybp.jl")
 include("neumaierbp.jl")
+################################################################################
 
+
+################################################################################
+# Run package
+#-------------------------------------------------------------------------------
 function bp(DATA::String = "data_33_14",
             MAXI::Int64 = 20,
             DAMP::Int64 = 10,
@@ -40,9 +39,9 @@ function bp(DATA::String = "data_33_14",
             PATH::String = "src/data/")
 
     H, b, v = model(DATA, PATH)
-    
+
     if ALGORITHM == "sum"
-        xbp = runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
+        xbp = bps(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
     end
     if ALGORITHM == "kahan"
         xbp = bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
@@ -52,5 +51,6 @@ function bp(DATA::String = "data_33_14",
 
     return xbp
 end
+################################################################################
 
 end # SimplyGBP

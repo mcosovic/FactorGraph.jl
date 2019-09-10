@@ -1,5 +1,9 @@
+################################################################################
+# The belief propagation using simply summation procedure
+################################################################################
 
-function runbp(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
+
+function bps(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
 
     fgraph = @elapsed begin
         Nf, Nv, T = graph(H)                                                                                            # factorgraph.jl
