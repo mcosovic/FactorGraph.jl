@@ -49,7 +49,7 @@ H, b, v = model("SimpleTest", "test/")
 @testset "SimplyBP" begin
     @test bp("SimpleTest", 1000, 10, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
     @test bp("SimpleTest", 1000, 50, 0.0, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
-    @test bp("SimpleTest", 1000, 10, 0.6, 0.4, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 10, 0.2, 0.3, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
 end
 
 @testset "KahanBP" begin
