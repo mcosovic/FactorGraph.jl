@@ -69,7 +69,7 @@ function errors(H, b, v, xbp, ERROR, TIME)
 
         col0 = ["WRSS", "RMSE"]
         col1 = [wrss_bp, rmse_bp]
-        col3 = [wrss_wls, rmse_wls]
+        col2 = [wrss_wls, rmse_wls]
         pretty_table([col0 col1 col2 abs.(col1 - col2)],
                      ["Error" "BP" "WLS" "Distance"];
                      screen_size = (-1,-1),
