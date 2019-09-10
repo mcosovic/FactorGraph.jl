@@ -72,10 +72,6 @@ function errors(H, b, v, xbp, ERROR, TIME)
                      screen_size = (-1,-1), alignment=[:r,:r,:r, :r],
                      formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
 
-        pretty_table([col0 col1 col2 abs.(col1 - col2)], ["Error" "BP" "WLS" "Distance"];
-                     screen_size = (-1,-1), alignment=[:r,:r,:r, :r],
-                     formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
-
         col0 = collect(1:length(xbp))
         col3 = abs.(xbp - xwls)
         A = [col0 xbp xwls col3]
