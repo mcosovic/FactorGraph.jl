@@ -7,28 +7,28 @@ using Random
 using Printf
 
 
-################################################################################
+#--------------------------------------------------------------------------
 # Read data from SimpleTest.h5
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 function model(DATA, PATH)
-    system = string(PATH, DATA, ".h5")
+	system = string(PATH, DATA, ".h5")
 
-    Hlist = h5read(system, "/H")
-    H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
+	Hlist = h5read(system, "/H")
+	H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
 
-    b = h5read(system, "/b")
-    v = h5read(system, "/v")
+	b = h5read(system, "/b")
+	v = h5read(system, "/v")
 
-    return H, b, v
+	return H, b, v
 end
 
 H, b, v = model("SimpleTest", "test/")
-################################################################################
+#--------------------------------------------------------------------------
 
 
-################################################################################
+#--------------------------------------------------------------------------
 # Check for type stability function by function
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 include("../src/factorgraph.jl")
 Nf, Nv, T = @inferred graph(H)
 Nld, Nli, dir = @inferred links(Nf, T)
@@ -60,19 +60,20 @@ m_fv, vi_fv = @inferred dfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, H
 xbp = @inferred marginal(md, vid, msc, vsc, Ji, Nv)
 m_fv, vi_fv = @inferred nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
 m_vf, v_vf = @inferred nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli)
-m_fv, vi_fv = @inferred nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)             
+m_fv, vi_fv = @inferred nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
 m_fv, vi_fv = @inferred ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2)
 xbp = @inferred nmarginal(md, vid, msc, vsc, evc, Ji, Nv)
-################################################################################
+#--------------------------------------------------------------------------
 
 
-################################################################################
+#--------------------------------------------------------------------------
 # Check for type stability of main functions
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 include("../src/evaluation.jl")
 include("../src/simplybp.jl")
 include("../src/neumaierbp.jl")
 @inferred bps(H, b, v, 10, 5, 0.6, 0.5, 0.0, 1e-3, "on")
 @inferred bpn(H, b, v, 10, 5, 0.6, 0.5, 0.0, 1e-3, "on")
-################################################################################
-end
+#--------------------------------------------------------------------------
+
+end # Instability
