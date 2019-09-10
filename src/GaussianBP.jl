@@ -47,7 +47,7 @@ function bp(DATA::String = "data_33_14",
         xbp = bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
     end
 
-    errors(H, b, v, xbp, ERROR)
+    errors(H, b, v, xbp, ERROR, TIME)
 
     return xbp
 end

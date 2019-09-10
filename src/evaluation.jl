@@ -50,7 +50,7 @@ end
 # The belief propagation algorithm is evaluated for the option ERROR == "on"
 # and results are shown in the REPL
 #-------------------------------------------------------------------------------
-function errors(H, b, v, xbp, ERROR)
+function errors(H, b, v, xbp, ERROR, TIME)
     if ERROR == "on"
         wls = @elapsed begin
             xwls = wlsMldivide(H, b, v)
@@ -59,8 +59,11 @@ function errors(H, b, v, xbp, ERROR)
         wrss_bp, wrss_wls = wrss(H, b, v, xbp, xwls)
         rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
 
-        print("WLS:          $(@sprintf("%.6f", wls * 1000)) ms \n")
-        println(" ")
+        if TIME == "on"
+            print("WLS:          $(@sprintf("%.6f", wls * 1000)) ms \n")
+            println(" ")
+        end
+        
         print("WRSS WLS:     $(@sprintf("%.6f", wrss_wls)) \n")
         print("WRSS BP:      $(@sprintf("%.6f", wrss_bp)) \n")
         println(" ")
