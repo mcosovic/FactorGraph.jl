@@ -29,9 +29,9 @@ bp(MODEL, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
 ## Input Arguments:
 1. Input data `MODEL.h5` file located in `\src\data\` with variables:
-    - `MODEL.h5/H` - coefficient list of type Array{Float64,2} in the form [row column coefficient];
-    - `MODEL.h5/b` - observation values of type Array{Float64,1};
-    - `MODEL.h5/v` - observation variances of type Array{Float64,1};
+    - `MODEL.h5/H` - coefficient list in the form `H::Array{Float64,2} = [row column coefficient]`;
+    - `MODEL.h5/b` - observation values `b::Array{Float64,1}`;
+    - `MODEL.h5/v` - observation variances `v::Array{Float64,1}`;
 
     Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`;
 
