@@ -60,25 +60,26 @@ function errors(H, b, v, xbp, ERROR, TIME)
         rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
 
         if TIME == "on"
-            pretty_table(["WLS" 1000 * wls], ["" "Time (ms)"];
-                         screen_size = (-1,-1), alignment=[:l,:r],
+            pretty_table(["WLS" 1000 * wls],
+                         ["" "Time (ms)"];
+                         screen_size = (-1,-1),
+                         alignment=[:l,:r],
                          formatter = ft_printf("%3.6f", [2]))
         end
 
         col0 = ["WRSS", "RMSE"]
         col1 = [wrss_wls, rmse_wls]
         col2 = [wrss_bp, rmse_bp]
-        pretty_table([col0 col1 col2 abs.(col1 - col2)], ["Error" "BP" "WLS" "Distance"];
-                     screen_size = (-1,-1), alignment=[:r,:r,:r, :r],
+        pretty_table([col0 col1 col2 abs.(col1 - col2)],
+                     ["Error" "WLS" "BP" "Distance"];
+                     screen_size = (-1,-1),
+                     alignment=[:r,:r,:r, :r],
                      formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
 
-        col0 = collect(1:length(xbp))
-        col3 = abs.(xbp - xwls)
-        A = [col0 xbp xwls col3]
-        A = A[reverse(sortperm(A[:, 4])),  :]
-
-        pretty_table(A, ["State Variable" "BP Estimate" "WLS Estimate" "Max to Min Distance"],
-                        alignment=[:r,:r,:r, :r],
+        A = [collect(1:length(xbp)) xbp xwls abs.(xbp - xwls)]
+        pretty_table(A[reverse(sortperm(A[:, 4])),  :],
+                     ["State Variable" "BP Estimate" "WLS Estimate" "Max to Min Distance"],
+                     alignment=[:r,:r,:r, :r],
                      formatter = ft_printf(["%3.0f", "%3.6f","%3.6f","%3.6e"], [1,2,3,4]))
     end
 end
@@ -95,7 +96,8 @@ function bp_time(fg, it, ic, so, TIME)
         col2 = 1000 .* [fg, it, ic, so, fg + it + ic + so]
 
         pretty_table([col1 col2], ["BP Phase" "Time (ms)"];
-                     screen_size = (-1,200), alignment=[:l,:r],
+                     screen_size = (-1,200),
+                     alignment=[:l,:r],
                      formatter = ft_printf("%3.6f", [2]),
                      hlines = [4])
     end
