@@ -10,9 +10,9 @@ where **x** is the vector of the state variables (i.e., unknowns), **f**(**x**) 
 
 The solution can be obtained by solving linear weighted least-squares (WLS) problem:
 
-![wls](https://latex.codecogs.com/gif.latex?%28%5Ctextbf%7BA%7D%5ET%5Ctextbf%7BW%7D%5Ctextbf%7BA%7D%29%5Ctextbf%7Bx%7D%3D%5Ctextbf%7BA%7D%5ET%5Ctextbf%7BW%7D%5Ctextbf%7Bb%7D)
+![wls](https://latex.codecogs.com/gif.latex?%28%5Cmathbf%7BH%7D%5ET%5Cmathbf%7BW%7D%5Cmathbf%7BH%7D%29%5Cmathbf%7Bx%7D%20%3D%20%5Cmathbf%7BH%7D%5ET%20%5Cmathbf%7BW%7D%5Cmathbf%7Bb%7D)
 
-where **A** is the Jacobian matrix of linear functions or the coefficient  matrix for our system, and **W** is a diagonal matrix containing inverses of observation variances.
+where **H** is the Jacobian matrix of linear functions or the coefficient  matrix for our system, and **W** is a diagonal matrix containing inverses of observation variances.
 
 Further, the solution to the problem can be found via maximization of the likelihood function which is defined via likelihoods of independent observations, and that can be efficiently solved utilizing factor graphs and the Gaussian belief propagation (BP) algorithm.
 
