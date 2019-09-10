@@ -27,7 +27,7 @@ include("neumaierbp.jl")
 # Run package
 #--------------------------------------------------------------------------
 function bp(DATA::String = "data_33_14",
-			MAXI::Int64 = 20,
+		    MAXI::Int64 = 20,
 			DAMP::Int64 = 10,
 			PROB::Float64 = 0.6,
 			ALPH::Float64 = 0.4,
