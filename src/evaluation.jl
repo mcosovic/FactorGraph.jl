@@ -60,17 +60,30 @@ function errors(H, b, v, xbp, ERROR, TIME)
         rmse_bp, rmse_wls = rmse(H, b, v, xbp, xwls)
 
         if TIME == "on"
-            print("WLS:          $(@sprintf("%.6f", wls * 1000)) ms \n")
-            println(" ")
+            pretty_table(["WLS" 1000 * wls], ["" "Time (ms)"];
+                         screen_size = (-1,-1), alignment=[:l,:r],
+                         formatter = ft_printf("%3.6f", [2]))
         end
 
-        print("WRSS WLS:     $(@sprintf("%.6f", wrss_wls)) \n")
-        print("WRSS BP:      $(@sprintf("%.6f", wrss_bp)) \n")
-        println(" ")
-        print("RMSE WLS:     $(@sprintf("%.6f", rmse_wls)) \n")
-        print("RMSE BP:      $(@sprintf("%.6f", rmse_bp)) \n")
-        println(" ")
-        println("MAX DIFF: ", sort(abs.(xbp-xwls))[end])
+        col0 = ["WRSS", "RMSE"]
+        col1 = [wrss_wls, rmse_wls]
+        col2 = [wrss_bp, rmse_bp]
+        pretty_table([col0 col1 col2 abs.(col1 - col2)], ["Error" "BP" "WLS" "Distance"];
+                     screen_size = (-1,-1), alignment=[:r,:r,:r, :r],
+                     formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
+
+        pretty_table([col0 col1 col2 abs.(col1 - col2)], ["Error" "BP" "WLS" "Distance"];
+                     screen_size = (-1,-1), alignment=[:r,:r,:r, :r],
+                     formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
+
+        col0 = collect(1:length(xbp))
+        col3 = abs.(xbp - xwls)
+        A = [col0 xbp xwls col3]
+        A = A[sortperm(A[:, 4]), :]
+
+        pretty_table(A, ["State Variable" "BP Estimate" "WLS Estimate" "Max to Min Distance"],
+                        alignment=[:r,:r,:r, :r],
+                     formatter = ft_printf(["%3.0f", "%3.6f","%3.6f","%3.6e"], [1,2,3,4]))
     end
 end
 #------------------------------------------------------------------------
@@ -82,12 +95,13 @@ end
 #------------------------------------------------------------------------
 function bp_time(fg, it, ic, so, TIME)
     if TIME == "on"
-        print("Preprocesing: $(@sprintf("%.6f", fg * 1000)) ms \n")
-        print("Initialize:   $(@sprintf("%.6f", it * 1000)) ms \n")
-        print("Inference:    $(@sprintf("%.6f", ic * 1000)) ms \n")
-        print("Marginal:     $(@sprintf("%.6f", so * 1000)) ms \n")
-        println(" ")
-        print("BP:           $(@sprintf("%.6f", (fg + it + ic + so) * 1000)) ms \n")
+        col1 = ["Preprocesing", "Initialize", "Inference", "Marginal", "Total"]
+        col2 = 1000 .* [fg, it, ic, so, fg + it + ic + so]
+
+        pretty_table([col1 col2], ["BP Phase" "Time (ms)"];
+                     screen_size = (-1,200), alignment=[:l,:r],
+                     formatter = ft_printf("%3.6f", [2]),
+                     hlines = [4])
     end
 end
 #------------------------------------------------------------------------
