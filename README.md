@@ -24,7 +24,7 @@ pkg> add https://github.com/mcosovic/GaussianBP
 
 ## Syntax
 ```
-bp(DATA, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
+bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 ```
 
 ## Input Arguments:
@@ -40,8 +40,9 @@ bp(DATA, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
     - `DAMP` - applied randomized damping at the BP iteration;
+    - `BUMP` - cancel variance computation (in a usual scenario, variances converge much faster than means)
 
-    Default settings: `MAXI::Int64 = 20`, `MAXI::Int64 = 10`;
+    Default settings: `MAXI::Int64 = 20`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`;
 
 3. Convergence Parameters:
     - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1;
@@ -76,7 +77,7 @@ bp(DATA, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 julia> using GaussianBP
 julia> bp("data33_14", 100; TIME = "on")
 julia> bp("data33_14", 100; ERROR = "on")
-julia> bp("data33_14", 100, 10; ALGORITHM = "kahan")
+julia> bp("data33_14", 100, 10, 30; ALGORITHM = "kahan")
 julia> bp("data33_14", 100, 10; ALGORITHM = "kahan", TIME = "on")
 ```
 
