@@ -22,44 +22,80 @@
 #   - ah1: current iteration message weights
 #   - ah2: previous iteration message weights
 #   - evr: error vector of variance summation
+#   - iter: current iteration
+#   - BUMP: canceled variances
 # Output Data:
 #   - m_fv: mean messages from factor node to variable node
 #   - vi_fv: inverse variance messages from factor node to variable node
 #------------------------------------------------------------------------
- function factor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli)
+ function factor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
         m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]
-        vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
+
+        if iter < BUMP
+            vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
+        end
     end
 
-    return m_fv, vi_fv
+    fill!(msr, 0.0)
+    if iter < BUMP
+        fill!(vsr, 0.0)
+    end
+
+    return m_fv, vi_fv, msr, vsr
  end
 
- function dfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli, ah1, ah2)
+ function dfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
     @inbounds for i = 1:Nli
         m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]) + ah2[i] * m_fv[i]
-        vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
+
+        if iter < BUMP
+            vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
+        end
     end
 
-    return m_fv, vi_fv
+    fill!(msr, 0.0)
+    if iter < BUMP
+        fill!(vsr, 0.0)
+    end
+
+    return m_fv, vi_fv, msr, vsr
  end
 
- function nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
+ function nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
         m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]
-        vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
+
+        if iter < BUMP
+            vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
+        end
     end
 
-    return m_fv, vi_fv
+    fill!(msr, 0.0)
+    if iter < BUMP
+        fill!(vsr, 0.0)
+        fill!(evr, 0.0)
+    end
+
+    return m_fv, vi_fv, msr, vsr, evr
  end
 
- function ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2)
-     @inbounds for i = 1:Nli
-         m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]) + ah2[i] * m_fv[i]
-         vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
-     end
+ function ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
+    @inbounds for i = 1:Nli
+        m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]) + ah2[i] * m_fv[i]
 
-     return m_fv, vi_fv
+        if iter < BUMP
+            vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
+        end
+    end
+
+    fill!(msr, 0.0)
+    if iter < BUMP
+        fill!(vsr, 0.0)
+        fill!(evr, 0.0)
+    end
+
+     return m_fv, vi_fv, msr, vsr, evr
  end
 #------------------------------------------------------------------------
 
@@ -79,26 +115,44 @@
 #   - Ji: indices of indirect factors according to variable nodes (columns)
 #   - Nli: number of links between indirect factor and variable nodes
 #   - evc: error vector of variance summation
+#   - iter: current iteration
+#   - BUMP: canceled variances
 # Output Data:
 #   - m_vf: mean messages from variable node to factor node
 #   - v_vf: variance messages from variable node to factor node
 #------------------------------------------------------------------------
-function variable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, Ji, Nli)
+function variable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, Ji, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
-        v_vf[i] = 1 / (vsc[Ji[i]] + vid[Ji[i]] - vi_fv[i])
+        if iter < BUMP
+            v_vf[i] = 1 / (vsc[Ji[i]] + vid[Ji[i]] - vi_fv[i])
+        end
+
         m_vf[i] = (msc[Ji[i]] - m_fv[i] * vi_fv[i] + md[Ji[i]]) * v_vf[i]
     end
 
-    return m_vf, v_vf
+    fill!(msc, 0.0)
+    if iter < BUMP
+        fill!(vsc, 0.0)
+    end
+
+    return m_vf, v_vf, msc, vsc
 end
 
-function nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli)
+function nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
-        v_vf[i] = 1 / ((vsc[Ji[i]] - vi_fv[i]) + evc[Ji[i]] + vid[Ji[i]])
+        if iter < BUMP
+            v_vf[i] = 1 / ((vsc[Ji[i]] - vi_fv[i]) + evc[Ji[i]] + vid[Ji[i]])
+        end
         m_vf[i] = (msc[Ji[i]] - m_fv[i] * vi_fv[i] + md[Ji[i]]) * v_vf[i]
     end
 
-    return m_vf, v_vf
+    fill!(msc, 0.0)
+    if iter < BUMP
+        fill!(vsc, 0.0)
+        fill!(evc, 0.0)
+    end
+
+    return m_vf, v_vf, msc, vsc, evc
 end
 #------------------------------------------------------------------------
 

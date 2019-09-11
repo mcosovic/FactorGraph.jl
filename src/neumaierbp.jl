@@ -3,7 +3,7 @@
 ####################################################################
 
 
-function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
+function bpn(H, b, v, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI, TIME)
 
     fgraph = @elapsed begin
         Nf, Nv, T = graph(H)
@@ -18,27 +18,25 @@ function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
         m_vf, v_vf = forward_directs(Hi, Ji, Nli, md, vid, v_vf, m_vf)
 
         msr, vsr, evr, msc, vsc, evc = nload_sum(Nv, Ni)
-        msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr)
-        m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
-        msr, vsr, evr, msc, vsc, evc = nclear_sum(msr, vsr, evr, msc, vsc, evc)
+        msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr, -1, BUMP)
+        m_fv, vi_fv, msr, vsr, evr = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, -1, BUMP)
     end
 
     infe = @elapsed begin
         for i = 1:MAXI
-            msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc)
-            m_vf, v_vf = nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli)
-            msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr)
+            msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc, i, BUMP)
+            m_vf, v_vf, msc, vsc, evc = nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji, Nli, i, BUMP)
+            msr, vsr, evr = nsum_rows(Hi, Ii, Nli, m_vf, v_vf, msr, vsr, evr, i, BUMP)
             if i < DAMP
-                m_fv, vi_fv = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli)
+                m_fv, vi_fv, msr, vsr, evr = nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, i, BUMP)
             else
-                m_fv, vi_fv = ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2)
+                m_fv, vi_fv, msr, vsr, evr = ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2, i, BUMP)
             end
-            msr, vsr, evr, msc, vsc, evc = nclear_sum(msr, vsr, evr, msc, vsc, evc)
         end
     end
 
     solu = @elapsed begin
-        msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc)
+        msc, vsc, evc = nsum_cols(Ji, Nli, m_fv, vi_fv, msc, vsc, evc, -1, BUMP)
         xbp = nmarginal(md, vid, msc, vsc, evc, Ji, Nv)
     end
 
