@@ -42,9 +42,7 @@ Ii, Ji, Ni, bi, vi, Hi, md, vid = @inferred factors(Nf, Nv, Nld, Nli, T, b, v, v
 include("../src/auxiliary.jl")
 m_fv, vi_fv, m_vf, v_vf = @inferred load_messages(Hi)
 msr, vsr, msc, vsc = @inferred load_sum(Nv, Ni)
-msr, vsr, msc, vsc = @inferred clear_sum(msr, vsr, msc, vsc)
 msr, vsr, evr, msc, vsc, evc = @inferred nload_sum(Nv, Ni)
-msr, vsr, evr, msc, vsc, evc = @inferred nclear_sum(msr, vsr, evr, msc, vsc, evc)
 
 include("../src/initialize.jl")
 ah1, ah2 = @inferred damping(Nli, 0.5, 0.5)
