@@ -33,7 +33,7 @@ bp(DATA, MAXI, DAMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
     - `model.h5/b` - observation values `b::Array{Float64,1}`;
     - `model.h5/v` - observation variances `v::Array{Float64,1}`;
 
-    Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data29997_10000`, `data283803_70000`;
+    Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`;
 
     Default setting: `DATA::String = "data33_14"`;
 
