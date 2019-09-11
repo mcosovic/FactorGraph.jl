@@ -42,7 +42,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
     - `DAMP` - applied randomized damping at the BP iteration;
     - `BUMP` - cancel variance computation (in a usual scenario, variances converge much faster than means)
 
-    Default settings: `MAXI::Int64 = 20`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`;
+    Default settings: `MAXI::Int64 = 30`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`;
 
 3. Convergence Parameters:
     - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1;
@@ -56,7 +56,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
     - `MEAN` - the mean value of virtual factor nodes;
     - `VARI` - the variance value of the virtual factor nodes;
 
-    Default settings: `MEAN::Float64 = 0.0`, `VARI::Float64 = 1e3`;
+    Default settings: `MEAN::Float64 = 0.0`, `VARI::Float64 = 1e5`;
 
     Note: The virtual factor node is a singly-connected factor node used if the variable node x is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity.
 
