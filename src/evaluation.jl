@@ -103,3 +103,25 @@ function bp_time(fg, it, ic, so, TIME)
     end
 end
 #------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------
+# Graph Data
+#------------------------------------------------------------------------
+function graph_statistic(Nf, Nv, Ndl, Nli, vir, v)
+    col1 = ["Number of Factor Nodes",
+            "Number of Virtual Nodes",
+            "Number of Variable Nodes",
+            "Number of Direct Links",
+            "Number of Indirect Links",
+            "Minimum Variance Value",
+            "Maximum Variance Value"]
+
+    col2 = [Nf, length(findall(!iszero, vir)), Nv, Ndl, Nli, minimum(v), maximum(v)]
+
+    pretty_table([col1 col2], ["Graph Data" ""];
+                 screen_size = (-1,200),
+                 alignment=[:l,:r],
+                 hlines = [3,5])
+end
+#------------------------------------------------------------------------

@@ -42,6 +42,7 @@ function bpn(H, b, v, MAXI, DAMP, PROB, ALPH, MEAN, VARI, TIME)
         xbp = nmarginal(md, vid, msc, vsc, evc, Ji, Nv)
     end
 
+    graph_statistic(Nf, Nv, Nld, Nli, vir, v)
     bp_time(fgraph, init, infe, solu, TIME)
 
     return xbp
