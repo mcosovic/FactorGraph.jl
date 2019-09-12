@@ -107,6 +107,7 @@ function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
     Ii = fill(0, Nli)
     Ji = similar(Ii)
     Hi = fill(0.0, Nli)
+    Hr = similar(Hi)
     bi = fill(0.0, Ni)
     vi = similar(bi)
 
@@ -122,6 +123,7 @@ function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
             Ii[idxi] = idxr
             Ji[idxi] = i[1]
             Hi[idxi] = T[i]
+            Hr[idxi] = 1 / T[i]
             idxi += 1
             if idxT[T.colptr[i[2] + 1] - 1] == i
                 bi[idxr] = b[i[2]]
@@ -135,6 +137,6 @@ function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
         end
     end
 
-    return Ii, Ji, Ni, bi, vi, Hi, md, vid
+    return Ii, Ji, Ni, bi, vi, Hi, Hr, md, vid
 end
 #------------------------------------------------------------------------

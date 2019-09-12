@@ -28,9 +28,9 @@
 #   - m_fv: mean messages from factor node to variable node
 #   - vi_fv: inverse variance messages from factor node to variable node
 #------------------------------------------------------------------------
- function factor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli, iter, BUMP)
+ function factor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, Hr, bi, vi, Ii, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
-        m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]
+        m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) * Hr[i] + m_vf[i]
 
         if iter < BUMP
             vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
@@ -45,9 +45,9 @@
     return m_fv, vi_fv, msr, vsr
  end
 
- function dfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
+ function dfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, Hi, Hr, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
     @inbounds for i = 1:Nli
-        m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]) + ah2[i] * m_fv[i]
+        m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) * Hr[i] + m_vf[i]) + ah2[i] * m_fv[i]
 
         if iter < BUMP
             vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + vsr[Ii[i]] - Hi[i]^2 * v_vf[i])
@@ -62,9 +62,9 @@
     return m_fv, vi_fv, msr, vsr
  end
 
- function nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, iter, BUMP)
+ function nfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, Hr, bi, vi, Ii, Nli, iter, BUMP)
     @inbounds for i = 1:Nli
-        m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]
+        m_fv[i] = (bi[Ii[i]] - msr[Ii[i]]) * Hr[i] + m_vf[i]
 
         if iter < BUMP
             vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
@@ -80,9 +80,9 @@
     return m_fv, vi_fv, msr, vsr, evr
  end
 
- function ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
+ function ndfactor_to_variable(m_vf, v_vf, m_fv, vi_fv, msr, vsr, evr, Hi, Hr, bi, vi, Ii, Nli, ah1, ah2, iter, BUMP)
     @inbounds for i = 1:Nli
-        m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) / Hi[i] + m_vf[i]) + ah2[i] * m_fv[i]
+        m_fv[i] = ah1[i] * ((bi[Ii[i]] - msr[Ii[i]]) * Hr[i] + m_vf[i]) + ah2[i] * m_fv[i]
 
         if iter < BUMP
             vi_fv[i] =  (Hi[i]^2) / (vi[Ii[i]] + (vsr[Ii[i]] - Hi[i]^2 * v_vf[i]) + evr[Ii[i]])
@@ -143,6 +143,7 @@ function nvariable_to_factor(m_vf, v_vf, m_fv, vi_fv, md, vid, msc, vsc, evc, Ji
         if iter < BUMP
             v_vf[i] = 1 / ((vsc[Ji[i]] - vi_fv[i]) + evc[Ji[i]] + vid[Ji[i]])
         end
+
         m_vf[i] = (msc[Ji[i]] - m_fv[i] * vi_fv[i] + md[Ji[i]]) * v_vf[i]
     end
 

@@ -70,11 +70,20 @@ function errors(H, b, v, xbp, ERROR, TIME)
         col0 = ["WRSS", "RMSE"]
         col1 = [wrss_bp, rmse_bp]
         col2 = [wrss_wls, rmse_wls]
+        data = [col1 col1 col2 abs.(col1 - col2)]
+
+        if data[1,4] > 1
+            high = Highlighter((data,i,j) -> j in (4) && data[i,j] > 1e-2,
+                   Crayon(bold = true, background = :red))
+        else
+            high = ()
+        end
         pretty_table([col0 col1 col2 abs.(col1 - col2)],
                      ["Error" "BP" "WLS" "Distance"];
                      screen_size = (-1,-1),
                      alignment=[:r,:r,:r, :r],
-                     formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]))
+                     formatter = ft_printf(["%3.6f","%3.6f","%3.6e"], [2,3,4]),
+                     highlighters = high)
 
         A = [collect(1:length(xbp)) xbp xwls abs.(xbp - xwls)]
         pretty_table(A[reverse(sortperm(A[:, 4])),  :],
