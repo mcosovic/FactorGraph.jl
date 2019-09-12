@@ -72,8 +72,8 @@ function errors(H, b, v, xbp, ERROR, TIME)
         col2 = [wrss_wls, rmse_wls]
         data = [col1 col1 col2 abs.(col1 - col2)]
 
-        if data[1,4] > 1
-            high = Highlighter((data,i,j) -> j in (4) && data[i,j] > 1,
+        if data[1,4] > 100
+            high = Highlighter((data,i,j) -> i == 1 && data[1,4] > 100,
                    Crayon(bold = true, background = :red))
         else
             high = ()
