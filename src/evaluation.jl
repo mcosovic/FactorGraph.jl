@@ -73,7 +73,7 @@ function errors(H, b, v, xbp, ERROR, TIME)
         data = [col1 col1 col2 abs.(col1 - col2)]
 
         if data[1,4] > 1
-            high = Highlighter((data,i,j) -> j in (4) && data[i,j] > 1e-2,
+            high = Highlighter((data,i,j) -> j in (4) && data[i,j] > 1,
                    Crayon(bold = true, background = :red))
         else
             high = ()
