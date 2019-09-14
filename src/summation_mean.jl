@@ -16,7 +16,6 @@ function sum_rows_mean(Mvar, Mrow, coeff, row, Nlink)
     return Mrow
 end
 
-
 function sum_rows_mean_recursion(
     Mfac, VfacInv, Mrow, Mcol, Maux, Vaux, Mdir,
     coeff, row, col, Nlink)

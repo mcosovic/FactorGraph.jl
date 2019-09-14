@@ -57,7 +57,8 @@ inference = @elapsed begin
                                       alpha2)
         end
     end
-    for i = 1:(MAXI - BUMP)
+    
+    for i = (BUMP + 1):MAXI
         Mcol = sum_cols_mean(Mfac, VfacInv, Mcol, col, Nlink)
 
         Mrow, Maux =
