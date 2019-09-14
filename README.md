@@ -64,7 +64,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `METHOD = "passing"` - computes separately messages from factor and variable nodes;
     - `METHOD = "recursion"` - computes jointly messages reduced to factor nodes (only for `ALGORITHM = "sum"`);
 
-    Default setting: `METHOD = "passing"`;
+    Default setting: `METHOD::String = "passing"`;
 
 6. Algorithms
     - `ALGORITHM = "sum"` - the belief propagation with simply summing messages;
@@ -77,7 +77,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `ERROR = "on"` - shows belief propagation evaluation vs. weighted least-squares;
     - `STATISTIC = "on"` - shows system data ;
 
-    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC = "off"`;
+    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`;
 
 ## Quick Start
 ```
