@@ -77,7 +77,6 @@ function bp(
                                 TIME, ERROR, STATISTIC)
     end
 
-
     return Xbp
 
 end

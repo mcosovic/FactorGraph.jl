@@ -24,7 +24,7 @@ pkg> add https://github.com/mcosovic/GaussianBP
 
 ## Syntax
 ```
-bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD ALGORITHM, TIME, ERROR, STATISTIC)
+bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERROR, STATISTIC)
 ```
 
 ## Input Arguments:
