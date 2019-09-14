@@ -7,12 +7,12 @@
 function model(DATA, PATH)
     system = string(PATH, DATA, ".h5")
 
-    Hlist = h5read(system, "/H")
-    H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
+    list = h5read(system, "/H")
+    jacobian = sparse(list[:,1], list[:,2], list[:,3])
 
-    b = h5read(system, "/b")
-    v = h5read(system, "/v")
+    observation = h5read(system, "/b")
+    noise = h5read(system, "/v")
 
-    return H, b, v
+    return jacobian, observation, noise
 end
 #------------------------------------------------------------------------

@@ -4,139 +4,105 @@
 ###########################################################
 
 
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Define the node numbers and the transpose system matrix
-# Input Data:
-#   - H: system model sparse matrix
-# Output Data:
-#   - Nf: number of factor nodes
-#   - Nv: number of variable nodes
-#   - T: system model transpose sparse matrix
-#------------------------------------------------------------------------
-function graph(H)
-    Nf, Nv = size(H)
-    T = SparseMatrixCSC(H')
+#-------------------------------------------------------------------------------
+function graph(jacobian)
+    Nfactor, Nvariable = size(jacobian)
+    jacobianT = SparseMatrixCSC(jacobian')
 
-    return Nf, Nv, T
+    return Nfactor, Nvariable, jacobianT
 end
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Find number of links
-# Input Data:
-#   - Nf: number of factor nodes
-#   - T: system model transpose sparse matrix
-# Output Data:
-#   - Nld: number of links - singly-connected factor and variable nodes
-#   - Nli: number of links - indirect factor and variable nodes
-#   - dir: position of each singly-connected factor to variable nodes
-#------------------------------------------------------------------------
-function links(Nf, T)
-    Nld = 0
-    Nli = 0
-    num = 0
-    dir = fill(0, Nf)
+#-------------------------------------------------------------------------------
+function links(Nfactor, jacobianT)
+    Ndir = 0
+    Nlink = 0
+    variables_in_column = 0
+    dir_position = fill(0, Nfactor)
 
-    @inbounds for i = 1:Nf
-        num = T.colptr[i + 1] - T.colptr[i]
+    @inbounds for i = 1:Nfactor
+        variables_in_column = jacobianT.colptr[i + 1] - jacobianT.colptr[i]
 
-        if num == 1
-            Nld += num
-            dir[i] = T.rowval[T.colptr[i]]
+        if variables_in_column == 1
+            Ndir += variables_in_column
+            dir_position[i] = jacobianT.rowval[jacobianT.colptr[i]]
         else
-            Nli += num
+            Nlink += variables_in_column
         end
     end
 
-    return Nld, Nli, dir
+    return Ndir, Nlink, dir_position
 end
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Define position of virtual factor nodes
-# Input Data:
-#   - Nf: number of factor nodes
-#   - dir: position of each singly-connected factor to variable nodes
-# Output Data:
-#   - vir: virtual factors according to variable nodes
-#------------------------------------------------------------------------
-function virtuals(Nv, dir)
-    idx = findall(!iszero, dir)
-    vir = fill(1, Nv)
+#-------------------------------------------------------------------------------
+function virtuals(Nvariable, dir_position)
+    idx = findall(!iszero, dir_position)
+    virtual = fill(1, Nvariable)
 
     @inbounds for i in idx
-        vir[dir[i]] = 0
+        virtual[dir_position[i]] = 0
     end
 
-    return vir
+    return virtual
 end
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Define singly-connected, virtual and indirect factor nodes arrays
-# Input Data:
-#   - Nf: number of factor nodes
-#   - Nv: number of variable nodes
-#   - Nld: number of links - singly-connected factor and variable nodes
-#   - Nli: number of links - indirect factor and variable nodes
-#   - T: system model transpose sparse matrix
-#   - b: mean vector of measurements
-#   - v: variance vector of measurements
-#   - vir: virtual factors according to variable nodes
-#   - MEAN: virtual factor node mean value
-#   - VARI: virtual factor node variance value
-# Output Data:
-#   - Hi: vector of coefficient of indirect factor nodes
-#   - bi: vector of measurement means of indecies factor nodes
-#   - vi: vector of measurement variances of indirect factor nodes
-#   - Ii: indices of indirect factors according to factor nodes (rows)
-#   - Ji: indices of indirect factors according to variable nodes (columns)
-#   - Ni: number of indirect factor nodes
-#   - md: like means from singly-connected factors
-#   - vid: inverse variance from singly-connected factors
-#------------------------------------------------------------------------
-function factors(Nf, Nv, Nld, Nli, T, b, v, vir, MEAN, VARI)
-    Ni = Nf - Nld
+#-------------------------------------------------------------------------------
+function factors(
+    Nfactor, Nvariable, Ndir, Nlink,
+    jacobianT, observation, noise, virtual,
+    MEAN, VARI)
 
-    md = fill(0.0, Nv)
-    vid = fill(0.0, Nv)
+    Nind = Nfactor - Ndir
 
-    Ii = fill(0, Nli)
-    Ji = similar(Ii)
-    Hi = fill(0.0, Nli)
-    Hr = similar(Hi)
-    bi = fill(0.0, Ni)
-    vi = similar(bi)
+    Mdir = fill(0.0, Nvariable)
+    VdirInv = fill(0.0, Nvariable)
+
+    row = fill(0, Nlink)
+    col = similar(row)
+    coeff = fill(0.0, Nlink)
+    coeffInv = similar(coeff)
+    Mind = fill(0.0, Nind)
+    Vind = similar(Mind)
 
     idxi = 1
     idxr = 1
 
-    idxT = findall(!iszero, T)
+    idxT = findall(!iszero, jacobianT)
     @inbounds for i in idxT
-        if (T.colptr[i[2] + 1] - T.colptr[i[2]]) == 1
-            md[i[1]] += b[i[2]] * T[i] / v[i[2]]
-            vid[i[1]] += (T[i]^2) / v[i[2]]
+        if (jacobianT.colptr[i[2] + 1] - jacobianT.colptr[i[2]]) == 1
+            Mdir[i[1]] += observation[i[2]] * jacobianT[i] / noise[i[2]]
+            VdirInv[i[1]] += (jacobianT[i]^2) / noise[i[2]]
         else
-            Ii[idxi] = idxr
-            Ji[idxi] = i[1]
-            Hi[idxi] = T[i]
-            Hr[idxi] = 1 / T[i]
+            row[idxi] = idxr
+            col[idxi] = i[1]
+            coeff[idxi] = jacobianT[i]
+            coeffInv[idxi] = 1 / jacobianT[i]
             idxi += 1
-            if idxT[T.colptr[i[2] + 1] - 1] == i
-                bi[idxr] = b[i[2]]
-                vi[idxr] = v[i[2]]
+            if idxT[jacobianT.colptr[i[2] + 1] - 1] == i
+                Mind[idxr] = observation[i[2]]
+                Vind[idxr] = noise[i[2]]
                 idxr += 1
             end
         end
-        if vir[i[1]] !== 0
-            md[i[1]] = MEAN / VARI
-            vid[i[1]] = 1 / VARI
+        if virtual[i[1]] !== 0
+            Mdir[i[1]] = MEAN / VARI
+            VdirInv[i[1]] = 1 / VARI
         end
     end
 
-    return Ii, Ji, Ni, bi, vi, Hi, Hr, md, vid
+    return row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv
 end
 #------------------------------------------------------------------------

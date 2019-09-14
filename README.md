@@ -24,7 +24,7 @@ pkg> add https://github.com/mcosovic/GaussianBP
 
 ## Syntax
 ```
-bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
+bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD ALGORITHM, TIME, ERROR, STATISTIC)
 ```
 
 ## Input Arguments:
@@ -40,7 +40,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
     - `DAMP` - applied randomized damping at the BP iteration;
-    - `BUMP` - cancel variance computation (in a usual scenario, variances converge much faster than means)
+    - `BUMP` - cancel variance computation at the BP iteration (in a usual scenario, variances converge much faster than means)
 
     Default settings: `MAXI::Int64 = 30`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`;
 
@@ -60,17 +60,24 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; ALGORITHM, TIME, ERROR)
 
     Note: The virtual factor node is a singly-connected factor node used if the variable node x is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity.
 
-5. Algorithms
+5. Methods
+    - `METHOD = "passing"` - computes separately messages from factor and variable nodes;
+    - `METHOD = "recursion"` - computes jointly messages reduced to factor nodes (only for `ALGORITHM = "sum"`);
+
+    Default setting: `METHOD = "passing"`;
+
+6. Algorithms
     - `ALGORITHM = "sum"` - the belief propagation with simply summing messages;
     - `ALGORITHM = "kahan"` - the belief propagation with Kahan-Babuska algorithm for summing variances;
 
     Default setting: `ALGORITHM::String = "sum"`
 
-5. Post-Processing Options:
+7. Post-Processing Options:
     - `TIME = "on"` - shows belief propagation time;
     - `ERROR = "on"` - shows belief propagation evaluation vs. weighted least-squares;
+    - `STATISTIC = "on"` - shows system data ;
 
-    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`;
+    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC = "off"`;
 
 ## Quick Start
 ```
