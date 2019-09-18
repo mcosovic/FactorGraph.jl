@@ -28,12 +28,12 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 ```
 
 ## Input Arguments:
-1. Input data `model.h5` file located in `\src\data\` with variables:
+1. Input `DATA` HDF5 file with variables:
     - `model.h5/H` - coefficient data `H::Array{Float64,2} = [row column coefficient]`;
     - `model.h5/b` - observation values `b::Array{Float64,1}`;
     - `model.h5/v` - observation variances `v::Array{Float64,1}`;
 
-    Available systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`;
+    Example systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`;
 
     Default setting: `DATA::String = "data33_14"`;
 
@@ -78,8 +78,12 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `STATISTIC = "on"` - shows system data;
     - `PATH` - path to the input data model.h5;
 
-    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`, `PATH::String = from_package`;
+    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`   
 
+8. Path Option:
+  - `PATH` - path to the `DATA` HDF5 file;
+
+    Default setting: `PATH::String = from_package`
 
 
 ## Quick Start
