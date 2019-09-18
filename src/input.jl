@@ -3,8 +3,13 @@
 #######################
 
 
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 function model(DATA, PATH)
+    if PATH == "from_package"
+        package_dir = abspath(joinpath(dirname(Base.find_package("GaussianBP")), ".."))
+        PATH = joinpath(package_dir, "src/data/")
+    end
+
     system = string(PATH, DATA, ".h5")
 
     list = h5read(system, "/H")
@@ -15,4 +20,4 @@ function model(DATA, PATH)
 
     return jacobian, observation, noise
 end
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------

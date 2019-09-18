@@ -1,7 +1,5 @@
 module GaussianBP
 
-push!(LOAD_PATH, pwd())
-
 export bp
 
 using SparseArrays
@@ -57,7 +55,8 @@ function bp(
     TIME::String = "off",
     ERROR::String = "off",
     STATISTIC::String = "off",
-    PATH::String = "src/data/")
+    PATH::String = "from_package")
+
 
     check_iteration_scheme(MAXI, DAMP, BUMP)
 
@@ -80,6 +79,7 @@ function bp(
     end
 
     return Xbp
+
 
 end
 
