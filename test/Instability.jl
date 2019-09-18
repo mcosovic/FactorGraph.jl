@@ -18,16 +18,16 @@ using PrettyTables
 function model(DATA, PATH)
     system = string(PATH, DATA, ".h5")
 
-    Hlist = h5read(system, "/H")
-    H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
+    list = h5read(system, "/H")
+    jacobian = sparse(list[:,1], list[:,2], list[:,3])
 
-    b = h5read(system, "/b")
-    v = h5read(system, "/v")
+    observation = h5read(system, "/b")
+    noise = h5read(system, "/v")
 
-    return H, b, v
+    return jacobian, observation, noise
 end
 
-H, b, v = model("SimpleTest", "test/")
+jacobian, observation, noise = model("SimpleTest", "test/")
 
 
 ################################################
@@ -36,13 +36,14 @@ H, b, v = model("SimpleTest", "test/")
 include("../src/factorgraph.jl")
 include("../src/auxiliary.jl")
 include("../src/initialize.jl")
-include("../src/summation.jl")
 include("../src/inference.jl")
 include("../src/evaluation.jl")
-include("../src/simplybp.jl")
-include("../src/neumaierbp.jl")
-@inferred bps(H, b, v, 10, 5, 10, 0.6, 0.5, 0.0, 1e-3, "on")
-@inferred bpn(H, b, v, 10, 5, 10, 0.6, 0.5, 0.0, 1e-3, "on")
+include("../src/bp_simple_passing.jl")
+include("../src/bp_kahan_passing.jl")
+include("../src/bp_simple_recursion.jl")
 
+@inferred bp_simple_passing(jacobian, observation, noise, 10, 5, 10, 0.6, 0.5, 0.0, 1e-3, "on", "on", "on")
+@inferred bp_kahan_passing(jacobian, observation, noise, 10, 5, 10, 0.6, 0.5, 0.0, 1e-3, "on", "on", "on")
+@inferred bp_simple_recursion(jacobian, observation, noise, 10, 5, 10, 0.6, 0.5, 0.0, 1e-3, "on", "on", "on")
 
 end # Instability

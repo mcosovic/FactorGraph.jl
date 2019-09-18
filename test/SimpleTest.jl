@@ -55,7 +55,13 @@ end
 @testset "KahanBP" begin
     @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e30, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
     @test bp("SimpleTest", 1000, 50, 50, 0.0, 0.0, 0.0, 1e60, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
-    @test bp("SimpleTest", 500, 10, 50, 0.6, 0.4, 10.0, 1e80, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 500, 10, 500, 0.6, 0.4, 10.0, 1e80, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+end
+
+@testset "Recursion" begin
+    @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e6, METHOD = "recursion", ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 1000, 50, 50, 0.0, 0.0, 0.0, 1e7, METHOD = "recursion", ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 500, 10, 500, 0.6, 0.4, 10.0, 1e8, METHOD = "recursion", ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
 end
 
 end # SimpleTest
