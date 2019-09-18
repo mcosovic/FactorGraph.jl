@@ -79,8 +79,6 @@ function bp(
     end
 
     return Xbp
-
-
 end
 
 end # SimplyGBP

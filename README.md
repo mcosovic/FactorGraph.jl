@@ -75,9 +75,12 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 7. Post-Processing Options:
     - `TIME = "on"` - shows belief propagation time;
     - `ERROR = "on"` - shows belief propagation evaluation vs. weighted least-squares;
-    - `STATISTIC = "on"` - shows system data ;
+    - `STATISTIC = "on"` - shows system data;
+    - `PATH` - path to the input data model.h5;
 
-    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`;
+    Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`, `PATH::String = from_package`;
+
+
 
 ## Quick Start
 ```
