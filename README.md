@@ -33,22 +33,22 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `model.h5/b` - observation values `b::Array{Float64,1}`;
     - `model.h5/v` - observation variances `v::Array{Float64,1}`;
 
-    Example systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`;
+    Example systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`
 
-    Default setting: `DATA::String = "data33_14"`;
+    Default setting: `DATA::String = "data33_14"`
 
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
     - `DAMP` - applied randomized damping at the BP iteration;
     - `BUMP` - cancel variance computation at the BP iteration (in a usual scenario, variances converge much faster than means)
 
-    Default settings: `MAXI::Int64 = 30`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`;
+    Default settings: `MAXI::Int64 = 30`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`
 
 3. Convergence Parameters:
     - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1;
     - `ALPH` - the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights "ALPH" and 1 - "ALPH", where "ALPH" is between 0 and 1;
 
-    Default settings: `PROB::Float64 = 0.6`, `ALPH::Float64 = 0.4`;
+    Default settings: `PROB::Float64 = 0.6`, `ALPH::Float64 = 0.4`
 
     Note: We use an improved BP algorithm that applies synchronous scheduling  with randomized damping. The randomized damping parameter pairs lead to a trade-off between the number of non-converging simulations and the rate of convergence. In general, for the selection of "PROB" and "ALPH" for which only a small fraction of messages are combined with their values in a previous iteration, and that is a case for "PROB" close to 0 or "ALPH" close to 1, we observe a large number of non-converging simulations.
 
@@ -56,7 +56,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `MEAN` - the mean value of virtual factor nodes;
     - `VARI` - the variance value of the virtual factor nodes;
 
-    Default settings: `MEAN::Float64 = 0.0`, `VARI::Float64 = 1e5`;
+    Default settings: `MEAN::Float64 = 0.0`, `VARI::Float64 = 1e5`
 
     Note: The virtual factor node is a singly-connected factor node used if the variable node x is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity.
 
@@ -64,7 +64,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `METHOD = "passing"` - computes separately messages from factor and variable nodes;
     - `METHOD = "recursion"` - computes jointly messages reduced to factor nodes (only for `ALGORITHM = "sum"`);
 
-    Default setting: `METHOD::String = "passing"`;
+    Default setting: `METHOD::String = "passing"`
 
 6. Algorithms
     - `ALGORITHM = "sum"` - the belief propagation with simply summing messages;
@@ -83,7 +83,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 8. Path Option:
     - `PATH` - path to the `DATA` HDF5 file;
 
-    Default setting: `PATH::String = from_package`
+    Default setting: `PATH::String = "from_package"`
 
 
 ## Quick Start
