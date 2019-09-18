@@ -25,7 +25,7 @@ initialize = @elapsed begin
     Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
     alpha1, alpha2 = damping(Nlink, ALPH, PROB)
     fv, vf = keep_order(Nlink, row, col)
-    Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, col, Nlink)
+    Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, Nvariable, variable_colptr, fv)
     Mfac, VfacInv = factor_to_variable(Mvar, Vvar, Mfac, VfacInv, Mind, Vind, coeff,
                                        coeffInv, row, Nind, factor_colptr, vf)
     Mcol, VcolInv = load_sum_col_recursion(Nvariable)

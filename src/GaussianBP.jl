@@ -80,5 +80,9 @@ function bp(
 
     return Xbp
 end
-
+Xbp = bp("data33_14", 1, 0, 1, 0.6, 0.4, 0.0, 1e6;
+         METHOD = "passing",
+         ALGORITHM = "sum",
+         TIME = "on",
+         ERROR = "on")
 end # SimplyGBP

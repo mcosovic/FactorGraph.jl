@@ -6,11 +6,13 @@
 #-------------------------------------------------------------------------------
 # Pass messages from singly-connected factor nodes to all indirect links
 #-------------------------------------------------------------------------------
-function forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, col, Nlink)
-    @inbounds for i = 1:Nlink
-        temp = 1 / VdirInv[col[i]]
-        Mvar[i] = Mdir[col[i]] * temp
-        Vvar[i] = temp
+function forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, Nvariable, variable_colptr, fv)
+    @inbounds for i = 1:Nvariable
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Vvar[fv[j]] = 1 / VdirInv[i]
+            Mvar[fv[j]] = Mdir[i] * Vvar[fv[j]]
+        end
+
     end
 
     return Mvar, Vvar
