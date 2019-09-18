@@ -40,9 +40,9 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
     - `DAMP` - applied randomized damping at the BP iteration;
-    - `BUMP` - cancel variance computation at the BP iteration (in a usual scenario, variances converge much faster than means)
+    - `BUMP` - suspend the computation of variances at the BP iteration (in a usual scenario, variances converge much faster than means)
 
-    Default settings: `MAXI::Int64 = 30`, `MAXI::Int64 = 10`, `BUMP::Int64 = MAXI`
+    Default settings: `MAXI::Int64 = 30`, `DAMP::Int64 = 10`, `BUMP::Int64 = MAXI`
 
 3. Convergence Parameters:
     - `PROB` - a Bernoulli random variable with probability "PROB" independently sampled for each mean value message from indirect factor node to a variable node, with values between 0 and 1;
@@ -76,14 +76,13 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - `TIME = "on"` - shows belief propagation time;
     - `ERROR = "on"` - shows belief propagation evaluation vs. weighted least-squares;
     - `STATISTIC = "on"` - shows system data;
-    - `PATH` - path to the input data model.h5;
 
     Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`   
 
 8. Path Option:
     - `PATH` - path to the `DATA` HDF5 file;
 
-    Default setting: `PATH::String = "from_package"`
+    Default setting: `PATH::String = "src/data"`
 
 
 ## Quick Start
