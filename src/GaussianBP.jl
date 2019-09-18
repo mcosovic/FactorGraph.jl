@@ -1,5 +1,7 @@
 module GaussianBP
 
+push!(LOAD_PATH, pwd())
+
 export bp
 
 using SparseArrays
