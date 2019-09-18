@@ -25,7 +25,7 @@ function bp_kahan_passing(
         Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
         alpha1, alpha2 = damping(Nlink, ALPH, PROB)
         fv, vf = keep_order(Nlink, row, col)
-        Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mind, Vind, col, Nlink)
+        Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, col, Nlink)
     end
 
 inference = @elapsed begin
@@ -41,7 +41,7 @@ inference = @elapsed begin
                                               Nvariable, variable_colptr, fv)
     end
 
-    for i = (BUMP + 1):MAXI 
+    for i = (BUMP + 1):MAXI
         if i < DAMP
             Mfac = factor_to_variable_mean(Mvar, Mfac, Mind, coeff, coeffInv,
                                            row, Nind, factor_colptr, vf)

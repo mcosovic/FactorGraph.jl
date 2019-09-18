@@ -49,7 +49,7 @@ jacobian, observation, noise = model("SimpleTest", "test/")
 @testset "SimplyBP" begin
     @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
     @test bp("SimpleTest", 1000, 50, 80, 0.0, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
-    @test bp("SimpleTest", 1000, 10, 80, 0.2, 0.3, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 1000, 10, 1000, 0.2, 0.3, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
 end
 
 @testset "KahanBP" begin
