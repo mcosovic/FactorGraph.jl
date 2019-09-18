@@ -4,201 +4,261 @@
 
 
 #-------------------------------------------------------------------------------
-# Compute messages from factor nodes to variable nodes using
-# state-of-the-art equations, or damping equations, or using sum
-# compensation without or with damping
+# Compute messages using state-of-the-art equations with simply summation
 #-------------------------------------------------------------------------------
- function factor_to_variable(
+function factor_to_variable(
     Mvar, Vvar, Mfac, VfacInv,
-    Mrow, Vrow,
-    Mind, Vind,
-    coeff, coeffInv,
-    row, Nlink)
-
-    @inbounds for i = 1:Nlink
-        Mfac[i] = (Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] + Mvar[i]
-
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + Vrow[row[i]] -
-                      coeff[i]^2 * Vvar[i])
-    end
-
-    fill!(Mrow, 0.0)
-    fill!(Vrow, 0.0)
-
-    return Mfac, VfacInv, Mrow, Vrow
- end
-
- function factor_to_variable_damp(
-    Mvar, Vvar, Mfac, VfacInv,
-    Mrow, Vrow,
-    Mind, Vind,
-    coeff, coeffInv,
-    row, Nlink, alpha1, alpha2)
-
-    @inbounds for i = 1:Nlink
-        Mfac[i] = alpha1[i] * ((Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] +
-                  Mvar[i]) + alpha2[i] * Mfac[i]
-
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + Vrow[row[i]] -
-                     coeff[i]^2 * Vvar[i])
-    end
-
-    fill!(Mrow, 0.0)
-    fill!(Vrow, 0.0)
-
-    return Mfac, VfacInv, Mrow, Vrow
- end
-
-
- function factor_to_variable_kahan(
-    Mvar, Vvar, Mfac, VfacInv,
-    Mrow, Vrow, error_row,
-    Mind, Vind, coeff, coeffInv, row, Nlink)
-
-    @inbounds for i = 1:Nlink
-        Mfac[i] = (Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] + Mvar[i]
-
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + (Vrow[row[i]] -
-                     coeff[i]^2 * Vvar[i]) + error_row[row[i]])
-    end
-
-    fill!(Mrow, 0.0)
-    fill!(Vrow, 0.0)
-    fill!(error_row, 0.0)
-
-    return Mfac, VfacInv, Mrow, Vrow, error_row
- end
-
- function factor_to_variable_kahan_damp(
-    Mvar, Vvar, Mfac, VfacInv,
-    Mrow, Vrow, error_row,
     Mind, Vind, coeff, coeffInv,
-    row, Nlink, alpha1, alpha2)
+    row, Nind, factor_colptr, vf)
 
-    @inbounds for i = 1:Nlink
-        Mfac[i] = alpha1[i] * ((Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] +
-                  Mvar[i]) + alpha2[i] * Mfac[i]
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
 
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + (Vrow[row[i]] -
-                     coeff[i]^2 * Vvar[i]) + error_row[row[i]])
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mrow += (coeff[j] * Mvar[j])
+            Vrow += (coeff[j]^2 * Vvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar[j])
+        end
     end
 
-    fill!(Mrow, 0.0)
-    fill!(Vrow, 0.0)
-    fill!(error_row, 0.0)
+    return Mfac, VfacInv
+end
 
-    return Mfac, VfacInv, Mrow, Vrow, error_row
- end
-
- function factor_recursion(
+function factor_to_variable_damp(
     Mvar, Vvar, Mfac, VfacInv,
-    Mrow, Vrow, Mcol, VcolInv, Vaux, Maux,
-    Mind, Vind,
-    coeff, coeffInv,
-    row, Nlink)
+    Mind, Vind, coeff, coeffInv,
+    row, Nind, factor_colptr, vf,
+    alpha1, alpha2)
 
-    @inbounds for i = 1:Nlink
-        Mfac[i] = (Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] + Maux[i]
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
 
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + Vrow[row[i]] -
-                     coeff[i]^2 * Vaux[i])
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mrow += (coeff[j] * Mvar[j])
+            Vrow += (coeff[j]^2 * Vvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = alpha1[vf[j]] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]) + alpha2[vf[j]] * Mfac[vf[j]]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar[j])
+        end
     end
 
-    fill!(Mrow, 0.0)
-    fill!(Mcol, 0.0)
-    fill!(Vrow, 0.0)
-    fill!(VcolInv, 0.0)
-
-   return Mfac, VfacInv, Mrow, Vrow, Mcol, VcolInv
+    return Mfac, VfacInv
 end
 
-function factor_recursion_damp(
-   Mvar, Vvar, Mfac, VfacInv,
-   Mrow, Vrow, Mcol, VcolInv, Vaux, Maux,
-   Mind, Vind,
-   coeff, coeffInv,
-   row, Nlink, alpha1, alpha2)
-
-    @inbounds for i = 1:Nlink
-        Mfac[i] = alpha1[i] * ((Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] +
-                  Maux[i]) + alpha2[i] * Mfac[i]
-
-        VfacInv[i] = (coeff[i]^2) / (Vind[row[i]] + Vrow[row[i]] -
-                     coeff[i]^2 * Vaux[i])
-    end
-
-    fill!(Mrow, 0.0)
-    fill!(Mcol, 0.0)
-    fill!(Vrow, 0.0)
-    fill!(VcolInv, 0.0)
-
-  return Mfac, VfacInv, Mrow, Vrow, Mcol, VcolInv
-end
-#-------------------------------------------------------------------------------
-
-
-#-------------------------------------------------------------------------------
-# Compute messages from variable nodes to factor nodes using
-# state-of-the-art equations, or sum compensation
-#-------------------------------------------------------------------------------
 function variable_to_factor(
     Mvar, Vvar, Mfac, VfacInv,
-    Mcol, VcolInv,
     Mdir, VdirInv,
-    col, Nlink)
+    col, Nvariable, variable_colptr, fv)
 
-    @inbounds for i = 1:Nlink
-        Vvar[i] = 1 / (VcolInv[col[i]] + VdirInv[col[i]] - VfacInv[i])
+    @inbounds for i = 1:Nvariable
+        Mcol = 0.0
+        VcolInv = 0.0
 
-        Mvar[i] = (Mcol[col[i]] - Mfac[i] * VfacInv[i] + Mdir[col[i]]) * Vvar[i]
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Mcol += Mfac[j] * VfacInv[j]
+            VcolInv += VfacInv[j]
+        end
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Vvar[fv[j]] = 1 / (VcolInv + VdirInv[i] - VfacInv[j])
+            Mvar[fv[j]] = (Mcol - Mfac[j] * VfacInv[j] + Mdir[i]) * Vvar[fv[j]]
+        end
     end
 
-    fill!(Mcol, 0.0)
-    fill!(VcolInv, 0.0)
+    return Mvar, Vvar
+end
+#-------------------------------------------------------------------------------
 
-    return Mvar, Vvar, Mcol, VcolInv
+#-------------------------------------------------------------------------------
+# Compute messages using sum compensation, Kahan-Babuska algorithm
+#------------------------------------------------------------------------------
+function factor_to_variable_kahan(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mind, Vind, coeff, coeffInv,
+    row, Nind, factor_colptr, vf)
+
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
+        error = 0.0
+
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mrow += (coeff[j] * Mvar[j])
+
+            x = coeff[j]^2 * Vvar[j]
+            t = Vrow + x
+            if abs(Vrow) >= abs(x)
+                error += (Vrow - t) + x
+            else
+                error += (x - t) + Vrow
+            end
+            Vrow = t
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + (Vrow - coeff[j]^2 * Vvar[j]) + error)
+        end
+    end
+
+    return Mfac, VfacInv
+end
+
+function factor_to_variable_damp_kahan(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mind, Vind, coeff, coeffInv,
+    row, Nind, factor_colptr, vf,
+    alpha1, alpha2)
+
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
+        error = 0.0
+
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mrow += (coeff[j] * Mvar[j])
+
+            x = coeff[j]^2 * Vvar[j]
+            t = Vrow + x
+            if abs(Vrow) >= abs(x)
+                error += (Vrow - t) + x
+            else
+                error += (x - t) + Vrow
+            end
+            Vrow = t
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = alpha1[vf[j]] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]) + alpha2[vf[j]] * Mfac[vf[j]]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + (Vrow - coeff[j]^2 * Vvar[j]) + error)
+        end
+    end
+
+    return Mfac, VfacInv
 end
 
 function variable_to_factor_kahan(
     Mvar, Vvar, Mfac, VfacInv,
-    Mcol, VcolInv, error_col,
     Mdir, VdirInv,
-    col, Nlink)
+    col, Nvariable, variable_colptr, fv)
+
+    @inbounds for i = 1:Nvariable
+        Mcol = 0.0
+        VcolInv = 0.0
+        error = 0.0
+
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Mcol += Mfac[j] * VfacInv[j]
+
+            t = VcolInv + VfacInv[j]
+            if abs(VcolInv) >= abs(VfacInv[j])
+                error += (VcolInv - t) + VfacInv[j]
+            else
+                error += (VfacInv[j] - t) + VcolInv
+            end
+            VcolInv = t
+        end
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Vvar[fv[j]] = 1 / ((VcolInv - VfacInv[j]) + error + VdirInv[i])
+            Mvar[fv[j]] = (Mcol - Mfac[j] * VfacInv[j] + Mdir[i]) * Vvar[fv[j]]
+        end
+    end
+
+    return Mvar, Vvar
+end
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Compute messages using recursion with simply summation
+#-------------------------------------------------------------------------------
+function factor_recursion(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mdir, VdirInv, Mind, Vind,
+    coeff, coeffInv, row, col, Mcol, VcolInv,
+    Nind, Nlink, factor_colptr, vf)
 
     @inbounds for i = 1:Nlink
-        Vvar[i] = 1 / ((VcolInv[col[i]] - VfacInv[i]) +
-                  error_col[col[i]] + VdirInv[col[i]])
+        Mcol[col[i]] += Mfac[vf[i]] * VfacInv[vf[i]]
+        VcolInv[col[i]] += VfacInv[vf[i]]
+    end
 
-        Mvar[i] = (Mcol[col[i]] - Mfac[i] * VfacInv[i] + Mdir[col[i]]) * Vvar[i]
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
+
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Vvar[j] = 1 / (VcolInv[col[j]] + VdirInv[col[j]] - VfacInv[vf[j]])
+            Mvar[j] = (Mcol[col[j]] - Mfac[vf[j]] * VfacInv[vf[j]] + Mdir[col[j]]) * Vvar[j]
+
+            Mrow += (coeff[j] * Mvar[j])
+            Vrow += (coeff[j]^2 * Vvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar[j])
+        end
     end
 
     fill!(Mcol, 0.0)
     fill!(VcolInv, 0.0)
-    fill!(error_col, 0.0)
 
-    return Mvar, Vvar, Mcol, VcolInv, error_col
+    return Mfac, VfacInv, Mcol, VcolInv
 end
-#-------------------------------------------------------------------------------
 
+function factor_recursion_damp(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mdir, VdirInv, Mind, Vind,
+    coeff, coeffInv, row, col, Mcol, VcolInv,
+    Nind, Nlink, factor_colptr, vf, alpha1, alpha2)
 
-#-------------------------------------------------------------------------------
-# Compute marginals using state-of-the-art equations, or sum compensation
-#-------------------------------------------------------------------------------
-function marginal(Mcol, VcolInv, Mdir, VdirInv, col, Nvariable)
-    Xbp = fill(0.0, Nvariable)
-
-    @inbounds for i = 1:Nvariable
-        Xbp[i] = (Mcol[i] + Mdir[i]) / (VcolInv[i] + VdirInv[i])
+    @inbounds for i = 1:Nlink
+        Mcol[col[i]] += Mfac[vf[i]] * VfacInv[vf[i]]
+        VcolInv[col[i]] += VfacInv[vf[i]]
     end
 
-    return Xbp
-end
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+        Vrow = 0.0
 
-function marginal_kahan(Mcol, VcolInv, error_col, Mdir, VdirInv, col, Nvariable)
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Vvar[j] = 1 / (VcolInv[col[j]] + VdirInv[col[j]] - VfacInv[vf[j]])
+            Mvar[j] = (Mcol[col[j]] - Mfac[vf[j]] * VfacInv[vf[j]] + Mdir[col[j]]) * Vvar[j]
+
+            Mrow += (coeff[j] * Mvar[j])
+            Vrow += (coeff[j]^2 * Vvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = alpha1[vf[j]] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]) + alpha2[vf[j]] * Mfac[vf[j]]
+            VfacInv[vf[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar[j])
+        end
+    end
+
+    fill!(Mcol, 0.0)
+    fill!(VcolInv, 0.0)
+
+    return Mfac, VfacInv, Mcol, VcolInv
+end
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# Compute marginals
+#-------------------------------------------------------------------------------
+function marginal(Mfac, VfacInv, Mdir, VdirInv, col, Nvariable, variable_colptr)
     Xbp = fill(0.0, Nvariable)
 
     @inbounds for i = 1:Nvariable
-        Xbp[i] = (Mcol[i] + Mdir[i]) / (VcolInv[i] + VdirInv[i] + error_col[i])
+        Mcol = 0.0
+        VcolInv = 0.0
+
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Mcol += Mfac[j] * VfacInv[j]
+            VcolInv += VfacInv[j]
+        end
+        Xbp[i] = (Mcol + Mdir[i]) / (VcolInv + VdirInv[i])
     end
 
     return Xbp

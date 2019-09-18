@@ -17,45 +17,45 @@ using Test
 function model(DATA, PATH)
     system = string(PATH, DATA, ".h5")
 
-    Hlist = h5read(system, "/H")
-    H = sparse(Hlist[:,1], Hlist[:,2], Hlist[:,3])
+    list = h5read(system, "/H")
+    jacobian = sparse(list[:,1], list[:,2], list[:,3])
 
-    b = h5read(system, "/b")
-    v = h5read(system, "/v")
+    observation = h5read(system, "/b")
+    noise = h5read(system, "/v")
 
-    return H, b, v
+    return jacobian, observation, noise
 end
 
 
 #################################################
 #  Compute the weighted least-squares solution  #
 #################################################
-function wlsMldivide(H, b, v)
-    W = spdiagm(0 =>  @. 1.0 / sqrt(v))
-    Hti = W * H
-    rti = W * b
+function wls_mldivide(jacobian, observation, noise)
+    W = spdiagm(0 =>  @. 1.0 / sqrt(noise))
+    Hti = W * jacobian
+    rti = W * observation
 
-    xml = (Hti' * Hti) \ (Hti' * rti)
+    Xml = (Hti' * Hti) \ (Hti' * rti)
 
-    return xml
+    return Xml
 end
 
 
 ##############################################
 #  Test for the belief propagation accuracy  #
 ##############################################
-H, b, v = model("SimpleTest", "test/")
+jacobian, observation, noise = model("SimpleTest", "test/")
 
 @testset "SimplyBP" begin
-    @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
-    @test bp("SimpleTest", 1000, 50, 80, 0.0, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
-    @test bp("SimpleTest", 1000, 10, 80, 0.2, 0.3, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 1000, 50, 80, 0.0, 0.4, 0.0, 1e6, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 1000, 10, 80, 0.2, 0.3, 10.0, 1e8, ALGORITHM = "sum", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
 end
 
 @testset "KahanBP" begin
-    @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e30, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
-    @test bp("SimpleTest", 1000, 50, 50, 0.0, 0.0, 0.0, 1e60, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
-    @test bp("SimpleTest", 500, 10, 50, 0.6, 0.4, 10.0, 1e80, ALGORITHM = "kahan", PATH = "test/") ≈ wlsMldivide(H, b, v)
+    @test bp("SimpleTest", 1000, 10, 50, 0.6, 0.4, 0.0, 1e30, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 1000, 50, 50, 0.0, 0.0, 0.0, 1e60, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
+    @test bp("SimpleTest", 500, 10, 50, 0.6, 0.4, 10.0, 1e80, ALGORITHM = "kahan", PATH = "test/") ≈ wls_mldivide(jacobian, observation, noise)
 end
 
 end # SimpleTest

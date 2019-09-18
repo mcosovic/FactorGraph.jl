@@ -24,16 +24,14 @@ using PrettyTables
 #  Includes  #
 ##############
 include("input.jl")
-include("factorgraph.jl")
+include("error.jl")
 include("auxiliary.jl")
-include("initialize.jl")
+include("evaluation.jl")
 
+include("factorgraph.jl")
+include("initialize.jl")
 include("inference.jl")
 include("inference_mean.jl")
-include("summation.jl")
-include("summation_mean.jl")
-
-include("evaluation.jl")
 
 include("bp_simple_passing.jl")
 include("bp_kahan_passing.jl")
@@ -59,6 +57,8 @@ function bp(
     STATISTIC::String = "off",
     PATH::String = "src/data/")
 
+    check_iteration_scheme(MAXI, DAMP, BUMP)
+
     jacobian, observation, noise = model(DATA, PATH)
 
     if METHOD == "passing" && ALGORITHM == "sum"
@@ -77,7 +77,7 @@ function bp(
                                 TIME, ERROR, STATISTIC)
     end
 
-    return Xbp
+    return
 
 end
 

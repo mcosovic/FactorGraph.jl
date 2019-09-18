@@ -10,88 +10,52 @@ function bp_kahan_passing(
     MEAN, VARI,
     TIME, ERROR, STATISTIC)
 
-factorgraph = @elapsed begin
-    Nfactor, Nvariable, jacobianT = graph(jacobian)
-    Ndir, Nlink, dir_position = links(Nfactor, jacobianT)
-    virtual = virtuals(Nvariable, dir_position)
+    factorgraph = @elapsed begin
+        Nfactor, Nvariable, jacobianT = graph(jacobian)
+        Ndir, Nlink, dir_position = links(Nfactor, jacobianT)
+        virtual = virtuals(Nvariable, dir_position)
 
-    row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv =
-        factors(Nfactor, Nvariable, Ndir, Nlink, jacobianT, observation,
-                noise, virtual, MEAN, VARI)
-end
+        row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv,
+        variable_colptr, factor_colptr =
+            factors(Nfactor, Nvariable, Ndir, Nlink, jacobianT, observation,
+                    noise, virtual, MEAN, VARI)
+    end
 
-initialize = @elapsed begin
-    Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
-    alpha1, alpha2 = damping(Nlink, ALPH, PROB)
-    Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mind, Vind, col, Nlink)
-
-    Mrow, Vrow, error_row, Mcol, VcolInv, error_col =
-        load_sum_kahan(Nvariable, Nind)
-
-    Mrow, Vrow, error_row =
-        sum_rows_kahan(Mvar, Vvar, Mrow, Vrow, error_row,
-                       coeff, row, Nlink)
-
-    Mfac, VfacInv, Mrow, Vrow, error_row =
-        factor_to_variable_kahan(Mvar, Vvar, Mfac, VfacInv, Mrow, Vrow,
-                                 error_row, Mind, Vind, coeff, coeffInv, row,
-                                 Nlink)
-
-end
+    initialize = @elapsed begin
+        Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
+        alpha1, alpha2 = damping(Nlink, ALPH, PROB)
+        fv, vf = keep_order(Nlink, row, col)
+        Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mind, Vind, col, Nlink)
+    end
 
 inference = @elapsed begin
     for i = 1:BUMP
-        Mcol, VcolInv, error_col =
-            sum_cols_kahan(Mfac, VfacInv, Mcol, VcolInv, error_col, col, Nlink)
-
-        Mvar, Vvar, Mcol, VcolInv, error_col =
-            variable_to_factor_kahan(Mvar, Vvar, Mfac, VfacInv, Mcol, VcolInv,
-                                     error_col, Mdir, VdirInv, col, Nlink)
-
-        Mrow, Vrow, error_row =
-            sum_rows_kahan(Mvar, Vvar, Mrow, Vrow, error_row,
-                           coeff, row, Nlink)
-
-            if i < DAMP
-                Mfac, VfacInv, Mrow, Vrow, error_row =
-                    factor_to_variable_kahan(Mvar, Vvar, Mfac, VfacInv, Mrow,
-                                             Vrow, error_row, Mind, Vind, coeff,
-                                             coeffInv, row, Nlink)
-            else
-                Mfac, VfacInv, Mrow, Vrow, error_row =
-                factor_to_variable_kahan_damp(Mvar, Vvar, Mfac, VfacInv, Mrow,
-                                              Vrow, error_row, Mind, Vind, coeff,
-                                              coeffInv, row, Nlink, alpha1,
-                                              alpha2)
-            end
-    end
-    
-    for i = (BUMP + 1):MAXI
-        Mcol = sum_cols_mean(Mfac, VfacInv, Mcol, col, Nlink)
-
-        Mvar, Mcol =
-            variable_to_factor_mean(Mvar, Vvar, Mfac, VfacInv, Mcol, Mdir,
-                                    col, Nlink)
-
-        Mrow = sum_rows_mean(Mvar, Mrow, coeff, row, Nlink)
-
         if i < DAMP
-            Mfac, Mrow =
-                factor_to_variable_mean(Mvar, Mfac, Mrow, Mind, coeffInv,
-                                        row, Nlink)
+            Mfac, VfacInv = factor_to_variable_kahan(Mvar, Vvar, Mfac, VfacInv, Mind, Vind,
+                                                     coeff, coeffInv, row, Nind, factor_colptr, vf)
         else
-            Mfac, Mrow =
-                factor_to_variable_mean_damp(Mvar, Mfac, Mrow, Mind, coeffInv,
-                                            row, Nlink, alpha1, alpha2)
+            Mfac, VfacInv = factor_to_variable_damp_kahan(Mvar, Vvar, Mfac, VfacInv, Mind, Vind, coeff,
+                                                          coeffInv, row, Nind, factor_colptr, vf, alpha1, alpha2)
         end
+        Mvar, Vvar = variable_to_factor_kahan(Mvar, Vvar, Mfac, VfacInv, Mdir, VdirInv, col,
+                                              Nvariable, variable_colptr, fv)
+    end
+
+    for i = (BUMP + 1):MAXI 
+        if i < DAMP
+            Mfac = factor_to_variable_mean(Mvar, Mfac, Mind, coeff, coeffInv,
+                                           row, Nind, factor_colptr, vf)
+        else
+            Mfac = factor_to_variable_damp_mean(Mvar, Mfac, Mind, coeff, coeffInv,
+                                                row, Nind, factor_colptr, vf, alpha1, alpha2)
+        end
+        Mvar = variable_to_factor_mean(Mvar, Vvar, Mfac, VfacInv, Mdir,
+                                       col, Nvariable, variable_colptr, fv)
     end
 end
 
 solution = @elapsed begin
-    Mcol, VcolInv, error_col =
-        sum_cols_kahan(Mfac, VfacInv, Mcol, VcolInv, error_col, col, Nlink)
-
-    Xbp = marginal_kahan(Mcol, VcolInv, error_col, Mdir, VdirInv, col, Nvariable)
+    Xbp = marginal(Mfac, VfacInv, Mdir, VdirInv, col, Nvariable, variable_colptr)
 end
 
     if STATISTIC == "on"

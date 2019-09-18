@@ -77,6 +77,9 @@ function factors(
     Mind = fill(0.0, Nind)
     Vind = similar(Mind)
 
+    factor_colptr = fill(0, Nind)
+    variable_colptr = fill(0, Nvariable)
+
     idxi = 1
     idxr = 1
 
@@ -88,9 +91,15 @@ function factors(
         else
             row[idxi] = idxr
             col[idxi] = i[1]
+
             coeff[idxi] = jacobianT[i]
             coeffInv[idxi] = 1 / jacobianT[i]
+
             idxi += 1
+
+            variable_colptr[i[1]] += 1
+            factor_colptr[idxr] = idxi
+
             if idxT[jacobianT.colptr[i[2] + 1] - 1] == i
                 Mind[idxr] = observation[i[2]]
                 Vind[idxr] = noise[i[2]]
@@ -103,6 +112,11 @@ function factors(
         end
     end
 
-    return row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv
+    pushfirst!(variable_colptr, 1)
+    variable_colptr = cumsum(variable_colptr)
+    pushfirst!(factor_colptr, 1)
+
+    return row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv,
+           variable_colptr, factor_colptr
 end
-#------------------------------------------------------------------------
+#-------------------------------------------------------------------------------

@@ -1,80 +1,124 @@
-####################################
-#  Compute messages and marginals  #
-####################################
+##########################################
+#  Compute mean values of messages only  #
+##########################################
 
 
 #-------------------------------------------------------------------------------
-# Compute only means from factor nodes to variable nodes using
-# state-of-the-art equations, or damping equations, or using sum
-# compensation without or with damping
+# Compute means using state-of-the-art equations
 #-------------------------------------------------------------------------------
-function factor_to_variable_mean(Mvar, Mfac, Mrow, Mind, coeffInv, row, Nlink)
-    @inbounds for i = 1:Nlink
-        Mfac[i] = (Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] + Mvar[i]
-    end
+function factor_to_variable_mean(
+   Mvar, Mfac, Mind, coeff, coeffInv,
+   row, Nind, factor_colptr, vf)
 
-    fill!(Mrow, 0.0)
+   @inbounds for i = 1:Nind
+       Mrow = 0.0
+       Vrow = 0.0
 
-    return Mfac, Mrow
-end
-
-function factor_to_variable_mean_damp(
-    Mvar, Mfac, Mrow, Mind, coeffInv, row, Nlink,
-    alpha1, alpha2)
-
-    @inbounds for i = 1:Nlink
-        Mfac[i] = alpha1[i] * ((Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] +
-                  Mvar[i]) + alpha2[i] * Mfac[i]
-    end
-
-    fill!(Mrow, 0.0)
-
-    return Mfac, Mrow
-end
-
-function factor_mean_recursion(
-    Mfac, Mrow, Mcol, Maux, Mind,
-    coeffInv, row, Nlink)
-
-   @inbounds for i = 1:Nlink
-       Mfac[i] = (Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] + Maux[i]
+       for j in (factor_colptr[i]):factor_colptr[i+1]-1
+           Mrow += (coeff[j] * Mvar[j])
+       end
+       for j in (factor_colptr[i]):factor_colptr[i+1]-1
+           Mfac[vf[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]
+       end
    end
 
-   fill!(Mrow, 0.0)
-   fill!(Mcol, 0.0)
-
-   return Mfac, Mrow, Mcol
+   return Mfac
 end
 
-function factor_recursion_damp(
-    Mfac, Mrow, Mcol, Maux, Mind,
-    coeffInv, row, Nlink, alpha1, alpha2)
+function factor_to_variable_damp_mean(
+    Mvar, Mfac, Mind, coeff, coeffInv,
+    row, Nind, factor_colptr, vf,
+    alpha1, alpha2)
 
-    @inbounds for i = 1:Nlink
-        Mfac[i] = alpha1[i] * ((Mind[row[i]] - Mrow[row[i]]) * coeffInv[i] +
-                  Maux[i]) + alpha2[i] * Mfac[i]
+   @inbounds for i = 1:Nind
+       Mrow = 0.0
+
+       for j in (factor_colptr[i]):factor_colptr[i+1]-1
+           Mrow += (coeff[j] * Mvar[j])
+       end
+       for j in (factor_colptr[i]):factor_colptr[i+1]-1
+           Mfac[vf[j]] = alpha1[vf[j]] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]) + alpha2[vf[j]] * Mfac[vf[j]]
+       end
+   end
+
+   return Mfac
+end
+
+function variable_to_factor_mean(
+    Mvar, Vvar, Mfac, VfacInv, Mdir,
+    col, Nvariable, variable_colptr, fv)
+
+    @inbounds for i = 1:Nvariable
+        Mcol = 0.0
+
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Mcol += Mfac[j] * VfacInv[j]
+        end
+        for j in (variable_colptr[i]):variable_colptr[i+1]-1
+            Mvar[fv[j]] = (Mcol - Mfac[j] * VfacInv[j] + Mdir[i]) * Vvar[fv[j]]
+        end
     end
-
-    fill!(Mrow, 0.0)
-    fill!(Mcol, 0.0)
-
-    return Mfac, Mrow, Mcol
+    return Mvar
 end
 #-------------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------
-# Compute only means from variable nodes to factor nodes using
-# state-of-the-art equations, or sum compensation
+# Compute means using recursion equations
 #-------------------------------------------------------------------------------
-function variable_to_factor_mean(Mvar, Vvar, Mfac, VfacInv, Mcol, Mdir, col, Nlink)
+function factor_recursion_mean(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mdir, Mind,
+    coeff, coeffInv, row, col, Mcol, VcolInv,
+    Nind, Nlink, factor_colptr, vf)
 
     @inbounds for i = 1:Nlink
-        Mvar[i] = (Mcol[col[i]] - Mfac[i] * VfacInv[i] + Mdir[col[i]]) * Vvar[i]
+        Mcol[col[i]] += Mfac[vf[i]] * VfacInv[vf[i]]
+    end
+
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mvar[j] = (Mcol[col[j]] - Mfac[vf[j]] * VfacInv[vf[j]] + Mdir[col[j]]) * Vvar[j]
+
+            Mrow += (coeff[j] * Mvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]
+        end
     end
 
     fill!(Mcol, 0.0)
 
-    return Mvar, Mcol
+    return Mfac, Mcol
+end
+
+function factor_recursion_damp_mean(
+    Mvar, Vvar, Mfac, VfacInv,
+    Mdir, Mind,
+    coeff, coeffInv, row, col, Mcol, VcolInv,
+    Nind, Nlink, factor_colptr, vf, alpha1, alpha2)
+
+    @inbounds for i = 1:Nlink
+        Mcol[col[i]] += Mfac[vf[i]] * VfacInv[vf[i]]
+    end
+
+    @inbounds for i = 1:Nind
+        Mrow = 0.0
+
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mvar[j] = (Mcol[col[j]] - Mfac[vf[j]] * VfacInv[vf[j]] + Mdir[col[j]]) * Vvar[j]
+
+            Mrow += (coeff[j] * Mvar[j])
+        end
+        for j in (factor_colptr[i]):factor_colptr[i+1]-1
+            Mfac[vf[j]] = alpha1[vf[j]] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar[j]) + alpha2[vf[j]] * Mfac[vf[j]]
+        end
+    end
+
+    fill!(Mcol, 0.0)
+
+    return Mfac, Mcol
 end
 #-------------------------------------------------------------------------------
