@@ -81,5 +81,10 @@ function bp(
 
     return Xbp
 end
+Xbp = bp("data7149_2000.h5", 2, 10, 50, 0.6, 0.4, 0.0, 1e6;
+         METHOD = "recursion",
+         ALGORITHM = "sum",
+         TIME = "on",
+         ERROR = "on")
 
 end # SimplyGBP

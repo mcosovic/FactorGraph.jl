@@ -35,12 +35,12 @@ inference = @elapsed begin
             Mfac_var, Wfac_var, Mcol, Wcol = factor_recursion(
                     Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Wdir, Mind, Vind,
                     coeff, coeffInv, row, col, Mcol, Wcol,
-                    Nind, Nlink, row_colptr, to_var)
+                    Nind, Nlink, row_colptr, to_var, Nvar, col_colptr)
         else
             Mfac_var, Wfac_var, Mcol, Wcol = factor_recursion_damp(
                     Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Wdir, Mind, Vind,
                     coeff, coeffInv, row, col, Mcol, Wcol,
-                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2)
+                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2, Nvar, col_colptr)
         end
     end
 
@@ -49,12 +49,12 @@ inference = @elapsed begin
             Mfac_var, Mcol = factor_recursion_mean(
                     Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Mind,
                     coeff, coeffInv, row, col, Mcol, Wcol,
-                    Nind, Nlink, row_colptr, to_var)
+                    Nind, Nlink, row_colptr, to_var, Nvar, col_colptr)
         else
             Mfac_var, Mcol = factor_recursion_damp_mean(
                     Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Mind,
                     coeff, coeffInv, row, col, Mcol, Wcol,
-                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2)
+                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2, Nvar, col_colptr)
 
         end
     end
