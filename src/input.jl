@@ -8,7 +8,7 @@ function get_extension(DATA)
     try
         match(r"\.[A-Za-z0-9]+$", DATA).match
     catch
-        error("Input DATA extansion is missing.")
+        error("The input DATA extansion is missing.")
     end
 end
 #-------------------------------------------------------------------------------
@@ -31,14 +31,17 @@ function model(DATA, PATH)
 
         observation = h5read(system, "/b")
         noise = h5read(system, "/v")
-    end
 
-    if extension == ".csv"
-        data = CSV.read(system)
-        jacobian = sparse(data.row, data.column, data.value)
+    elseif extension == ".csv"
+        data = DataFrame(load(system))
 
-        observation = data.observation
-        noise = data.variance
+        list = dropmissing!(data[:,[1,2,3]])
+        jacobian = sparse(list.row, list.column, list.value)
+
+        observation = dropmissing!(data[:,[4]]).observation
+        noise = dropmissing!(data[:,[5]]).variance
+    else
+        error("The input data is not a valid")
     end
 
     return jacobian, observation, noise

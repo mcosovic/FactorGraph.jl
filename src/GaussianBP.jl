@@ -4,7 +4,7 @@ export bp
 
 using SparseArrays
 using HDF5
-using CSV
+using CSVFiles, DataFrames
 using Random
 using PrettyTables
 
