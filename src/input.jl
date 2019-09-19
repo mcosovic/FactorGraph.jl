@@ -18,7 +18,7 @@ end
 function model(DATA, PATH)
     if PATH == "from_package"
         package_dir = abspath(joinpath(dirname(Base.find_package("GaussianBP")), ".."))
-        PATH = joinpath(package_dir, "src/data/")
+        PATH = joinpath(package_dir, "src/example/")
     end
 
     extension = get_extension(DATA)
@@ -41,9 +41,8 @@ function model(DATA, PATH)
         observation = dropmissing!(data[:,[4]]).observation
         noise = dropmissing!(data[:,[5]]).variance
     else
-        error("The input data is not a valid.")
+        error("The input data is not a valid format.")
     end
 
-    return jacobian, observation, noise
 end
 #-------------------------------------------------------------------------------

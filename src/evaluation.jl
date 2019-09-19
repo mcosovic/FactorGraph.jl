@@ -102,7 +102,7 @@ function bp_time(factorgraph, initialize, inference, solution)
             "Initialize"  1000 * initialize;
             "Inference"  1000 * inference;
             "Marginal"  1000 * solution;
-            "Total" 1000 .* (factorgraph + initialize + inference + solution)]
+            "Total" 1000 * (factorgraph + initialize + inference + solution)]
 
     pretty_table(
         data, ["BP Phase" "Time (ms)"];
