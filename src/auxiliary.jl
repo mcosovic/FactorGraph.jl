@@ -7,12 +7,12 @@
 # Load arrays for messages
 #-------------------------------------------------------------------------------
 function load_messages(coeff)
-    Mfac = similar(coeff)
-    VfacInv = similar(coeff)
-    Mvar = similar(coeff)
-    Vvar = similar(coeff)
+    Mfac_var = similar(coeff)
+    Wfac_var = similar(coeff)
+    Mvar_fac = similar(coeff)
+    Vvar_fac = similar(coeff)
 
-    return Mfac, VfacInv, Mvar, Vvar
+    return Mfac_var, Wfac_var, Mvar_fac, Vvar_fac
 end
 #-------------------------------------------------------------------------------
 
@@ -20,10 +20,10 @@ end
 #-------------------------------------------------------------------------------
 # Load arrays for column summation, METHOD = "recursion"
 #-------------------------------------------------------------------------------
-function load_sum_col_recursion(Nvariable)
-    Mcol = fill(0.0, Nvariable)
-    VcolInv = fill(0.0, Nvariable)
+function load_sum_col_recursion(Nvar)
+    Mcol = fill(0.0, Nvar)
+    Wcol = fill(0.0, Nvar)
 
-    return Mcol, VcolInv
+    return Mcol, Wcol
 end
 #-------------------------------------------------------------------------------

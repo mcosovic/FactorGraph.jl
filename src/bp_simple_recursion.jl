@@ -11,63 +11,61 @@ function bp_simple_recursion(
     TIME, ERROR, STATISTIC)
 
 factorgraph = @elapsed begin
-    Nfactor, Nvariable, jacobianT = graph(jacobian)
-    Ndir, Nlink, dir_position = links(Nfactor, jacobianT)
-    virtual = virtuals(Nvariable, dir_position)
+    Nfac, Nvar, jacobianT = graph(jacobian)
+    Ndir, Nlink, dir_position = links(Nfac, jacobianT)
+    virtual = virtuals(Nvar, dir_position)
 
-    row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv,
-    variable_colptr, factor_colptr =
-        factors(Nfactor, Nvariable, Ndir, Nlink, jacobianT, observation,
-                noise, virtual, MEAN, VARI)
+    row, row_colptr, col, col_colptr, Nind, Mind, Vind, coeff, coeffInv, Mdir, Wdir  =
+        factors(Nfac, Nvar, Ndir, Nlink, jacobianT, observation, noise, virtual, MEAN, VARI)
 end
 
 initialize = @elapsed begin
-    Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
+    Mfac_var, Wfac_var, Mvar_fac, Vvar_fac = load_messages(coeff)
     alpha1, alpha2 = damping(Nlink, ALPH, PROB)
-    fv, vf = keep_order(Nlink, row, col)
-    Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, Nvariable, variable_colptr, fv)
-    Mfac, VfacInv = factor_to_variable(Mvar, Vvar, Mfac, VfacInv, Mind, Vind, coeff,
-                                       coeffInv, row, Nind, factor_colptr, vf)
-    Mcol, VcolInv = load_sum_col_recursion(Nvariable)
+    to_fac, to_var = keep_order(Nlink, row, col)
+    Mvar_fac, Vvar_fac = forward_directs_to_links(Mvar_fac, Vvar_fac, Mdir, Wdir, Nvar, col_colptr, to_fac)
+    Mfac_var, Wfac_var = factor_to_variable(Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mind, Vind,
+                                            coeff, coeffInv, row, Nind, row_colptr, to_var)
+    Mcol, Wcol = load_sum_col_recursion(Nvar)
     end
 
 inference = @elapsed begin
     for i = 1:BUMP
         if i < DAMP
-            Mfac, VfacInv, Mcol, VcolInv = factor_recursion(
-                    Mvar, Vvar, Mfac, VfacInv, Mdir, VdirInv, Mind, Vind,
-                    coeff, coeffInv, row, col, Mcol, VcolInv,
-                    Nind, Nlink, factor_colptr, vf)
+            Mfac_var, Wfac_var, Mcol, Wcol = factor_recursion(
+                    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Wdir, Mind, Vind,
+                    coeff, coeffInv, row, col, Mcol, Wcol,
+                    Nind, Nlink, row_colptr, to_var)
         else
-            Mfac, VfacInv, Mcol, VcolInv = factor_recursion_damp(
-                    Mvar, Vvar, Mfac, VfacInv, Mdir, VdirInv, Mind, Vind,
-                    coeff, coeffInv, row, col, Mcol, VcolInv,
-                    Nind, Nlink, factor_colptr, vf, alpha1, alpha2)
+            Mfac_var, Wfac_var, Mcol, Wcol = factor_recursion_damp(
+                    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Wdir, Mind, Vind,
+                    coeff, coeffInv, row, col, Mcol, Wcol,
+                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2)
         end
     end
 
     for i = (BUMP + 1):MAXI
         if i < DAMP
-            Mfac, Mcol = factor_recursion_mean(
-                    Mvar, Vvar, Mfac, VfacInv, Mdir, Mind,
-                    coeff, coeffInv, row, col, Mcol, VcolInv,
-                    Nind, Nlink, factor_colptr, vf)
+            Mfac_var, Mcol = factor_recursion_mean(
+                    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Mind,
+                    coeff, coeffInv, row, col, Mcol, Wcol,
+                    Nind, Nlink, row_colptr, to_var)
         else
-            Mfac, Mcol = factor_recursion_damp_mean(
-                    Mvar, Vvar, Mfac, VfacInv, Mdir, Mind,
-                    coeff, coeffInv, row, col, Mcol, VcolInv,
-                    Nind, Nlink, factor_colptr, vf, alpha1, alpha2)
+            Mfac_var, Mcol = factor_recursion_damp_mean(
+                    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir, Mind,
+                    coeff, coeffInv, row, col, Mcol, Wcol,
+                    Nind, Nlink, row_colptr, to_var, alpha1, alpha2)
 
         end
     end
 end
 
 solution = @elapsed begin
-    Xbp = marginal(Mfac, VfacInv, Mdir, VdirInv, col, Nvariable, variable_colptr)
+    Xbp = marginal(Mfac_var, Wfac_var, Mdir, Wdir, col, Nvar, col_colptr)
 end
 
     if STATISTIC == "on"
-        graph_statistic(Nfactor, Nvariable, Ndir, Nlink, virtual, noise)
+        graph_statistic(Nfac, Nvar, Ndir, Nlink, virtual, noise)
     end
     if TIME == "on"
         bp_time(factorgraph, initialize, inference, solution)

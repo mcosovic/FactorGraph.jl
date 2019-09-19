@@ -117,10 +117,10 @@ end
 #-------------------------------------------------------------------------------
 # Graph Data
 #-------------------------------------------------------------------------------
-function graph_statistic(Nfactor, Nvariable, Ndir, Nlink, virtual, noise)
-    data = ["Number of Factor Nodes" Nfactor;
+function graph_statistic(Nfac, Nvar, Ndir, Nlink, virtual, noise)
+    data = ["Number of Factor Nodes" Nfac;
             "Number of Virtual Nodes" length(findall(!iszero, virtual));
-            "Number of Variable Nodes" Nvariable;
+            "Number of Variable Nodes" Nvar;
             "Number of Direct Links" Ndir;
             "Number of Indirect Links" Nlink;
             "Minimum Variance Value" minimum(noise);

@@ -10,56 +10,54 @@ function bp_kahan_passing(
     MEAN, VARI,
     TIME, ERROR, STATISTIC)
 
-    factorgraph = @elapsed begin
-        Nfactor, Nvariable, jacobianT = graph(jacobian)
-        Ndir, Nlink, dir_position = links(Nfactor, jacobianT)
-        virtual = virtuals(Nvariable, dir_position)
+factorgraph = @elapsed begin
+    Nfac, Nvar, jacobianT = graph(jacobian)
+    Ndir, Nlink, dir_position = links(Nfac, jacobianT)
+    virtual = virtuals(Nvar, dir_position)
 
-        row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv,
-        variable_colptr, factor_colptr =
-            factors(Nfactor, Nvariable, Ndir, Nlink, jacobianT, observation,
-                    noise, virtual, MEAN, VARI)
-    end
+    row, row_colptr, col, col_colptr, Nind, Mind, Vind, coeff, coeffInv, Mdir, Wdir  =
+        factors(Nfac, Nvar, Ndir, Nlink, jacobianT, observation, noise, virtual, MEAN, VARI)
+end
 
-    initialize = @elapsed begin
-        Mfac, VfacInv, Mvar, Vvar = load_messages(coeff)
-        alpha1, alpha2 = damping(Nlink, ALPH, PROB)
-        fv, vf = keep_order(Nlink, row, col)
-        Mvar, Vvar = forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, Nvariable, variable_colptr, fv)
-    end
+initialize = @elapsed begin
+    Mfac_var, Wfac_var, Mvar_fac, Vvar_fac = load_messages(coeff)
+    alpha1, alpha2 = damping(Nlink, ALPH, PROB)
+    to_fac, to_var = keep_order(Nlink, row, col)
+    Mvar_fac, Vvar_fac = forward_directs_to_links(Mvar_fac, Vvar_fac, Mdir, Wdir, Nvar, col_colptr, to_fac)
+end
 
 inference = @elapsed begin
     for i = 1:BUMP
         if i < DAMP
-            Mfac, VfacInv = factor_to_variable_kahan(Mvar, Vvar, Mfac, VfacInv, Mind, Vind,
-                                                     coeff, coeffInv, row, Nind, factor_colptr, vf)
+            Mfac_var, Wfac_var = factor_to_variable_kahan(Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mind, Vind,
+                                                          coeff, coeffInv, row, Nind, row_colptr, to_var)
         else
-            Mfac, VfacInv = factor_to_variable_damp_kahan(Mvar, Vvar, Mfac, VfacInv, Mind, Vind, coeff,
-                                                          coeffInv, row, Nind, factor_colptr, vf, alpha1, alpha2)
+            Mfac_var, Wfac_var = factor_to_variable_damp_kahan(Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mind, Vind, coeff,
+                                                               coeffInv, row, Nind, row_colptr, to_var, alpha1, alpha2)
         end
-        Mvar, Vvar = variable_to_factor_kahan(Mvar, Vvar, Mfac, VfacInv, Mdir, VdirInv, col,
-                                              Nvariable, variable_colptr, fv)
+        Mvar_fac, Vvar_fac = variable_to_factor_kahan(Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
+                                                      Mdir, Wdir, col, Nvar, col_colptr, to_fac)
     end
 
     for i = (BUMP + 1):MAXI
         if i < DAMP
-            Mfac = factor_to_variable_mean(Mvar, Mfac, Mind, coeff, coeffInv,
-                                           row, Nind, factor_colptr, vf)
+            Mfac_var = factor_to_variable_mean(Mvar_fac, Mfac_var, Mind, coeff,
+                                               coeffInv, row, Nind, row_colptr, to_var)
         else
-            Mfac = factor_to_variable_damp_mean(Mvar, Mfac, Mind, coeff, coeffInv,
-                                                row, Nind, factor_colptr, vf, alpha1, alpha2)
+            Mfac_var = factor_to_variable_damp_mean(Mvar_fac, Mfac_var, Mind, coeff, coeffInv,
+                                                    row, Nind, row_colptr, to_var, alpha1, alpha2)
         end
-        Mvar = variable_to_factor_mean(Mvar, Vvar, Mfac, VfacInv, Mdir,
-                                       col, Nvariable, variable_colptr, fv)
+        Mvar_fac = variable_to_factor_mean(Mvar_fac, Vvar_fac, Mfac_var, Wfac_var, Mdir,
+                                           col, Nvar, col_colptr, to_fac)
     end
 end
 
 solution = @elapsed begin
-    Xbp = marginal(Mfac, VfacInv, Mdir, VdirInv, col, Nvariable, variable_colptr)
+    Xbp = marginal(Mfac_var, Wfac_var, Mdir, Wdir, col, Nvar, col_colptr)
 end
 
     if STATISTIC == "on"
-        graph_statistic(Nfactor, Nvariable, Ndir, Nlink, virtual, noise)
+        graph_statistic(Nfac, Nvar, Ndir, Nlink, virtual, noise)
     end
     if TIME == "on"
         bp_time(factorgraph, initialize, inference, solution)

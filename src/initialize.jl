@@ -6,16 +6,16 @@
 #-------------------------------------------------------------------------------
 # Pass messages from singly-connected factor nodes to all indirect links
 #-------------------------------------------------------------------------------
-function forward_directs_to_links(Mvar, Vvar, Mdir, VdirInv, Nvariable, variable_colptr, fv)
-    @inbounds for i = 1:Nvariable
-        for j in (variable_colptr[i]):variable_colptr[i+1]-1
-            Vvar[fv[j]] = 1 / VdirInv[i]
-            Mvar[fv[j]] = Mdir[i] * Vvar[fv[j]]
+function forward_directs_to_links(Mvar_fac, Vvar_fac, Mdir, Wdir, Nvar, var_colptr, to_fac)
+    @inbounds for i = 1:Nvar
+        for j in (var_colptr[i]):var_colptr[i+1]-1
+            Vvar_fac[to_fac[j]] = 1 / Wdir[i]
+            Mvar_fac[to_fac[j]] = Mdir[i] * Vvar_fac[to_fac[j]]
         end
 
     end
 
-    return Mvar, Vvar
+    return Mvar_fac, Vvar_fac
 end
 #-------------------------------------------------------------------------------
 
@@ -26,13 +26,13 @@ end
 function keep_order(Nlink, row, col)
     temp = collect(1:Nlink)
     sort_col_idx = sortperm(col)
-    set_around_factor = temp[sort_col_idx]
+    to_fac = temp[sort_col_idx]
 
     new_row = row[sort_col_idx]
     sort_row_idx = sortperm(new_row)
-    set_around_variable = temp[sort_row_idx]
+    to_var = temp[sort_row_idx]
 
-    return set_around_factor, set_around_variable
+    return to_fac, to_var
 end
 #-------------------------------------------------------------------------------
 

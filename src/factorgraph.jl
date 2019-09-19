@@ -8,10 +8,10 @@
 # Define the node numbers and the transpose system matrix
 #-------------------------------------------------------------------------------
 function graph(jacobian)
-    Nfactor, Nvariable = size(jacobian)
+    Nfac, Nvar = size(jacobian)
     jacobianT = SparseMatrixCSC(jacobian')
 
-    return Nfactor, Nvariable, jacobianT
+    return Nfac, Nvar, jacobianT
 end
 #-------------------------------------------------------------------------------
 
@@ -19,20 +19,20 @@ end
 #-------------------------------------------------------------------------------
 # Find number of links
 #-------------------------------------------------------------------------------
-function links(Nfactor, jacobianT)
+function links(Nfac, jacobianT)
     Ndir = 0
     Nlink = 0
-    variables_in_column = 0
-    dir_position = fill(0, Nfactor)
+    var_in_column = 0
+    dir_position = fill(0, Nfac)
 
-    @inbounds for i = 1:Nfactor
-        variables_in_column = jacobianT.colptr[i + 1] - jacobianT.colptr[i]
+    @inbounds for i = 1:Nfac
+        var_in_column = jacobianT.colptr[i + 1] - jacobianT.colptr[i]
 
-        if variables_in_column == 1
-            Ndir += variables_in_column
+        if var_in_column == 1
+            Ndir += var_in_column
             dir_position[i] = jacobianT.rowval[jacobianT.colptr[i]]
         else
-            Nlink += variables_in_column
+            Nlink += var_in_column
         end
     end
 
@@ -44,9 +44,9 @@ end
 #-------------------------------------------------------------------------------
 # Define position of virtual factor nodes
 #-------------------------------------------------------------------------------
-function virtuals(Nvariable, dir_position)
+function virtuals(Nvar, dir_position)
     idx = findall(!iszero, dir_position)
-    virtual = fill(1, Nvariable)
+    virtual = fill(1, Nvar)
 
     @inbounds for i in idx
         virtual[dir_position[i]] = 0
@@ -61,14 +61,14 @@ end
 # Define singly-connected, virtual and indirect factor nodes arrays
 #-------------------------------------------------------------------------------
 function factors(
-    Nfactor, Nvariable, Ndir, Nlink,
+    Nfac, Nvar, Ndir, Nlink,
     jacobianT, observation, noise, virtual,
     MEAN, VARI)
 
-    Nind = Nfactor - Ndir
+    Nind = Nfac - Ndir
 
-    Mdir = fill(0.0, Nvariable)
-    VdirInv = fill(0.0, Nvariable)
+    Mdir = fill(0.0, Nvar)
+    Wdir = fill(0.0, Nvar)
 
     row = fill(0, Nlink)
     col = similar(row)
@@ -77,8 +77,8 @@ function factors(
     Mind = fill(0.0, Nind)
     Vind = similar(Mind)
 
-    factor_colptr = fill(0, Nind)
-    variable_colptr = fill(0, Nvariable)
+    row_colptr = fill(0, Nind)
+    col_colptr = fill(0, Nvar)
 
     idxi = 1
     idxr = 1
@@ -87,7 +87,7 @@ function factors(
     @inbounds for i in idxT
         if (jacobianT.colptr[i[2] + 1] - jacobianT.colptr[i[2]]) == 1
             Mdir[i[1]] += observation[i[2]] * jacobianT[i] / noise[i[2]]
-            VdirInv[i[1]] += (jacobianT[i]^2) / noise[i[2]]
+            Wdir[i[1]] += (jacobianT[i]^2) / noise[i[2]]
         else
             row[idxi] = idxr
             col[idxi] = i[1]
@@ -97,8 +97,8 @@ function factors(
 
             idxi += 1
 
-            variable_colptr[i[1]] += 1
-            factor_colptr[idxr] = idxi
+            col_colptr[i[1]] += 1
+            row_colptr[idxr] = idxi
 
             if idxT[jacobianT.colptr[i[2] + 1] - 1] == i
                 Mind[idxr] = observation[i[2]]
@@ -108,15 +108,15 @@ function factors(
         end
         if virtual[i[1]] !== 0
             Mdir[i[1]] = MEAN / VARI
-            VdirInv[i[1]] = 1 / VARI
+            Wdir[i[1]] = 1 / VARI
         end
     end
 
-    pushfirst!(variable_colptr, 1)
-    variable_colptr = cumsum(variable_colptr)
-    pushfirst!(factor_colptr, 1)
+    pushfirst!(col_colptr, 1)
+    pushfirst!(row_colptr, 1)
+    col_colptr = cumsum(col_colptr)
 
-    return row, col, Nind, Mind, Vind, coeff, coeffInv, Mdir, VdirInv,
-           variable_colptr, factor_colptr
+    return row, row_colptr, col, col_colptr,
+           Nind, Mind, Vind, coeff, coeffInv, Mdir, Wdir
 end
 #-------------------------------------------------------------------------------

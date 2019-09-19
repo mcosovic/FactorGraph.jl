@@ -4,6 +4,7 @@ export bp
 
 using SparseArrays
 using HDF5
+using CSV
 using Random
 using PrettyTables
 
@@ -13,11 +14,12 @@ using PrettyTables
 # prefix "N" stands for the amount of the stem
 # prefix "M" stands for the mean of the stem
 # prefix "V" stands for the variance of the stem
-# sufix "dir" stands for the direct (singly-connected) factor nodes
-# sufix "ind" stands for the indirect factor nodes
+# prefix "W" stands for the inverse of variance (weight) of the stem
+# abbreviation "fac" stands for factor node
+# abbreviation "var" stands for variable node
+# abbreviation "dir" stands for the direct (singly-connected) factor nodes
+# abbreviation "ind" stands for the indirect factor nodes
 # sufix "Inv" stands for the inverse value of the stem
-# abbreviation "fac" stands for fator to variable value
-# abbreviation "var" stands for variable to factor value
 
 
 ##############
@@ -36,7 +38,6 @@ include("inference_mean.jl")
 include("bp_simple_passing.jl")
 include("bp_kahan_passing.jl")
 include("bp_simple_recursion.jl")
-
 
 #################
 #  Run package  #

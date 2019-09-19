@@ -4,19 +4,42 @@
 
 
 #-------------------------------------------------------------------------------
+function get_extension(DATA)
+    try
+        match(r"\.[A-Za-z0-9]+$", DATA).match
+    catch
+        error("Input DATA extansion is missing.")
+    end
+end
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
 function model(DATA, PATH)
     if PATH == "from_package"
         package_dir = abspath(joinpath(dirname(Base.find_package("GaussianBP")), ".."))
         PATH = joinpath(package_dir, "src/data/")
     end
 
-    system = string(PATH, DATA, ".h5")
+    extension  = get_extension(DATA)
 
-    list = h5read(system, "/H")
-    jacobian = sparse(list[:,1], list[:,2], list[:,3])
+    system = string(PATH, DATA)
 
-    observation = h5read(system, "/b")
-    noise = h5read(system, "/v")
+    if extension == ".h5"
+        list = h5read(system, "/H")
+        jacobian = sparse(list[:,1], list[:,2], list[:,3])
+
+        observation = h5read(system, "/b")
+        noise = h5read(system, "/v")
+    end
+
+    if extension == ".csv"
+        data = CSV.read(system)
+        jacobian = sparse(data.row, data.column, data.value)
+
+        observation = data.observation
+        noise = data.variance
+    end
 
     return jacobian, observation, noise
 end
