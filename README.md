@@ -83,7 +83,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     Default settings: `TIME::String = "off"`, `ERROR::String = "off"`, `STATISTIC::String = "off"`   
 
 8. Path Option:
-    - `PATH` - path to the `DATA` HDF5 file;
+    - `PATH` - path to the `DATA` file;
 
     Default setting: `PATH::String = "src/data"`
 

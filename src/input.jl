@@ -21,7 +21,7 @@ function model(DATA, PATH)
         PATH = joinpath(package_dir, "src/data/")
     end
 
-    extension  = get_extension(DATA)
+    extension = get_extension(DATA)
 
     system = string(PATH, DATA)
 
