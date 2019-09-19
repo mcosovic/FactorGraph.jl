@@ -34,7 +34,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
       - `model.h5/b` - observation values `b::Array{Float64,1}`;
       - `model.h5/v` - observation variances `v::Array{Float64,1}`;
     - CSV:
-      - `model.csv` - data with columns `row | column | coefficient | observations | variances`;
+      - `model.csv` - data with columns `row | column | coefficient | observation | variance`;
 
     Example systems: `data33_14.h5`, `data897_300.h5`, `data3119_1354.h5`, `data5997_2000.h5`, `data7149_2000.h5` `data29997_10000.h5`, `data283803_70000.h5`, `data33_14.csv`
 

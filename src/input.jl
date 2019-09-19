@@ -36,7 +36,7 @@ function model(DATA, PATH)
         data = DataFrame(load(system))
 
         list = dropmissing!(data[:,[1,2,3]])
-        jacobian = sparse(list.row, list.column, list.value)
+        jacobian = sparse(list.row, list.column, list.coefficient)
 
         observation = dropmissing!(data[:,[4]]).observation
         noise = dropmissing!(data[:,[5]]).variance

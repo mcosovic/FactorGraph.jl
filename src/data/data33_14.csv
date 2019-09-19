@@ -1,4 +1,4 @@
-row,column,value,observation,variance
+row,column,coefficient,observation,variance
 1,1,4,0,1.00
 9,1,-16.90045631,-0.087476928,1.00
 11,1,-4.483500717,-0.259210842,1.00
