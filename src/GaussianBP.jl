@@ -43,7 +43,7 @@ include("bp_simple_recursion.jl")
 #  Run package  #
 #################
 function bp(
-    DATA::String = "data33_14",
+    DATA::String = "data33_14.h5",
     MAXI::Int64 = 30,
     DAMP::Int64 = 10,
     BUMP::Int64 = MAXI,

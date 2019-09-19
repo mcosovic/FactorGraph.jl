@@ -28,14 +28,17 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 ```
 
 ## Input Arguments:
-1. Input `DATA` HDF5 file with variables:
-    - `model.h5/H` - coefficient data `H::Array{Float64,2} = [row column coefficient]`;
-    - `model.h5/b` - observation values `b::Array{Float64,1}`;
-    - `model.h5/v` - observation variances `v::Array{Float64,1}`;
+1. The input argument `DATA` can be given in formats:
+    - HDF5:
+      - `model.h5/H` - coefficient data `H::Array{Float64,2} = [row column coefficient]`;
+      - `model.h5/b` - observation values `b::Array{Float64,1}`;
+      - `model.h5/v` - observation variances `v::Array{Float64,1}`;
+    - CSV:
+      - `model.csv` - data with columns `row | column | coefficient | observations | variances]`;
 
-    Example systems: `data33_14`, `data897_300`, `data3119_1354`, `data5997_2000`, `data7149_2000` `data29997_10000`, `data283803_70000`
+    Example systems: `data33_14.h5`, `data897_300.h5`, `data3119_1354.h5`, `data5997_2000.h5`, `data7149_2000.h5` `data29997_10000.h5`, `data283803_70000.h5`, `data33_14.csv`
 
-    Default setting: `DATA::String = "data33_14"`
+    Default setting: `DATA::String = "data33_14.h5"`
 
 2. Design of Iteration Scheme:
     - `MAXI` - the upper limit on BP iterations;
@@ -88,10 +91,10 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 ## Quick Start
 ```
 julia> using GaussianBP
-julia> bp("data33_14", 100; TIME = "on")
-julia> bp("data33_14", 100; ERROR = "on")
-julia> bp("data33_14", 100, 10, 30; ALGORITHM = "kahan")
-julia> bp("data33_14", 100, 10; ALGORITHM = "kahan", TIME = "on")
+julia> bp("data33_14.h5", 100; TIME = "on")
+julia> bp("data33_14.h5", 100; ERROR = "on")
+julia> bp("data33_14.h5", 100, 10, 30; ALGORITHM = "kahan")
+julia> bp("data33_14.h5", 100, 10; ALGORITHM = "kahan", TIME = "on")
 ```
 
 ## More information:
