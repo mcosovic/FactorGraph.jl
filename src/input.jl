@@ -44,5 +44,6 @@ function model(DATA, PATH)
         error("The input data is not a valid format.")
     end
 
+    return jacobian, observation, noise
 end
 #-------------------------------------------------------------------------------
