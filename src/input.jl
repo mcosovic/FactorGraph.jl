@@ -41,7 +41,7 @@ function model(DATA, PATH)
         observation = dropmissing!(data[:,[4]]).observation
         noise = dropmissing!(data[:,[5]]).variance
     else
-        error("The input data is not a valid")
+        error("The input data is not a valid.")
     end
 
     return jacobian, observation, noise
