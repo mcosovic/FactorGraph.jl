@@ -82,9 +82,4 @@ function bp(
     return Xbp
 end
 
-Xbp = bp("data33_14.csv", 200, 20, 20, 0.6, 0.4, 0.0, 1e60;
-         METHOD = "passing",
-         ALGORITHM = "kahan",
-         TIME = "on",
-         ERROR = "on")
 end # SimplyGBP
