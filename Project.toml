@@ -1,7 +1,7 @@
 name = "GaussianBP"
 uuid = "76339c80-d302-11e9-01dd-25b50e59e32d"
 authors = ["Mirsad Cosovic <mirsad.cosovic@gmail.com>"]
-version = "1.1.1"
+version = "1.1.2"
 
 [deps]
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

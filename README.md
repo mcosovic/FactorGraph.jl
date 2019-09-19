@@ -36,7 +36,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
     - CSV:
       - `model.csv` - data with columns `row | column | coefficient | observation | variance`;
 
-    Example systems: `data33_14.h5`, `data897_300.h5`, `data3119_1354.h5`, `data5997_2000.h5`, `data7149_2000.h5` `data29997_10000.h5`, `data283803_70000.h5`, `data33_14.csv`
+    Example systems located in `src/example`: `data33_14.h5`, `data897_300.h5`, `data3119_1354.h5`, `data5997_2000.h5`, `data7149_2000.h5` `data29997_10000.h5`, `data283803_70000.h5`, `data33_14.csv`, `data5997_2000.csv`
 
     Default setting: `DATA::String = "data33_14.h5"`
 
@@ -85,7 +85,7 @@ bp(DATA, MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI; METHOD, ALGORITHM, TIME, ERRO
 8. Path Option:
     - `PATH` - path to the `DATA` file;
 
-    Default setting: `PATH::String = "src/data"`
+    Default setting: `PATH::String = "src/example"`
 
 
 ## Quick Start
