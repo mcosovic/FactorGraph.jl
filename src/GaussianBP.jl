@@ -110,7 +110,7 @@ function bp(
 
     results(system, graph, bp, Xbp, wls, prep, infe)
 
-    return Xbp
+    return Xbp, system
 end
 
 end # SimplyGBP

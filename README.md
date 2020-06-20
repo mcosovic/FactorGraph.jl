@@ -88,9 +88,9 @@ bp(DATA; max, damp, bump, prob, alpha, mean, variance, method, algorithm, wls, p
 ## Quick Start
 ```
 julia> using GaussianBP
-julia> bp("data33_14.h5"; max = 100)
-julia> bp("data33_14.h5"; max = 100, damp = 10, bump = 50)
-julia> bp("data33_14.h5"; max = 100, damp = 10, bump = 50, algorithm = "kahan")
+julia> Xbp, system = bp("data33_14.h5"; max = 100)
+julia> Xbp, system = bp("data33_14.h5"; max = 100, damp = 10, bump = 50)
+julia> Xbp, system = bp("data33_14.h5"; max = 100, damp = 10, bump = 50, algorithm = "kahan")
 ```
 
 ## More information:
