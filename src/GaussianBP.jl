@@ -2,15 +2,15 @@ module GaussianBP
 
 export bp
 
-using SparseArrays
+using SparseArrays, LinearAlgebra
 using HDF5
 using CSVFiles, DataFrames
 using Random
 using PrettyTables
+using Printf
 
-#########################
-#  Variable Name Style  #
-#########################
+
+### Variable Name Style
 # prefix "N" stands for the amount of the stem
 # prefix "M" stands for the mean of the stem
 # prefix "V" stands for the variance of the stem
@@ -22,62 +22,93 @@ using PrettyTables
 # sufix "Inv" stands for the inverse value of the stem
 
 
-##############
-#  Includes  #
-##############
+### Includes
 include("input.jl")
-include("error.jl")
-include("auxiliary.jl")
-include("evaluation.jl")
-
-include("factorgraph.jl")
-include("initialize.jl")
+include("routine.jl")
 include("inference.jl")
-include("inference_mean.jl")
 
-include("bp_simple_passing.jl")
-include("bp_kahan_passing.jl")
-include("bp_simple_recursion.jl")
-
-#################
-#  Run package  #
-#################
+### Run package
 function bp(
-    DATA::String = "data33_14.h5",
-    MAXI::Int64 = 30,
-    DAMP::Int64 = 10,
-    BUMP::Int64 = MAXI,
-    PROB::Float64 = 0.6,
-    ALPH::Float64 = 0.4,
-    MEAN::Float64 = 0.0,
-    VARI::Float64 = 1e5;
-    METHOD::String = "passing",
-    ALGORITHM::String = "sum",
-    TIME::String = "off",
-    ERROR::String = "off",
-    STATISTIC::String = "off",
-    PATH::String = "from_package")
+    data::String = "data33_14.h5";
+    max::Int64 = 30,
+    damp::Int64 = 10,
+    bump::Int64 = max,
+    prob::Float64 = 0.6,
+    alpha::Float64 = 0.4,
+    mean::Float64 = 0.0,
+    variance::Float64 = 1e5,
+    method::String = "passing",
+    algorithm::String = "sum",
+    path::String = "from_package",
+    wls::String = "no")
 
+    system = model(data, max, damp, bump, path)
 
-    check_iteration_scheme(MAXI, DAMP, BUMP)
+  prep = @elapsed begin
+    graph = factors(system, mean, variance)
+    bp = initialize(graph, max, damp, bump, prob, alpha)
+  end
 
-    jacobian, observation, noise = model(DATA, PATH)
-
-    if METHOD == "passing" && ALGORITHM == "sum"
-        Xbp = bp_simple_passing(jacobian, observation, noise,
-                                MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI,
-                                TIME, ERROR, STATISTIC)
+  infe = @elapsed begin
+    if method == "passing" && algorithm == "sum"
+        for iter = 1:bp.IterNative
+            factor_to_variable(graph, bp)
+            variable_to_factor(graph, bp)
+        end
+        for iter = 1:bp.IterDamp
+            factor_to_variable_damp(graph, bp)
+            variable_to_factor(graph, bp)
+        end
+        for iter = 1:bp.IterBump
+            factor_to_variable_mean(graph, bp)
+            variable_to_factor_mean(graph, bp)
+        end
+        for iter = 1:bp.IterDampBump
+            factor_to_variable_mean_damp(graph, bp)
+            variable_to_factor_mean(graph, bp)
+        end
     end
-    if METHOD == "passing" && ALGORITHM == "kahan"
-        Xbp = bp_kahan_passing(jacobian, observation, noise,
-                               MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI,
-                               TIME, ERROR, STATISTIC)
+
+    if method == "passing" && algorithm == "kahan"
+        for iter = 1:bp.IterNative
+            factor_to_variable_kahan(graph, bp)
+            variable_to_factor_kahan(graph, bp)
+        end
+        for iter = 1:bp.IterDamp
+            factor_to_variable_kahan_damp(graph, bp)
+            variable_to_factor_kahan(graph, bp)
+        end
+        for iter = 1:bp.IterBump
+            factor_to_variable_mean(graph, bp)
+            variable_to_factor_mean(graph, bp)
+        end
+        for iter = 1:bp.IterDampBump
+            factor_to_variable_mean_damp(graph, bp)
+            variable_to_factor_mean(graph, bp)
+        end
     end
-    if METHOD == "recursion" && ALGORITHM == "sum"
-        Xbp = bp_simple_recursion(jacobian, observation, noise,
-                                MAXI, DAMP, BUMP, PROB, ALPH, MEAN, VARI,
-                                TIME, ERROR, STATISTIC)
+
+    if method == "recursion" && algorithm == "sum"
+        factor_to_variable(graph, bp)
+        rec = recursionini(graph)
+        for iter = 1:bp.IterNative
+            factor_recursion(graph, bp, rec)
+        end
+        for iter = 1:bp.IterDamp
+            factor_recursion_damp(graph, bp, rec)
+        end
+        for iter = 1:bp.IterBump
+            factor_recursion_mean(graph, bp, rec)
+        end
+        for iter = 1:bp.IterDampBump
+            factor_recursion_mean_damp(graph, bp, rec)
+        end
     end
+
+    Xbp = marginal(graph, bp)
+  end
+
+    results(system, graph, bp, Xbp, wls, prep, infe)
 
     return Xbp
 end

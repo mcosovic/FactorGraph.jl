@@ -1,96 +1,103 @@
-####################################
-#  Compute messages and marginals  #
-####################################
+### Factor to variable messages
+@inline function factor_to_variable(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0
 
-
-#-------------------------------------------------------------------------------
-# Compute messages using state-of-the-art equations with simply summation
-#-------------------------------------------------------------------------------
-function factor_to_variable(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mind, Vind, coeff, coeffInv,
-    row, Nind, row_colptr, to_var)
-
-    @inbounds for i = 1:Nind
-        Mrow = 0.0
-        Vrow = 0.0
-
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mrow += (coeff[j] * Mvar_fac[j])
-            Vrow += (coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+            Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
-
-    return Mfac_var, Wfac_var
 end
 
-function factor_to_variable_damp(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mind, Vind, coeff, coeffInv,
-    row, Nind, row_colptr, to_var,
-    alpha1, alpha2)
+### Factor to variable messages with damping
+@inline function factor_to_variable_damp(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0
 
-    @inbounds for i = 1:Nind
-        Mrow = 0.0
-        Vrow = 0.0
-
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mrow += (coeff[j] * Mvar_fac[j])
-            Vrow += (coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+            Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = alpha1[j] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]) + alpha2[j] * Mfac_var[to_var[j]]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
-
-    return Mfac_var, Wfac_var
 end
 
-function variable_to_factor(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mdir, VdirInv,
-    col, Nvar, col_colptr, to_fac)
+### Factor to variable means only
+@inline function factor_to_variable_mean(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0
 
-    @inbounds for i = 1:Nvar
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+        end
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+        end
+    end
+end
+
+### Factor to variable means only with damping
+@inline function factor_to_variable_mean_damp(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0
+
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+        end
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+        end
+    end
+end
+
+
+### Variable to factor messages
+@inline function variable_to_factor(graph, bp)
+    @inbounds for i = 1:graph.Nvar
+        Mcol = 0.0; Wcol = 0.0
+
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            Mcol += bp.Mfac_var[j] * bp.Wfac_var[j]
+            Wcol += bp.Wfac_var[j]
+        end
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            bp.Vvar_fac[bp.to_fac[j]] = 1 / (Wcol + graph.Wdir[i] - bp.Wfac_var[j])
+            bp.Mvar_fac[bp.to_fac[j]] = (Mcol - bp.Mfac_var[j] * bp.Wfac_var[j] + graph.Mdir[i]) * bp.Vvar_fac[bp.to_fac[j]]
+        end
+    end
+end
+
+### Variable to factor means only
+@inline function variable_to_factor_mean(graph, bp)
+    @inbounds for i = 1:graph.Nvar
         Mcol = 0.0
-        Wcol = 0.0
 
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Mcol += Mfac_var[j] * Wfac_var[j]
-            Wcol += Wfac_var[j]
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            Mcol += bp.Mfac_var[j] * bp.Wfac_var[j]
         end
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Vvar_fac[to_fac[j]] = 1 / (Wcol + VdirInv[i] - Wfac_var[j])
-            Mvar_fac[to_fac[j]] = (Mcol - Mfac_var[j] * Wfac_var[j] + Mdir[i]) * Vvar_fac[to_fac[j]]
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            bp.Mvar_fac[bp.to_fac[j]] = (Mcol - bp.Mfac_var[j] * bp.Wfac_var[j] + graph.Mdir[i]) * bp.Vvar_fac[bp.to_fac[j]]
         end
     end
-
-    return Mvar_fac, Vvar_fac
 end
-#-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# Compute messages using sum compensation, Kahan-Babuska algorithm
-#------------------------------------------------------------------------------
-function factor_to_variable_kahan(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mind, Vind, coeff, coeffInv,
-    row, Nind, row_colptr, to_var)
+### Factor to variable messages with Kahan-Babuska summation algorithm
+@inline function factor_to_variable_kahan(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0; error = 0.0
 
-    @inbounds for i = 1:Nind
-        Mrow = 0.0
-        Vrow = 0.0
-        error = 0.0
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
 
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mrow += (coeff[j] * Mvar_fac[j])
-
-            x = coeff[j]^2 * Vvar_fac[j]
+            x = graph.coeff[j]^2 * bp.Vvar_fac[j]
             t = Vrow + x
             if abs(Vrow) >= abs(x)
                 error += (Vrow - t) + x
@@ -99,30 +106,22 @@ function factor_to_variable_kahan(
             end
             Vrow = t
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + (Vrow - coeff[j]^2 * Vvar_fac[j]) + error)
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
         end
     end
-
-    return Mfac_var, Wfac_var
 end
 
-function factor_to_variable_damp_kahan(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mind, Vind, coeff, coeffInv,
-    row, Nind, row_colptr, to_var,
-    alpha1, alpha2)
+### Factor to variable messages with damping and Kahan-Babuska summation algorithm
+@inline function factor_to_variable_kahan_damp(graph, bp)
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0; error = 0.0
 
-    @inbounds for i = 1:Nind
-        Mrow = 0.0
-        Vrow = 0.0
-        error = 0.0
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
 
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mrow += (coeff[j] * Mvar_fac[j])
-
-            x = coeff[j]^2 * Vvar_fac[j]
+            x = graph.coeff[j]^2 * bp.Vvar_fac[j]
             t = Vrow + x
             if abs(Vrow) >= abs(x)
                 error += (Vrow - t) + x
@@ -131,140 +130,166 @@ function factor_to_variable_damp_kahan(
             end
             Vrow = t
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = alpha1[j] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]) + alpha2[j] * Mfac_var[to_var[j]]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + (Vrow - coeff[j]^2 * Vvar_fac[j]) + error)
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
         end
     end
-
-    return Mfac_var, Wfac_var
 end
 
-function variable_to_factor_kahan(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mdir, VdirInv,
-    col, Nvariable, col_colptr, to_fac)
+### Variable to factor messages using Kahan-Babuska summation algorithm
+@inline function variable_to_factor_kahan(graph, bp)
+    @inbounds for i = 1:graph.Nvar
+        Mcol = 0.0; Wcol = 0.0; error = 0.0
 
-    @inbounds for i = 1:Nvariable
-        Mcol = 0.0
-        Wcol = 0.0
-        error = 0.0
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            Mcol += bp.Mfac_var[j] * bp.Wfac_var[j]
 
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Mcol += Mfac_var[j] * Wfac_var[j]
-
-            t = Wcol + Wfac_var[j]
-            if abs(Wcol) >= abs(Wfac_var[j])
-                error += (Wcol - t) + Wfac_var[j]
+            t = Wcol + bp.Wfac_var[j]
+            if abs(Wcol) >= abs(bp.Wfac_var[j])
+                error += (Wcol - t) + bp.Wfac_var[j]
             else
-                error += (Wfac_var[j] - t) + Wcol
+                error += (bp.Wfac_var[j] - t) + Wcol
             end
             Wcol = t
         end
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Vvar_fac[to_fac[j]] = 1 / ((Wcol - Wfac_var[j]) + error + VdirInv[i])
-            Mvar_fac[to_fac[j]] = (Mcol - Mfac_var[j] * Wfac_var[j] + Mdir[i]) * Vvar_fac[to_fac[j]]
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            bp.Vvar_fac[bp.to_fac[j]] = 1 / ((Wcol - bp.Wfac_var[j]) + error + graph.Wdir[i])
+            bp.Mvar_fac[bp.to_fac[j]] = (Mcol -bp.Mfac_var[j] * bp.Wfac_var[j] + graph.Mdir[i]) * bp.Vvar_fac[bp.to_fac[j]]
         end
     end
-
-    return Mvar_fac, Vvar_fac
 end
-#-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# Compute messages using recursion with simply summation
-#-------------------------------------------------------------------------------
-function factor_recursion(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mdir, VdirInv, Mind, Vind,
-    coeff, coeffInv, row, col, Mcol, Wcol,
-    Nind, Nlink, row_colptr, to_var, Nvar, col_colptr)
-
-    @inbounds for i = 1:Nvar
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Mcol[i] += Mfac_var[j] * Wfac_var[j]
-            Wcol[i] += Wfac_var[j]
+### Factor to variable messages in recursion mode
+function factor_recursion(graph, bp, rec)
+    @inbounds for i = 1:graph.Nvar
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            rec.Mcol[i] += bp.Mfac_var[j] * bp.Wfac_var[j]
+            rec.Wcol[i] += bp.Wfac_var[j]
         end
     end
 
-    @inbounds for i = 1:Nind
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0
+
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Vvar_fac[j] = 1 / (rec.Wcol[graph.col[j]] + graph.Wdir[graph.col[j]] - bp.Wfac_var[bp.to_var[j]])
+            bp.Mvar_fac[j] = (rec.Mcol[graph.col[j]] - bp.Mfac_var[bp.to_var[j]] * bp.Wfac_var[bp.to_var[j]] + graph.Mdir[graph.col[j]]) * bp.Vvar_fac[j]
+
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+            Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
+        end
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+        end
+    end
+
+    @inbounds for i = 1:graph.Nvar
+        rec.Mcol[i] = 0.0
+        rec.Wcol[i] = 0.0
+    end
+end
+
+
+### Factor to variable messages in recursion mode
+function factor_recursion_damp(graph, bp, rec)
+    @inbounds for i = 1:graph.Nvar
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            rec.Mcol[i] += bp.Mfac_var[j] * bp.Wfac_var[j]
+            rec.Wcol[i] += bp.Wfac_var[j]
+        end
+    end
+
+    @inbounds for i = 1:graph.Nind
+        Mrow = 0.0; Vrow = 0.0
+
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Vvar_fac[j] = 1 / (rec.Wcol[graph.col[j]] + graph.Wdir[graph.col[j]] - bp.Wfac_var[bp.to_var[j]])
+            bp.Mvar_fac[j] = (rec.Mcol[graph.col[j]] - bp.Mfac_var[bp.to_var[j]] * bp.Wfac_var[bp.to_var[j]] + graph.Mdir[graph.col[j]]) * bp.Vvar_fac[j]
+
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
+            Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
+        end
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+        end
+    end
+
+    @inbounds for i = 1:graph.Nvar
+        rec.Mcol[i] = 0.0
+        rec.Wcol[i] = 0.0
+    end
+end
+
+### Factor to variable means only in recursion mode
+function factor_recursion_mean(graph, bp, rec)
+    @inbounds for i = 1:graph.Nvar
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            rec.Mcol[i] += bp.Mfac_var[j] * bp.Wfac_var[j]
+        end
+    end
+
+    @inbounds for i = 1:graph.Nind
         Mrow = 0.0
-        Vrow = 0.0
 
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Vvar_fac[j] = 1 / (Wcol[col[j]] + VdirInv[col[j]] - Wfac_var[to_var[j]])
-            Mvar_fac[j] = (Mcol[col[j]] - Mfac_var[to_var[j]] * Wfac_var[to_var[j]] + Mdir[col[j]]) * Vvar_fac[j]
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mvar_fac[j] = (rec.Mcol[graph.col[j]] - bp.Mfac_var[bp.to_var[j]] * bp.Wfac_var[bp.to_var[j]] + graph.Mdir[graph.col[j]]) * bp.Vvar_fac[j]
 
-            Mrow += (coeff[j] * Mvar_fac[j])
-            Vrow += (coeff[j]^2 * Vvar_fac[j])
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = (Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
         end
     end
 
-    fill!(Mcol, 0.0)
-    fill!(Wcol, 0.0)
-
-    return Mfac_var, Wfac_var, Mcol, Wcol
+    @inbounds for i = 1:graph.Nvar
+        rec.Mcol[i] = 0.0
+    end
 end
 
-function factor_recursion_damp(
-    Mvar_fac, Vvar_fac, Mfac_var, Wfac_var,
-    Mdir, VdirInv, Mind, Vind,
-    coeff, coeffInv, row, col, Mcol, Wcol,
-    Nind, Nlink, row_colptr, to_var, alpha1, alpha2, Nvar, col_colptr)
-
-    @inbounds for i = 1:Nvar
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Mcol[i] += Mfac_var[j] * Wfac_var[j]
-            Wcol[i] += Wfac_var[j]
+### Factor to variable means only in recursion mode with damping
+function factor_recursion_mean_damp(graph, bp, rec)
+    @inbounds for i = 1:graph.Nvar
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            rec.Mcol[i] += bp.Mfac_var[j] * bp.Wfac_var[j]
         end
     end
 
-    @inbounds for i = 1:Nind
+    @inbounds for i = 1:graph.Nind
         Mrow = 0.0
-        Vrow = 0.0
 
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Vvar_fac[j] = 1 / (Wcol[col[j]] + VdirInv[col[j]] - Wfac_var[to_var[j]])
-            Mvar_fac[j] = (Mcol[col[j]] - Mfac_var[to_var[j]] * Wfac_var[to_var[j]] + Mdir[col[j]]) * Vvar_fac[j]
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mvar_fac[j] = (rec.Mcol[graph.col[j]] - bp.Mfac_var[bp.to_var[j]] * bp.Wfac_var[bp.to_var[j]] + graph.Mdir[graph.col[j]]) * bp.Vvar_fac[j]
 
-            Mrow += (coeff[j] * Mvar_fac[j])
-            Vrow += (coeff[j]^2 * Vvar_fac[j])
+            Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
-        for j in row_colptr[i]:(row_colptr[i + 1] - 1)
-            Mfac_var[to_var[j]] = alpha1[j] * ((Mind[row[j]] - Mrow) * coeffInv[j] + Mvar_fac[j]) + alpha2[j] * Mfac_var[to_var[j]]
-            Wfac_var[to_var[j]] = (coeff[j]^2) / (Vind[row[j]] + Vrow - coeff[j]^2 * Vvar_fac[j])
+        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
         end
     end
 
-    fill!(Mcol, 0.0)
-    fill!(Wcol, 0.0)
-
-    return Mfac_var, Wfac_var, Mcol, Wcol
+    @inbounds for i = 1:graph.Nvar
+        rec.Mcol[i] = 0.0
+    end
 end
-#-------------------------------------------------------------------------------
 
 
-#-------------------------------------------------------------------------------
-# Compute marginals
-#-------------------------------------------------------------------------------
-function marginal(Mfac_var, Wfac_var, Mdir, VdirInv, col, Nvariable, col_colptr)
-    Xbp = fill(0.0, Nvariable)
 
-    @inbounds for i = 1:Nvariable
-        Mcol = 0.0
-        Wcol = 0.0
+### Compute marginals
+function marginal(graph, bp)
+    Xbp = fill(0.0, graph.Nvar)
 
-        for j in col_colptr[i]:(col_colptr[i + 1] - 1)
-            Mcol += Mfac_var[j] * Wfac_var[j]
-            Wcol += Wfac_var[j]
+    @inbounds for i = 1:graph.Nvar
+        Mcol = 0.0; Wcol = 0.0
+
+        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+            Mcol += bp.Mfac_var[j] * bp.Wfac_var[j]
+            Wcol += bp.Wfac_var[j]
         end
-        Xbp[i] = (Mcol + Mdir[i]) / (Wcol + VdirInv[i])
+        Xbp[i] = (Mcol + graph.Mdir[i]) / (Wcol + graph.Wdir[i])
     end
 
     return Xbp
 end
-#-------------------------------------------------------------------------------
