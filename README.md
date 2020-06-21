@@ -1,4 +1,7 @@
 # Gaussian Belief Propagation Linear Systems Solver
+
+![Build](https://github.com/mcosovic/GaussBP.jl/workflows/Build/badge.svg)
+
 The solver provides the solution of the linear system of equations with/without Gaussian noise using belief propagation (BP) algorithm applied over the factor graph.
 
 ## The System Model
