@@ -1,4 +1,4 @@
-module GaussianBP
+module GaussBP
 
 export bp
 
@@ -113,4 +113,4 @@ function bp(
     return Xbp, system
 end
 
-end # SimplyGBP
+end # GaussBP

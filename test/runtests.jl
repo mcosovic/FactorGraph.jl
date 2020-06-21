@@ -1,4 +1,4 @@
-using GaussianBP
+using GaussBP
 using SparseArrays
 using Test
 
