@@ -2,7 +2,7 @@ using GaussBP
 using SparseArrays
 using Test
 
-@testset "GaussianBP" begin
+@testset "GaussBP" begin
     Xbp, system = bp("data33_14.csv"; max = 1000, damp = 50, bump = 1000, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e5, method = "passing", algorithm = "sum", wls = "builtin")
     W = spdiagm(0 =>  @. 1.0 / sqrt(system.v))
     H = W * system.J
