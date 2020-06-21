@@ -17,9 +17,9 @@ where **H** is the Jacobian matrix of linear functions or the coefficient  matri
 Further, the solution to the problem can be found via maximization of the likelihood function which is defined via likelihoods of independent observations, and that can be efficiently solved utilizing factor graphs and the Gaussian belief propagation (BP) algorithm.
 
 ## Installation
-The package requires Julia 1.1 and higher, to install `GaussianBP`, you can run the following:
+The package requires Julia 1.2 and higher, to install `GaussBP`, you can run the following:
 ```
-pkg> add https://github.com/mcosovic/GaussianBP
+pkg> add https://github.com/mcosovic/GaussBP.jl
 ```
 
 ## Syntax
