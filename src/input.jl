@@ -8,7 +8,7 @@ end
 
 
 #### Read system model
-function model(dataname, maxIter, damp, bump, path)
+function model(dataname, maxIter, damp, bump, method, algorithm, path)
     pathtoGaussianBP = Base.find_package("GaussianBP")
     if pathtoGaussianBP == nothing
         throw(ErrorException("GaussianBP not found in install packages"))
@@ -34,6 +34,14 @@ function model(dataname, maxIter, damp, bump, path)
     end
     if bump > maxIter || bump <= 0
         error("Applied variance computation parameter bump has invalid value.")
+    end
+
+    if !(method in ["passing", "recursion"])
+        error("Invalid method key.")
+    end
+
+    if !(algorithm in ["sum", "kahan"])
+        error("Invalid algorithm key.")
     end
 
     if path == "from_package"
