@@ -45,7 +45,7 @@ function model(dataname, maxIter, damp, bump, method, algorithm, path)
     end
 
     if path == "from_package"
-        package_dir = abspath(joinpath(dirname(Base.find_package("GaussianBP")), ".."))
+        package_dir = abspath(joinpath(dirname(Base.find_package("GaussBP")), ".."))
         path = joinpath(package_dir, "src/example/")
     end
     system = string(path, dataname)
