@@ -113,6 +113,4 @@ function bp(
     return Xbp, system
 end
 
-Xbp, system = bp("data33_14.csv"; max = 1000, damp = 1000, bump = 100, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e60, method = "passing", algorithm = "kahan", wls = "builtin")
-
 end # GaussBP
