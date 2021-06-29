@@ -42,7 +42,7 @@ function bp(
     path::String = "from_package",
     wls::String = "no")
 
-    system = model(data, max, damp, bump, method, algorithm, path)
+   system = model(data, max, damp, bump, method, algorithm, path)
 
   prep = @elapsed begin
     graph = factors(system, mean, variance)
