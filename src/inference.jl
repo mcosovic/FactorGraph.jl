@@ -8,8 +8,8 @@
             Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
 end
@@ -24,8 +24,8 @@ end
             Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
 end
@@ -39,7 +39,7 @@ end
             Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
         end
     end
 end
@@ -53,7 +53,7 @@ end
             Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
         end
     end
 end
@@ -107,8 +107,8 @@ end
             Vrow = t
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
         end
     end
 end
@@ -131,8 +131,8 @@ end
             Vrow = t
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + error)
         end
     end
 end
@@ -180,8 +180,8 @@ function factor_recursion(graph, bp, rec)
             Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
 
@@ -212,8 +212,8 @@ function factor_recursion_damp(graph, bp, rec)
             Vrow += (graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[graph.row[j]] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j])
         end
     end
 
@@ -240,7 +240,7 @@ function factor_recursion_mean(graph, bp, rec)
             Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
+            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]
         end
     end
 
@@ -266,7 +266,7 @@ function factor_recursion_mean_damp(graph, bp, rec)
             Mrow += (graph.coeff[j] * bp.Mvar_fac[j])
         end
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[graph.row[j]] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
+            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * ((graph.Mind[j] - Mrow) * graph.coeffInv[j] + bp.Mvar_fac[j]) + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
         end
     end
 
@@ -280,7 +280,6 @@ end
 ### Compute marginals
 function marginal(graph, bp)
     Xbp = fill(0.0, graph.Nvar)
-
     @inbounds for i = 1:graph.Nvar
         Mcol = 0.0; Wcol = 0.0
 

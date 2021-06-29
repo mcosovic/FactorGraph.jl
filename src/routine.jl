@@ -75,7 +75,7 @@ function factors(system, meanVirtual, variVirtual)
     col = similar(row)
     coeff = fill(0.0, Nlink)
     coeffInv = similar(coeff)
-    Mind = fill(0.0, Nind)
+    Mind = fill(0.0, Nlink)
     Vind = similar(Mind)
 
     rowptr = fill(0, Nind)
@@ -95,14 +95,15 @@ function factors(system, meanVirtual, variVirtual)
             coeff[idxi] = system.Jt[i]
             coeffInv[idxi] = 1 / system.Jt[i]
 
+            Mind[idxi] = system.z[i[2]]
+            Vind[idxi] = system.v[i[2]]
+
             idxi += 1
 
             colptr[i[1]] += 1
             rowptr[idxr] = idxi
 
             if idxT[system.Jt.colptr[i[2] + 1] - 1] == i
-                Mind[idxr] = system.z[i[2]]
-                Vind[idxr] = system.v[i[2]]
                 idxr += 1
             end
         end
@@ -198,6 +199,7 @@ end
 ### Results
 function results(system, graph, bp, Xbp, wls, prep, infe)
     ########## Graph data and iterate scheme ##########
+
     data = ["Factor graph data and belief propagation iterations scheme" "" ""
             "Number of Factor Nodes" "."^10 graph.Nfac;
             "Number of Variable Nodes" "."^10 graph.Nvar;
@@ -207,18 +209,20 @@ function results(system, graph, bp, Xbp, wls, prep, infe)
             "Number of iterations where means and variances are computed using damping" "."^10 bp.IterDamp;
             "Number of iterations where only means are computed" "."^10 bp.IterBump;
             "Number of iterations where only means are computed using damping" "."^10 bp.IterDampBump]
-    pretty_table(data, screen_size = (-1,-1), tf = borderless, columns_width = [75, 11, 12],
+
+        pretty_table(data, tf = tf_borderless, columns_width = [75, 11, 12],
         noheader = true, alignment = [:l, :l, :r], formatters = ft_printf("%1.0f", 3),
         highlighters = (hl_cell( [(1,1)], crayon"bold"), hl_col(2, crayon"dark_gray")),
-        body_hlines = [1], body_hlines_format = Tuple('─' for _ = 1:4))
+        body_hlines = [1], body_hlines_format = Tuple('─' for _ = 1:4))    
 
+            
     ########## BP running time ##########
     data = ["" "" ""
             "Belief Propagation Time in Milliseconds" "" "";
             "Preprocesing" "."^10 1000 * prep;
             "Inference" "."^10 1000 * infe;
             "Total" "."^10 1000 * infe + 1000 * prep]
-    pretty_table(data, screen_size = (-1,-1), tf = borderless, columns_width = [75, 11, 12],
+    pretty_table(data, tf = tf_borderless, columns_width = [75, 11, 12],
         noheader = true, alignment = [:l, :l, :r], formatters = ft_printf("%1.4f", 3),
         highlighters = (hl_cell( [(2,1)], crayon"bold"), hl_col(2, crayon"dark_gray")),
         body_hlines = [2], body_hlines_format = Tuple('─' for _ = 1:4))
@@ -267,7 +271,7 @@ function results(system, graph, bp, Xbp, wls, prep, infe)
         high = Highlighter(hl_col(2, crayon"dark_gray"))
 
     end
-    pretty_table(data, screen_size = (-1,-1), tf = borderless, columns_width = [75, 11, 12],
+    pretty_table(data, tf = tf_borderless, columns_width = [75, 11, 12],
         noheader = true, alignment = [:l, :l, :r], formatters = ft_printf("%1.4e", 3),
         highlighters = (high, hl_cell([(2,1), (8,3), (5,3)], crayon"bold"), hl_col(2, crayon"dark_gray")),
         body_hlines = [2], body_hlines_format = Tuple('─' for _ = 1:4))

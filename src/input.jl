@@ -10,7 +10,7 @@ end
 #### Read system model
 function model(dataname, maxIter, damp, bump, method, algorithm, path)
     pathtoGaussBP = Base.find_package("GaussBP")
-    if pathtoGaussBP == nothing
+    if pathtoGaussBP .== nothing
         throw(ErrorException("GaussBP not found in install packages"))
     end
 
