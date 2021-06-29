@@ -278,11 +278,11 @@ function results(system, graph, bp, Xbp, wls, prep, infe)
 
     if wls == "builtin" || wls == "lu"
         println("\n State Variables Display")
-        pretty_table(A, ["State Variable" "Belief Propagation Estimate" "Weighted Least-squares Estimate" "Maximum to Minimum Ratio"],
+        pretty_table(A, header = ["State Variable", "Belief Propagation Estimate", "Weighted Least-squares Estimate", "Maximum to Minimum Ratio"],
             alignment=[:r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.6f","%3.6f","%3.6e"], [1, 2, 3, 4]))
     else
         println("\n State Variables Display")
-        pretty_table([collect(1:length(Xbp)) Xbp], ["State Variable" "Belief Propagation Estimate"],
+        pretty_table([collect(1:length(Xbp)) Xbp], header = ["State Variable", "Belief Propagation Estimate"],
             alignment=[:r, :r], formatters = ft_printf(["%3.0f", "%3.6f"], [1, 2]))
     end
 end
