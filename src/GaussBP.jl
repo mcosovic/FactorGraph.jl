@@ -1,6 +1,6 @@
 module GaussBP
 
-export bp
+export gbp
 
 using SparseArrays, LinearAlgebra
 using HDF5
@@ -25,92 +25,176 @@ using Printf
 ### Includes
 include("input.jl")
 include("routine.jl")
-include("inference.jl")
+include("vanillaGBP.jl")
+include("efficientGBP.jl")
+include("kahanGBP.jl")
 
 ### Run package
-function bp(
-    data::String = "data33_14.h5";
+function gbp(
+    args...;
     max::Int64 = 30,
-    damp::Int64 = 10,
+    damp::Int64 = max,
     bump::Int64 = max,
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     mean::Float64 = 0.0,
     variance::Float64 = 1e5,
-    method::String = "passing",
-    algorithm::String = "sum",
-    path::String = "from_package",
-    wls::String = "no")
+    algorithm::String = "gbp",
+    out::Union{String, Array{String,1}} = "no")
+    
+    if checkInputs(args)
+        system = outJulia(args)
+    else
+        system = inJulia(args)
+    end
+    settings = checkKeywords(max, damp, bump, prob, alpha, mean, variance, algorithm, out)
 
-   system = model(data, max, damp, bump, method, algorithm, path)
+    preprocessing = @elapsed begin
+        graph = factors(system, settings)
+        bp = initialize(graph, settings)
+    end
+    results = resultsdata(system, settings, graph.Nvar)
 
-  prep = @elapsed begin
-    graph = factors(system, mean, variance)
-    bp = initialize(graph, max, damp, bump, prob, alpha)
-  end
+    inference = @elapsed begin
+        if algorithm == "gbp" && !settings.iterate
+            for iter = 1:settings.IterNative
+                vanilla_factor_to_variable(graph, bp)
+                vanilla_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterDamp
+                vanilla_factor_to_variable_damp(graph, bp)
+                vanilla_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterBump
+                vanilla_factor_to_variable_mean(graph, bp)
+                vanilla_variable_to_factor_mean(graph, bp)
+            end
+            for iter = 1:settings.IterDampBump
+                vanilla_factor_to_variable_mean_damp(graph, bp)
+                vanilla_variable_to_factor_mean(graph, bp)
+            end
+            marginal(graph, bp, results)
+        end
 
-  infe = @elapsed begin
-    if method == "passing" && algorithm == "sum"
-        for iter = 1:bp.IterNative
-            factor_to_variable(graph, bp)
-            variable_to_factor(graph, bp)
+        if algorithm == "gbp" && settings.iterate
+            for iter = 1:settings.IterNative
+                vanilla_factor_to_variable(graph, bp)
+                vanilla_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDamp
+                vanilla_factor_to_variable_damp(graph, bp)
+                vanilla_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterBump
+                vanilla_factor_to_variable_mean(graph, bp)
+                vanilla_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDampBump
+                vanilla_factor_to_variable_mean_damp(graph, bp)
+                vanilla_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
         end
-        for iter = 1:bp.IterDamp
-            factor_to_variable_damp(graph, bp)
-            variable_to_factor(graph, bp)
+
+        if algorithm == "efficient" && !settings.iterate
+            for iter = 1:settings.IterNative
+                efficient_factor_to_variable(graph, bp)
+                efficient_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterDamp
+                efficient_factor_to_variable_damp(graph, bp)
+                efficient_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterBump
+                efficient_factor_to_variable_mean(graph, bp)
+                efficient_variable_to_factor_mean(graph, bp)
+            end
+            for iter = 1:settings.IterDampBump
+                efficient_factor_to_variable_mean_damp(graph, bp)
+                efficient_variable_to_factor_mean(graph, bp)
+            end
+            marginal(graph, bp, results)
         end
-        for iter = 1:bp.IterBump
-            factor_to_variable_mean(graph, bp)
-            variable_to_factor_mean(graph, bp)
+    
+        if algorithm == "efficient" && settings.iterate
+            for iter = 1:settings.IterNative
+                efficient_factor_to_variable(graph, bp)
+                efficient_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDamp
+                efficient_factor_to_variable_damp(graph, bp)
+                efficient_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterBump
+                efficient_factor_to_variable_mean(graph, bp)
+                efficient_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDampBump
+                efficient_factor_to_variable_mean_damp(graph, bp)
+                efficient_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
         end
-        for iter = 1:bp.IterDampBump
-            factor_to_variable_mean_damp(graph, bp)
-            variable_to_factor_mean(graph, bp)
+
+        if algorithm == "kahan" && !settings.iterate
+            for iter = 1:settings.IterNative
+                kahan_factor_to_variable(graph, bp)
+                kahan_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterDamp
+                kahan_factor_to_variable_damp(graph, bp)
+                kahan_variable_to_factor(graph, bp)
+            end
+            for iter = 1:settings.IterBump
+                kahan_factor_to_variable_mean(graph, bp)
+                kahan_variable_to_factor_mean(graph, bp)
+            end
+            for iter = 1:settings.IterDampBump
+                kahan_factor_to_variable_mean_damp(graph, bp)
+                kahan_variable_to_factor_mean(graph, bp)
+            end
+            marginal(graph, bp, results)
+        end
+
+        if algorithm == "kahan" && settings.iterate
+            for iter = 1:settings.IterNative
+                kahan_factor_to_variable(graph, bp)
+                kahan_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDamp
+                kahan_factor_to_variable_damp(graph, bp)
+                kahan_variable_to_factor(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterBump
+                kahan_factor_to_variable_mean(graph, bp)
+                kahan_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
+            for iter = 1:settings.IterDampBump
+                kahan_factor_to_variable_mean_damp(graph, bp)
+                kahan_variable_to_factor_mean(graph, bp)
+                marginal(graph, bp, results)
+            end
         end
     end
 
-    if method == "passing" && algorithm == "kahan"
-        for iter = 1:bp.IterNative
-            factor_to_variable_kahan(graph, bp)
-            variable_to_factor_kahan(graph, bp)
-        end
-        for iter = 1:bp.IterDamp
-            factor_to_variable_kahan_damp(graph, bp)
-            variable_to_factor_kahan(graph, bp)
-        end
-        for iter = 1:bp.IterBump
-            factor_to_variable_mean(graph, bp)
-            variable_to_factor_mean(graph, bp)
-        end
-        for iter = 1:bp.IterDampBump
-            factor_to_variable_mean_damp(graph, bp)
-            variable_to_factor_mean(graph, bp)
-        end
+    stats(system, results, settings)
+    if settings.displayshow
+        displaydata(graph, bp, results, settings, preprocessing, inference)
     end
 
-    if method == "recursion" && algorithm == "sum"
-        factor_to_variable(graph, bp)
-        rec = recursionini(graph)
-        for iter = 1:bp.IterNative
-            factor_recursion(graph, bp, rec)
-        end
-        for iter = 1:bp.IterDamp
-            factor_recursion_damp(graph, bp, rec)
-        end
-        for iter = 1:bp.IterBump
-            factor_recursion_mean(graph, bp, rec)
-        end
-        for iter = 1:bp.IterDampBump
-            factor_recursion_mean_damp(graph, bp, rec)
-        end
-    end
-
-    Xbp = marginal(graph, bp)
-  end
-
-    results(system, graph, bp, Xbp, wls, prep, infe)
-
-    return Xbp, system
+    return results, system
 end
 
 end # GaussBP
+
+
+
