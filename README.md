@@ -3,7 +3,7 @@
 [![Documentation][documentation-badge]][documentation] ![Build][build-badge]
 
 
-<a href="https://mcosovic.github.io/GaussBP.jl/stable/"><img align="right" width="180" src="/docs/src/assets/logo2.png" /></a>
+<a href="https://mcosovic.github.io/GaussBP.jl/dev/"><img align="right" width="180" src="/docs/src/assets/logo2.png" /></a>
 
 GaussBP is an open-source, easy-to-use simulation tool/solver for researchers and educators provided as a Julia package, with source code released under MIT License. The solver provides the solution of the linear system of equations with/without Gaussian noise using belief propagation algorithm applied over the factor graph.
 
@@ -55,4 +55,4 @@ results, settings = gbp(H, z, v; out = ["error", "wls", "display"], algorithm = 
 
 [documentation-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Documentation/badge.svg
 [build-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Build/badge.svg
-[documentation]: https://mcosovic.github.io/GaussBP.jl/stable/
+[documentation]: https://mcosovic.github.io/GaussBP.jl/dev/
