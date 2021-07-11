@@ -55,4 +55,4 @@ results, settings = gbp(H, z, v; out = ["error", "wls", "display"], algorithm = 
 
 [documentation-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Documentation/badge.svg
 [build-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Build/badge.svg
-[documentation]: https://mcosovic.github.io/GaussBP.jl/dev/
+[documentation]: https://mcosovic.github.io/GaussBP.jl/stable/
