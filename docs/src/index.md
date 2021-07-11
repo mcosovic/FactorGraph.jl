@@ -39,7 +39,7 @@ results, system = gbp("data33_14.h5"; algorithm = "kahan", out = ["error", "disp
 using GaussBP
 using Plots
 
-results, system = gbp("data33_14.csv"; variance = 1e60, out = ["iterate" "error", "display"])
+results, system = gbp("data33_14.csv"; variance = 1e60, out = ["iterate", "error", "display"])
 plot(results.iterations, results.rmse)
 ```
 ```julia-repl
