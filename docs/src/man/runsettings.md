@@ -26,7 +26,7 @@ gbp(DATA; ALGORITHM, ITERATIONS, VIRTUAL, OUT) controls output variable structur
 ```
 #### Output
 ```julia-repl
-results, system = bp() returns results and input system data
+results, system = gbp() returns results and input system data
 ```
 ```@raw html
 &nbsp;
@@ -63,9 +63,6 @@ The GBP function `gbp()` receives the variable argument DATA.
 | **Example**     | `"C:/name.csv"`                                                             |
 | **Description** | loads the system data using csv-file from a custom path                     |
 |                 |                                                                             |
-| **Example**     | `"C:/case14.xlsx"`                                                          |                                     
-| **Description** |  loads the power system data using xlsx-file from a custom path             |
-|                 |                                                                             |
 | **Example**     | `Jacobian, means, variances`                                                |
 | **Description** | loads the system data passing arguments directly                            |
 
@@ -86,10 +83,6 @@ The GBP function `gbp()` receives a group of arguments by keyword: ALGORITHM, IT
 |                 |                                                                                           |
 | **Command**     | `algorithm = "kahan"`                                                                     |
 | **Description** |  runs the solver using computation-efficient GBP algorithm with compensated summation     |
-|                 |                                                                                           |
-| **Command**     | `algorithm = "recursion"`                                                                 |
-| **Description** |  runs the solver using recursion GBP algorithm                                            |
-
 
 ```@raw html
 &nbsp;
