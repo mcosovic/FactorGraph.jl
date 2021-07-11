@@ -45,7 +45,7 @@ plot(results.iterations, results.rmse)
 ```julia-repl
 using GaussBP
 
-H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.5]
+H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.6]
 z = [0.8; 4.1; 2.2]
 v = [1.0; 1.0; 1.0]     
 
