@@ -155,25 +155,25 @@ function julia_out(args, settings)
         xf = XLSX.openxlsx(fullpath, mode = "r")
         if "jacobian" in XLSX.sheetnames(xf)
             start = startxlsx(xf["jacobian"])
-            list = xf["jacobian"][:][start:end, :]::Array{Float64,2}
-            jacobian = sparse(list[:, 1], list[:, 2], list[:, 3])::SparseMatrixCSC{Float64,Int64}
-            jacobianTranspose = sparse(list[:, 2], list[:, 1], list[:, 3])::SparseMatrixCSC{Float64,Int64}
+            list = xf["jacobian"][:][start:end, :]
+            jacobian = sparse(list[:, 1], list[:, 2], list[:, 3])
+            jacobianTranspose = sparse(list[:, 2], list[:, 1], list[:, 3])
         else
             throw(ErrorException("error opening sheet jacobian"))
         end
         if "measurement" in XLSX.sheetnames(xf)
             start = startxlsx(xf["measurement"])
-            list = xf["measurement"][:][start:end, :]::Array{Float64,2}
-            observation = list[:, 1]::Array{Float64,1}
-            variance = list[:, 2]::Array{Float64,1}
+            list = xf["measurement"][:][start:end, :]
+            observation = list[:, 1]
+            variance = list[:, 2]
         else
             throw(ErrorException("error opening sheet measurement"))
         end
         if settings.dynamic
             if "dynamic" in XLSX.sheetnames(xf)
                 start = startxlsx(xf["dynamic"])
-                dynamic = xf["dynamic"][:][start:end, :]::Array{Float64,2}
-                dynamic = sortslices(dynamic, dims = 1, by = x->x[1], rev = false)::Array{Float64,2}
+                dynamic = xf["dynamic"][:][start:end, :]
+                dynamic = sortslices(dynamic, dims = 1, by = x->x[1], rev = false)
                 dynamic_start(dynamic[1, 1])
             else
                 throw(ErrorException("error opening sheet dynamic"))
