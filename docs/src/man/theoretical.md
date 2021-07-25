@@ -4,7 +4,7 @@ As an input, we observe a noisy linear system of equations with real coefficient
 ```math
         \mathbf{z}=\mathbf{h}(\mathbf{x})+\mathbf{u},
 ```
-where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation or measurement functions,  ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of measurement values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated measurement errors. The linear system of equations is an overdetermined ``m>n`` that arises in many technical fields such as statistics, signal processing, and control theory. 
+where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation or measurement functions,  ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of measurement values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated measurement errors. The linear system of equations is an overdetermined ``m>n`` arising in many technical fields, such as statistics, signal processing, and control theory. 
 
 Each observation is associated with measured value ``z_i``, measurement error  ``u_i``, and measurement function ``h_i(\mathbf{x})``. Under the assumption that measurement errors ``u_i`` follow a zero-mean Gaussian distribution, the probability density function associated with the ``i``-th measurement is proportional to:
 ```math
@@ -32,13 +32,13 @@ It can be shown that the maximum a posteriori solution can be obtained by solvin
 ```math
 	\hat{\mathbf x} = \mathrm{arg}\min_{\mathbf{x}} \sum_{i=1}^m  \cfrac{[z_i-h_i(\mathbf x)]^2}{v_i}.
 ```
-The state estimate ``\hat{\mathbf x}`` representing the solution of the optimization problem is known as the WLS estimator, the maximum likelihood and WLS estimator are equivalent to the maximum a posteriori solution.
+The state estimate ``\hat{\mathbf x}`` representing the solution of the optimization problem is known as the WLS estimator. The maximum likelihood and WLS estimator are equivalent to the maximum a posteriori solution.
 
 ---
 
-## [Linear GBP Algorithm] (@id nativeGBP)
+## [Linear GBP Algorithm] (@id vanillaGBP)
 
-In the standard setup, the goal of the belief propagation (BP) algorithm is to efficiently evaluate the marginals of a set of random variables ``\mathcal{X} = \{x_1,\dots,x_n\}`` described via the joint probability density function ``g(\mathcal{X})``. Assuming that the function ``g(\mathcal{X})`` can be factorised proportionally (``\propto``) to a product of local functions:
+In the standard setup, the goal of the belief propagation (BP) algorithm is to efficiently evaluate the marginals of a set of random variables ``\mathcal{X} = \{x_1,\dots,x_n\}`` described via the joint probability density function ``g(\mathcal{X})``. Assuming the function ``g(\mathcal{X})`` can be factorised proportionally (``\propto``) to a product of local functions:
 ```math
     g(\mathcal{X}) \propto \prod_{i=1}^m \psi(\mathcal{X}_i),
 ```
@@ -53,7 +53,7 @@ The Gaussian belief propagation (GBP) represents a class of the BP, where local 
 ```math
     \mathcal{N}(z_i|\mathcal{X}_i,v_i) \propto \exp\Bigg\{-\cfrac{[z_i-h(\mathcal{X}_i)]^2}{2v_i}\Bigg\},
 ```
-where ``v_i`` is the variance, and the function ``h(\mathcal{X}_i)`` connects the set of state variables ``\mathcal{X}_i`` to the known ``z_i`` value. The \emph{linear}-GBP model implies the linear function ``h(\mathcal{X}_i)``, then if the linear-GBP algorithm converges, it will converge to a fixed point representing a true means \cite{bickson}, regardless of the structure of the factor graph. Unlike means, the variances of the linear-GBP algorithm need not converge to correct values for graphical models with loops, while for models without loops (i.e., tree factor graph) variances will have exact values.
+where ``v_i`` is the variance, and the function ``h(\mathcal{X}_i)`` connects the set of state variables ``\mathcal{X}_i`` to the known ``z_i`` value. The \emph{linear}-GBP model implies the linear function ``h(\mathcal{X}_i)``. If the linear-GBP algorithm converges, it will converge to a fixed point representing a true means \cite{bickson}, regardless of the structure of the factor graph. Unlike means, the variances of the linear-GBP algorithm may not converge to correct values for graphical models with loops, while for models without loops (i.e., tree factor graph) variances will have exact values.
 
 Under the **native GBP algorithm** , we imply the algorithm in which messages are calculated as described below.
 
@@ -131,7 +131,7 @@ with the mean value ``\hat x_s`` and variance ``v_{x_s}``:
 Finally, the mean-value ``\hat x_s`` is adopted as the estimated value of the state variable ``x_s``. 
 
 ## [Computation-efficient GBP Algorithm]  (@id efficientGBP)
-We can make a substantial improvement of the complexity by reducing the number of calculations per outgoing messages. We achieve this reduction by summarisation of all incoming messages for each variable and factor node instead of summarising all incoming messages per each outgoing message. This simple trick, allow a single variable or factor node to share these summations across all outgoing messages, hence calculating these summations only once. As a result, each outgoing message involves a constant number of operations improving the worst-case running complexity to ``\mathcal{O}(nm)``. In this framework, we calculate the message from the variable node to the factor node as:
+We can make a substantial improvement to the vanilla GBP algorithm's complexity by reducing the number of calculations per outgoing messages. We achieve this reduction by summarisation of all incoming messages for each variable and factor node instead of summarising all incoming messages per each outgoing message. This simple trick, allow a single variable or factor node to share these summations across all outgoing messages, hence calculating these summations only once. As a result, each outgoing message involves a constant number of operations improving the worst-case running complexity to ``\mathcal{O}(nm)``. In this framework, we calculate the message from the variable node to the factor node as:
 ```math
         z_{x_s \to f_i} = \Bigg(\alpha_{x_s} - \cfrac{z_{f_i \to x_s}}{v_{f_i \to x_s}}\Bigg) v_{x_s \to f_i} \\
 		\cfrac{1}{v_{x_s \to f_i}} = \beta_{x_s} - \cfrac{1}{v_{f_i \to x_s}},
@@ -153,7 +153,7 @@ where:
 ```
 
 ## [The GBP and Kahan–Babuška Algorithm]  (@id kahanGBP)
-The major drawback of the computation-efficient GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisly, we do summation that exist in messages as:  
+The major drawback of the computation-efficient GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in the values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisely, we do summation that exist in the messages as:  
 ```julia-repl
 function kahan(summands, total, epsilon)
     t = total + summands
@@ -167,3 +167,6 @@ function kahan(summands, total, epsilon)
     return total, epsilon
 end
 ```
+
+## [The Dynamic GBP Algorithm]  (@id dynamicGBP)
+To recall, each factor node is associated with the measurement value ``z_i`` and the measurement variance  ``v_i``. The dynamic framework allows the update of these values in any GBP iteration. This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurements from different measurement subsystems. Such measurements are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.

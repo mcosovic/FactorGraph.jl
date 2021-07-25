@@ -1,4 +1,4 @@
-### Vanilla GBP: Factor to variable messages
+########## Vanilla GBP: Factor to variable messages ##########
 @inline function vanilla_factor_to_variable(graph, bp)
     @inbounds for i = 1:graph.Nind
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
@@ -15,7 +15,7 @@
     end
 end
 
-### Vanilla GBP: Factor to variable messages with damping
+########## Vanilla GBP: Factor to variable messages with damping ##########
 @inline function vanilla_factor_to_variable_damp(graph, bp)
     @inbounds for i = 1:graph.Nind
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
@@ -32,7 +32,7 @@ end
     end
 end
 
-### Vanilla GBP: Factor to variable means only
+########## Vanilla GBP: Factor to variable means only ##########
 @inline function vanilla_factor_to_variable_mean(graph, bp)
     @inbounds for i = 1:graph.Nind
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
@@ -47,7 +47,7 @@ end
     end
 end
 
-### Vanilla GBP: Factor to variable means only with damping
+########## Vanilla GBP: Factor to variable means only with damping ##########
 @inline function vanilla_factor_to_variable_mean_damp(graph, bp)
     @inbounds for i = 1:graph.Nind
         for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
@@ -62,7 +62,7 @@ end
     end
 end
 
-### Vanilla GBP: Variable to factor messages
+############# Vanilla GBP: Variable to factor messages ##########
 @inline function vanilla_variable_to_factor(graph, bp)
     @inbounds for i = 1:graph.Nvar
         for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
@@ -79,7 +79,7 @@ end
     end
 end
 
-### Vanilla GBP: Variable to factor means only
+########## Vanilla GBP: Variable to factor means only ##########
 @inline function vanilla_variable_to_factor_mean(graph, bp)
     @inbounds for i = 1:graph.Nvar
         for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
@@ -91,20 +91,5 @@ end
             end
             bp.Mvar_fac[bp.to_fac[j]] = Mcol * bp.Vvar_fac[bp.to_fac[j]]
         end
-    end
-end
-
-### Compute marginals
-function marginal(graph, bp, results)
-    bp.iterCount[1] += 1
-    @inbounds for i = 1:graph.Nvar
-        Mcol = 0.0; Wcol = 0.0
-
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            Mcol += bp.Mfac_var[j] * bp.Wfac_var[j]
-            Wcol += bp.Wfac_var[j]
-        end
-        results.variances[i, bp.iterCount[1]] = 1 / (Wcol + graph.Wdir[i])
-        results.means[i, bp.iterCount[1]] = (Mcol + graph.Mdir[i]) * results.variances[i, bp.iterCount[1]]
     end
 end
