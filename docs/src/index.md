@@ -33,20 +33,20 @@ julia> using GaussBP
 ```julia-repl
 using GaussBP
 
-results, system = gbp("data33_14.h5"; max = 20, out = terminal)
+results, system = gbp("data33_14.h5"; max = 20, out = "display")
 ```
 
 ```julia-repl
 using GaussBP
 
-results, system = gbp("data33_14.h5"; algorithm = efficient, out = [evaluation, terminal])
+results, system = gbp("data33_14.h5"; algorithm = "efficient", out = ["error", "display"])
 ```
 
 ```julia-repl
 using GaussBP
 using Plots
 
-results, system = gbp("data33_14.xlsx"; variance = 1e60, out = [iteration, evaluation])
+results, system = gbp("data33_14.xlsx"; variance = 1e60, out = ["iterate", "error", "display"])
 plot(results.gbp.iteration, results.gbp.rmse)
 ```
 
@@ -57,7 +57,7 @@ H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
 z = [0.8; 4.1; 2.2]
 v = [1.0; 1.0; 1.0]     
 
-results, settings = gbp(H, z, v; algorithm = kahan, out = [wls, terminal])
+results, settings = gbp(H, z, v; algorithm = "kahan", out = ["wls", "display"])
 ```
 
 ```julia-repl
@@ -68,7 +68,7 @@ z = [0.8; 4.1; 2.2]
 v = [1.0; 1.0; 1.0]  
 d = [2 3 2.4 1.5; 15 1 0.85 0.9]
 
-results, settings = gbp(H, z, v, d; algorithm = vanillaDynamic, out = terminal)
+results, settings = gbp(H, z, v, d; algorithm = "vanillaDynamic", out = "display")
 ```
 ---
 

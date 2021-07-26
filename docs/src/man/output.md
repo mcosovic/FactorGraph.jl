@@ -4,11 +4,11 @@ The function `gbp()` returns a struct variable `results` with fields `gbp` and `
 
 The variable `results.gbp` contains the following fields:
 - `mean`, `variance`, `iteration`, `rmse`, `mae`, `wrss` 
-These variables save the GBP algorithm results. Values of the error metrics `rmse`, `mae` and `wrss` are available only if we use the command `out = evaluation`. 
+These variables save the GBP algorithm results. Values of the error metrics `rmse`, `mae` and `wrss` are available only if we use the command `out = "error"`. 
 
 The variable `results.wls` contains the following fields:
 - `mean` `rmse`, `mae`, `wrss`, `rmseGBPWLS`, `maeGBPWLS` 
-Those variables save the WLS results, which can be used to compare the results obtained by the GBP algorithm. However, values are only available if we use the command `out = wls`.
+Those variables save the WLS results, which can be used to compare the results obtained by the GBP algorithm. However, values are only available if we use the command `out = "wls"`.
 
 Finally, a struct variable `system` contains the input data.
 
@@ -36,7 +36,7 @@ d = [5 2 2.4  1.5;
 The `mean` and `variance` vectors contain mean and variance values of the marginals obtained using the GBP algorithm after the algorithm reaches the maximum number of iterations, while variable `iteration` save the maximum number of iterations.
 
 ```julia-repl
-results, ~ = gbp(H, z, v; algorithm = vanilla)
+results, ~ = gbp(H, z, v; algorithm = "vanilla")
 
 julia> results.gbp.mean
 2-element Vector{Float64}:
@@ -57,10 +57,10 @@ julia> results.gbp.iteration
 ```
 
 #### Compute means, variances and error metrics
-In addition, using the command `out = evaluation`, except `mean`, `variance` and `iteration` variables, we obtained root mean square error `rmse`, mean absolute error `mae`, and weighted residual sum of squares `wrss` of the GBP algorithm after the algorithm reaches the maximum number of iterations. 
+In addition, using the command `out = "error"`, except `mean`, `variance` and `iteration` variables, we obtained root mean square error `rmse`, mean absolute error `mae`, and weighted residual sum of squares `wrss` of the GBP algorithm after the algorithm reaches the maximum number of iterations. 
 
 ```julia-repl
-results, ~ = gbp(H, z, v; algorithm = vanilla, out = evaluation)
+results, ~ = gbp(H, z, v; algorithm = "vanilla", out = "error")
 
 julia> results.gbp.rmse
 1-element Vector{Float64}:
@@ -81,10 +81,10 @@ julia> results.gbp.wrss
 
 
 #### Compute means and variances through GBP iterations
-Using the keyword `out = iteration`, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`.   
+Using the keyword `out = "iterate"`, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`.   
 
 ```julia-repl
-results, ~ = gbp(H, z, v; algorithm = vanilla, max = 5, out = iteration)
+results, ~ = gbp(H, z, v; algorithm = "vanilla", max = 5, out = "iterate")
 
 julia> results.gbp.mean
 2×5 Matrix{Float64}:
@@ -110,10 +110,10 @@ julia> results.gbp.iteration
 ```
 
 #### Compute means, variances and error metrics through GBP iterations
-Further, fields `rmse`, `mae` and `wrss` become vectors if we use the command `out = [iteration, evaluation]`, where each error value corresponds to the iteration according to the vector `iteration`.
+Further, fields `rmse`, `mae` and `wrss` become vectors if we use the command `out = ["iterate", "error"]`, where each error value corresponds to the iteration according to the vector `iteration`.
 
 ```julia-repl
-results, ~ = gbp(H, z, v; algorithm = vanilla, max = 5, out = [iteration, evaluation])
+results, ~ = gbp(H, z, v; algorithm = "vanilla", max = 5, out = ["iterate", "error"])
 
 julia> results.gbp.rmse
 5-element Vector{Float64}:
@@ -145,11 +145,10 @@ julia> results.gbp.wrss
 ```
 
 #### Compute means, variances and error metrics in the dynamic framework
-The dynamic framework allows computing only means and variances, and error metrics if we use the command `out = evaluation`.
-In the dynamic framework, means, variances and/or error metrics are evaluated before each new measurement update. Thus, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. 
+The dynamic framework allows computing only means and variances, and error metrics if we use the command `out = "error"`. In the dynamic framework, means, variances and/or error metrics are evaluated before each new measurement update. Thus, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. 
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanillaDynamic)
+results, ~ = gbp(H, z, v, d; algorithm = "vanillaDynamic")
 
 julia> results.gbp.mean
 2×3 Matrix{Float64}:
@@ -173,10 +172,10 @@ julia> results.gbp.iteration
 ```
 
 #### Compute means, variances and error metrics in the dynamic framework through iteration
-Similar to before, using the keyword `out = iteration`, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. In addition, using the keyword `out = [iteration evaluation]` error metrics can be also evaluated through iterations. 
+Similar to before, using the keyword `out = "iterate"`, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. In addition, using the keyword `out = ["iterate", "error"]` error metrics can be also evaluated through iterations. 
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanillaDynamic, max = 5, out = iteration)
+results, ~ = gbp(H, z, v, d; algorithm = "vanillaDynamic", max = 5, out = "iterate")
 
 ulia> results.gbp.mean
 2×5 Matrix{Float64}:
@@ -209,7 +208,7 @@ The struct variable `results.wls` contains results obtained using the WLS, which
 Using the command `out = wls`, we obtained error metrics `rmse`, `mae` and `wrss` according to the WLS solution `mean`. Fields `rmseGBPWLS` and `maeGBPWLS` determine distances between the GBP estimate and WLS estimate after the GBP algorithm reaches the maximum number of iterations.
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanilla, out = wls)
+results, ~ = gbp(H, z, v, d; algorithm = "vanilla", out = "wls")
 
 julia> results.wls.mean
 2-element Vector{Float64}:
@@ -242,10 +241,10 @@ julia> results.wls.maeGBPWLS
 ```
 
 #### Compute WLS solution and error metrics through GBP iterations
-Using command `out = [iteration, wls]`, except variables `mean`, `rmse`, `mae` and `wrss`, we obtained fields `rmseGBPWLS` and `maeGBPWLS` for the each GBP iteration, where each element is related to the elements of the vector `results.gbp.iteration`
+Using command `out = ["iterate", "wls"]`, except variables `mean`, `rmse`, `mae` and `wrss`, we obtained fields `rmseGBPWLS` and `maeGBPWLS` for the each GBP iteration, where each element is related to the elements of the vector `results.gbp.iteration`
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanilla, max = 5, out = [iteration, wls])
+results, ~ = gbp(H, z, v, d; algorithm = "vanilla", max = 5, out = ["iterate", "wls"])
 
 julia> results.wls.rmseGBPWLS
 5-element Vector{Float64}:
@@ -281,7 +280,7 @@ In the dynamic framework, means and error metrics are evaluated before each new 
 
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanillaDynamic, out = wls)
+results, ~ = gbp(H, z, v, d; algorithm = "vanillaDynamic", out = "wls")
 
 julia> results.wls.mean
 2×3 Matrix{Float64}:
@@ -330,10 +329,10 @@ julia> results.gbp.iteration
 ```
 
 #### Compute means, variances and error metrics in the dynamic framework through iteration
-Using command `out = [iteration, wls]`, variables `mean`, `rmse`, `mae` and `wrss` are still evaluated before each new measurement update. Further, variables `rmseGBPWLS` and `maeGBPWLS` are obtained for each GBP iteration, where each element is related to the elements of the vector `results.gbp.iteration`.
+Using command `out = ["iterate", "wls"]`, variables `mean`, `rmse`, `mae` and `wrss` are still evaluated before each new measurement update. Further, variables `rmseGBPWLS` and `maeGBPWLS` are obtained for each GBP iteration, where each element is related to the elements of the vector `results.gbp.iteration`.
 
 ```julia-repl
-results, ~ = gbp(H, z, v, d; algorithm = vanillaDynamic, max = 5, out = [iteration, wls])
+results, ~ = gbp(H, z, v, d; algorithm = "vanillaDynamic", max = 5, out = ["iterate", "wls"])
 
 julia> results.wls.rmseGBPWLS
 5-element Vector{Float64}:

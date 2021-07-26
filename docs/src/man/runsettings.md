@@ -33,13 +33,13 @@ results, system = gbp() returns results and input system data
 ```
 ####  Examples
 ```julia-repl
-results, system = gbp("data897_300.h5"; algorithm = efficient, out = terminal)
+results, system = gbp("data897_300.h5"; algorithm = "efficient", out = "display")
 ```
 ```julia-repl
-results, system = gbp("data897_300.h5"; algorithm = kahan, out = [evaluation, terminal])
+results, system = gbp("data897_300.h5"; algorithm = "kahan", out = ["error", "display"])
 ```
 ```julia-repl
-results, system = gbp("data33_14.xlsx"; variance = 1e60, out = [iteration, evaluation])
+results, system = gbp("data33_14.xlsx"; variance = 1e60, out = ["iterate", "display"])
 ```
 ---
 
@@ -75,22 +75,22 @@ The GBP function `gbp()` receives a group of arguments by keyword: ALGORITHM, IT
 | ALGORITHM       | selects the type of the algorithm                                                                   |
 |:----------------|:----------------------------------------------------------------------------------------------------|
 |                 |                                                                                                     |
-| **Command**     | `algorithm = vanilla`                                                                               |
+| **Command**     | `algorithm = "vanilla"`                                                                             |
 | **Description** |  runs the solver using the native GBP algorithm, `default ALGORITHM setting`                        |
 |                 |                                                                                                     |
-| **Command**     | `algorithm = efficient`                                                                             |
+| **Command**     | `algorithm = "efficient"`                                                                           |
 | **Description** |  runs the solver using the computation-efficient GBP algorithm                                      |
 |                 |                                                                                                     |
-| **Command**     | `algorithm = kahan`                                                                                 |
+| **Command**     | `algorithm = "kahan"`                                                                               |
 | **Description** |  runs the solver using the computation-efficient GBP algorithm with compensated summation           |
 |                 |                                                                                                     |
-| **Command**     | `algorithm = vanillaDynamic`                                                                        |
+| **Command**     | `algorithm = "vanillaDynamic"`                                                                      |
 | **Description** |  runs the dynamic solver using the native GBP algorithm                                             |
 |                 |                                                                                                     |
-| **Command**     | `algorithm = efficientDynamic`                                                                      |
+| **Command**     | `algorithm = "efficientDynamic"`                                                                    |
 | **Description** |  runs the dynamic solver using the computation-efficient GBP algorithm                              |
 |                 |                                                                                                     |
-| **Command**     | `algorithm = kahanDynamic`                                                                          |
+| **Command**     | `algorithm = "kahanDynamic"`                                                                        |
 | **Description** |  runs the dynamic solver using the computation-efficient GBP algorithm with compensated summation   |
 
 ```@raw html
@@ -141,18 +141,18 @@ The GBP function `gbp()` receives a group of arguments by keyword: ALGORITHM, IT
 | OUT             | controls output variable structure and display                  |
 |:----------------|:----------------------------------------------------------------|
 |                 |                                                                 |
-| **Command**     | `out = iteration`                                               |
+| **Command**     | `out = "iterate"`                                               |
 | **Description** |  saves means and variances of the marginals through iterations  |
 |                 |                                                                 |
-| **Command**     | `out = evaluation`                                              |
-| **Description** |  computes error metrics of the GBP algorithm, note that if combined `evaluation` with `iteration` (`out = [iteration, evaluation]`) computes error metrics through iterations                                                          |
+| **Command**     | `out = "error"`                                                 |
+| **Description** |  computes error metrics of the GBP algorithm, note that if combined `"error"` with `"iterate"` (`out = ["error", "iterate"]`) computes error metrics through iterations                                                                  |
 |                 |                                                                 |
-| **Command**     | `out = wls`                                                     |
-| **Description** |  computes the solution using the WLS method and error metrics of the GBP algorithm according to the WLS solution, for the combination of `wls` with `iterate` (`out = [iteration, wls]`) error metrics are computed through iterations   |
+| **Command**     | `out = "wls"`                                                   |
+| **Description** |  computes the solution using the WLS method and error metrics of the GBP algorithm according to the WLS solution, for the combination of `"wls"` with `"iterate"` (`out = ["iterate", "wls"]`) error metrics are computed through iterations |
 |                 |                                                                  |
-| **Command**     | `out = terminal`                                                 |
+| **Command**     | `out = "display"`                                                |
 | **Description** |  shows data display in the Julia REPL                            |
 
 
 !!! note "OUT"
-    The keyword `out` accepts any subset of commands `iteration`, `evaluation`, `wls`, `terminal`. 
+    The keyword `out` accepts any subset of commands `"iterate"`, `"error"`, `"wls"`, `"display"`. 

@@ -1,5 +1,6 @@
 module GaussBP
 
+using LinearAlgebra: Algorithm
 export gbp
 
 using SparseArrays, LinearAlgebra
@@ -38,8 +39,8 @@ function gbp(
     alpha::Float64 = 0.4,
     mean::Float64 = 0.0,
     variance::Float64 = 1e5,
-    algorithm::AlgorithmType = vanilla,
-    out::Union{Array{OutputControl, 1}, OutputControl} = OutputControl[])
+    algorithm::String = "vanilla",
+    out::Union{String, Array{String,1}} = "no")
     
 
     settings = check_keywords(max, damp, bump, prob, alpha, mean, variance, algorithm, out)
@@ -55,7 +56,7 @@ function gbp(
 
     display_stat(graph, bp, settings, system, algorithm)
     
-    if algorithm == vanilla && !settings.outIterate
+    if algorithm == "vanilla" && !settings.outIterate
         for iter = 1:bp.iterNative
             vanilla_factor_to_variable(graph, bp)
             vanilla_variable_to_factor(graph, bp)
@@ -75,7 +76,7 @@ function gbp(
         marginal(settings, system, graph, bp, results)
     end
 
-    if algorithm == vanilla && settings.outIterate || algorithm == vanillaDynamic 
+    if algorithm == "vanilla" && settings.outIterate || algorithm == "vanillaDynamic" 
         for iter = 1:bp.iterNative
             graph_dynamic(settings, system, graph, bp)
             vanilla_factor_to_variable(graph, bp)
@@ -102,7 +103,7 @@ function gbp(
         end
     end
 
-    if algorithm == efficient && !settings.outIterate
+    if algorithm == "efficient" && !settings.outIterate
         for iter = 1:bp.iterNative
             efficient_factor_to_variable(graph, bp)
             efficient_variable_to_factor(graph, bp)
@@ -122,7 +123,7 @@ function gbp(
         marginal(settings, system, graph, bp, results)
     end
 
-    if algorithm == efficient && settings.outIterate || algorithm == efficientDynamic 
+    if algorithm == "efficient" && settings.outIterate || algorithm == "efficientDynamic" 
         for iter = 1:bp.iterNative
             graph_dynamic(settings, system, graph, bp)
             efficient_factor_to_variable(graph, bp)
@@ -149,7 +150,7 @@ function gbp(
         end
     end
 
-    if algorithm == kahan && !settings.outIterate
+    if algorithm == "kahan" && !settings.outIterate
         for iter = 1:bp.iterNative
             kahan_factor_to_variable(graph, bp)
             kahan_variable_to_factor(graph, bp)
@@ -169,7 +170,7 @@ function gbp(
         marginal(settings, system, graph, bp, results)
     end
 
-    if algorithm == kahan && settings.outIterate || algorithm == kahanDynamic 
+    if algorithm == "kahan" && settings.outIterate || algorithm == "kahanDynamic" 
         for iter = 1:bp.iterNative
             graph_dynamic(settings, system, graph, bp)
             kahan_factor_to_variable(graph, bp)
@@ -207,4 +208,12 @@ function gbp(
     return results, system
 end
 
+H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
+z = [0.8; 4.1; 2.2]
+v = [1.0; 1.0; 1.0]  
+d = [2 3 2.4 1.5; 15 1 0.85 0.9]
+
+results, system = gbp("data33_14.xlsx"; variance = 1e60, out = ["iterate", "display"])
+
 end # GaussBP
+

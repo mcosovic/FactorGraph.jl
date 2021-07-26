@@ -23,10 +23,6 @@ struct SystemModel
     data::String
 end
 
-@enum AlgorithmType vanilla efficient kahan vanillaDynamic efficientDynamic kahanDynamic
-@enum OutputControl iteration evaluation wls terminal
-
-
 ########## Check keyword arguments ##########
 function check_keywords(maxIter, damp, bump, prob, alpha, mean, variance, algorithm, out)
     #### Check the package is installed 
@@ -60,12 +56,18 @@ function check_keywords(maxIter, damp, bump, prob, alpha, mean, variance, algori
         error("Invalid variance value.")
     end
    
+    #### Check algorithm type
+    if !(algorithm in ["vanilla", "efficient", "kahan", "vanillaDynamic", "efficientDynamic", "kahanDynamic"])
+        error("Invalid ALGORITHM key.")
+    end
+
     #### Check dynamic model
     dynamic = false
-    if algorithm in [vanillaDynamic, efficientDynamic, kahanDynamic]
+    if algorithm in ["vanillaDynamic", "efficientDynamic", "kahanDynamic"]
         dynamic = true
     end
 
+    
     #### Check output data
     if !isa(out, Array)
         out = [out]
@@ -74,16 +76,16 @@ function check_keywords(maxIter, damp, bump, prob, alpha, mean, variance, algori
         
     outIterate = false; outEvaluation = false; outWls = false; outDisplay = false
     for i in out
-        if i == iteration
+        if i == "iterate"
             outIterate = true 
         end
-        if i == evaluation
+        if i == "error"
             outEvaluation = true
         end
-        if i == wls
+        if i == "wls"
             outWls = true
         end
-        if i == terminal
+        if i == "display"
             outDisplay = true
         end
     end
