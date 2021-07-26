@@ -39,13 +39,13 @@ end
     v = [10.0; 20.0; 30.0]    
     d = [10 1 6.0 1.0; 200 3 4.0 1.0; 100 2 3.0 1.0]
 
-    results, system = gbp(H, z, v, d; max = 1000, damp = 50, algorithm = "vanillaDynamic", out = ["wls", "display"])
+    results, system = gbp(H, z, v, d; max = 2000, damp = 50, algorithm = "vanillaDynamic", out = ["wls", "display"])
     @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 
-    results, system = gbp(H, z, v, d; max = 1000, damp = 50, algorithm = "efficientDynamic")
+    results, system = gbp(H, z, v, d; max = 2000, damp = 50, algorithm = "efficientDynamic")
     @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 
-    results, system = gbp(H, z, v, d; max = 1000, damp = 50, algorithm = "kahanDynamic")
+    results, system = gbp(H, z, v, d; max = 2000, damp = 50, algorithm = "kahanDynamic")
     @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 
     results, system = gbp("dataDynamic33_14.xlsx"; max = 1000, algorithm = "kahanDynamic", out = ["wls", "error"])

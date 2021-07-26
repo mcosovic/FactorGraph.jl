@@ -1,6 +1,5 @@
 module GaussBP
 
-using LinearAlgebra: Algorithm
 export gbp
 
 using SparseArrays, LinearAlgebra
