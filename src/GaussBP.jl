@@ -208,12 +208,5 @@ function gbp(
     return results, system
 end
 
-H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
-z = [0.8; 4.1; 2.2]
-v = [1.0; 1.0; 1.0]  
-d = [2 3 2.4 1.5; 15 1 0.85 0.9]
-
-results, system = gbp("data33_14.xlsx"; variance = 1e60, out = ["iterate", "display"])
-
 end # GaussBP
 
