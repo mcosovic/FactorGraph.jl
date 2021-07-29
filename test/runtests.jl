@@ -40,13 +40,13 @@ end
     d = [10 1 6.0 1.0; 200 3 4.0 1.0; 100 2 3.0 1.0]
 
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaDynamic", out = ["wls", "display"])
-    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
+    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
 
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "efficientDynamic")
-    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
+    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
 
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "kahanDynamic")
-    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
+    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
 
     results, system = gbp("dataDynamic33_14.xlsx"; max = 1000, algorithm = "kahanDynamic", out = ["wls", "error"])
     @test maximum(abs.(results.gbp.rmse - results.wls.rmse)) < 1e-8
