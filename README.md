@@ -79,7 +79,7 @@ using GaussBP
 jacobian = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
 observation = [0.5; 0.8; 4.1; 2.2]
 variance = [0.1; 1.0; 1.0; 1.0]  
-dynamic = [2 3 2.45 1.5 1 3 0.5 0 50; 8 1 0.85 0.9 2 4 0.3 0 30]
+dynamic = [2 3 2.45 1.5 1 4 0.5 0 50; 8 1 0.85 0.9 2 12 0.3 0.1 30]
 
 results, ~ = gbp(jacobian, observation, variance, dynamic; algorithm = "vanillaAgeing", out = "display")
 ```
