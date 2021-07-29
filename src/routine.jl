@@ -19,7 +19,6 @@ struct FactorGraph
     facDyn::Dict{Int64,Array{Int64,1}}
     observationDyn::Array{Float64,1}
     varianceDyn::Array{Float64,1}
-    flagDown::Array{Bool,1}
     flagUp::Array{Bool,1}
 end
 
@@ -83,7 +82,6 @@ function factors(system, settings)
         facDyn = Dict(node => Int64[] for node in collect(1:Nfac))  
         observationDyn = copy(system.observation)
         varianceDyn = copy(system.variance) 
-        flagDown = fill(true, Ndyn)
         flagUp = fill(true, Ndyn)
     else
         Ndyn = 0
@@ -91,7 +89,6 @@ function factors(system, settings)
         facDyn = Dict(1 => Int64[])    
         observationDyn = [0.0]
         varianceDyn = [0.0]
-        flagDown = [false]
         flagUp = [false]
     end
  
@@ -132,7 +129,7 @@ function factors(system, settings)
     pushfirst!(rowptr, 1)
     colptr = cumsum(colptr)
 
-    return FactorGraph(row, col, rowptr, colptr, Mind, Vind, coeff, coeffInv, Mdir, Wdir, Nvar, Nfac, Ndir, Nind, Nlink, Ndyn, dirDyn, facDyn, observationDyn, varianceDyn, flagDown, flagUp)
+    return FactorGraph(row, col, rowptr, colptr, Mind, Vind, coeff, coeffInv, Mdir, Wdir, Nvar, Nfac, Ndir, Nind, Nlink, Ndyn, dirDyn, facDyn, observationDyn, varianceDyn, flagUp)
 end
 
 
@@ -221,10 +218,7 @@ end
         factor = trunc(Int, system.dynamic[u, 2])
 
         if settings.outDisplay
-            println("\n Update Factor Nodes")
-            A = [system.dynamic[u, 1:2]; system.dynamic[u, 3:4]; graph.observationDyn[factor]; graph.varianceDyn[factor]]
-            pretty_table(A', header = ["Iteration", "Factor Node", "New Mean", "New Variance", "Old Mean", "Old Variance"],
-            alignment=[:r, :r, :r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.0f","%3.3f", "%3.3e", "%3.3f", "%3.3e"], [1, 2, 3, 4, 5, 6]))
+            display_update_dynamic(graph, system, u, factor)
         end
 
         graph.observationDyn[factor] = system.dynamic[u, 3] 
@@ -236,16 +230,19 @@ end
 end
 
 ########## Ageing the GBP update ##########
-@inline function graph_ageing(system, graph, bp)
+@inline function graph_ageing(system, settings, graph, bp)
     bp.iterCount[1] += 1 
     for i = 1:graph.Ndyn
         factor = trunc(Int, system.dynamic[i, 2])
 
-        if graph.flagDown[i] && system.dynamic[i, 1] <= bp.iterCount[1] < system.dynamic[i, 6]
+        if system.dynamic[i, 1] == bp.iterCount[1]
+            if settings.outDisplay
+                display_update_ageing(graph, system, i, factor)
+            end
+
             graph.observationDyn[factor] = system.dynamic[i, 3]
             graph.varianceDyn[factor] = system.dynamic[i, 4]
             update_mean_variance(system, graph, factor)
-            graph.flagDown[i] = false
         end   
         if graph.flagUp[i] && bp.iterCount[1] >= system.dynamic[i, 6]
             if system.dynamic[i, 5] == 1

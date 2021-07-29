@@ -299,3 +299,39 @@ function display_data(graph, bp, results, settings)
             alignment=[:r, :r], formatters = ft_printf(["%3.0f", "%3.6f"], [1, 2]))
     end
 end
+
+########## Display: Update factor nodes in the dynamic framework ##########
+function display_update_dynamic(graph, system, idx, factor)
+    meanOld = @sprintf("%5.4f", graph.observationDyn[factor])
+    variOld = @sprintf("%3.3e", graph.varianceDyn[factor])
+    meanNew = @sprintf("%5.4f", system.dynamic[idx, 3])
+    variNew = @sprintf("%3.3e", system.dynamic[idx, 4])
+    
+    A = [1 2 "$meanOld --> $meanNew" "$variOld --> $variNew"]
+
+    println("\n Update Factor Nodes")
+    pretty_table(A, header = ["Iteration", "Factor Node", "Measurement Value Update", "Variance Value Update"],
+    alignment=[:r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.0f"], [1, 2]))
+end
+
+########## Display: Update factor nodes in the ageing framework ##########
+function display_update_ageing(graph, system, idx, factor)
+    meanOld = @sprintf("%5.4f", graph.observationDyn[factor])
+    variOld = @sprintf("%3.3e", graph.varianceDyn[factor])
+    meanNew = @sprintf("%5.4f", system.dynamic[idx, 3])
+    variNew = @sprintf("%3.3e", system.dynamic[idx, 4])
+    
+    if system.dynamic[idx, 5] == 1
+        ageingModel = "linear"
+    elseif system.dynamic[idx, 5] == 2
+        ageingModel = "logarithmic"
+    else
+        ageingModel = "exponential"
+    end
+
+    A = [1 2 "$meanOld --> $meanNew" "$variOld --> $variNew" ageingModel]
+
+    println("\n Update Factor Nodes")
+    pretty_table(A, header = ["Iteration", "Factor Node", "Measurement Value Update", "Variance Value Update", "Ageing Model"],
+    alignment=[:r, :r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.0f"], [1, 2]))
+end
