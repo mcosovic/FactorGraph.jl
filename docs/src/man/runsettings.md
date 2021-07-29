@@ -92,6 +92,15 @@ The GBP function `gbp()` receives a group of arguments by keyword: ALGORITHM, IT
 |                 |                                                                                                     |
 | **Command**     | `algorithm = "kahanDynamic"`                                                                        |
 | **Description** |  runs the dynamic solver using the computation-efficient GBP algorithm with compensated summation   |
+|                 |                                                                                                     |
+| **Command**     | `algorithm = "vanillaAgeing"`                                                                       |
+| **Description** |  runs the ageing solver using the native GBP algorithm                                              |
+|                 |                                                                                                     |
+| **Command**     | `algorithm = "efficientAgeing"`                                                                     |
+| **Description** |  runs the ageing solver using the computation-efficient GBP algorithm                               |
+|                 |                                                                                                     |
+| **Command**     | `algorithm = "kahanAgeing"`                                                                         |
+| **Description** |  runs the ageing solver using the computation-efficient GBP algorithm with compensated summation    |
 
 ```@raw html
 &nbsp;

@@ -1,8 +1,8 @@
 # [Input Data](@id inputdata)
 
-The package GaussBP supports HDF5 and XLSX input files, or passing data directly via command line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix that contains coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. Note that, with large-scale systems, we strongly recommend using the HDF5 data format.  
+The package GaussBP supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix that contains coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. Note that, with large-scale systems, we strongly recommend using the HDF5 data format.  
 
-Running the GBP algorithm in a dynamic framework requires a variable `dynamic`, which defines the dynamic update scheme of the factor nodes.
+Running the GBP algorithm in a dynamic or ageing framework requires a variable `dynamic`, which defines the dynamic update scheme of the factor nodes.
 
 ---
 
@@ -13,7 +13,7 @@ The HDF5 input file must contain the following elements:
 - measurement variances `model.h5/variance`. 
 
 
-The input data for the dynamic GBP algorithm must contain the additional variable:
+The input data for the dynamic and ageing GBP algorithm must contain the additional variable:
 - dynamic data `model.h5/dynamic`.
 
 
@@ -30,7 +30,7 @@ The XLSX input file must contain the following sheets:
 - coefficient data `sheet: jacobian`; 
 - measurement data `sheet: measurement`.
 
-The input data for the dynamic GBP algorithm must contain the additional sheet:
+The input data for the dynamic GBP and ageing algorithm must contain the additional sheet:
 - dynamic data `sheet: dynamic`.
 
 The type and structure of the input data must be:
@@ -43,7 +43,7 @@ The type and structure of the input data must be:
 The structure of the arguments should be:
 - `gbp(jacobian, observation, variance)`
 
-The structure for the dynamic GBP algorithm must contain the additional argument:
+The structure for the dynamic and ageing GBP algorithm must contain the additional argument:
 - `gbp(jacobian, observation, variance, dynamic)`
 
 The type and structure of the arguments must be:
@@ -66,7 +66,7 @@ The `jacobian` input data is used for all analysis available in the GaussBP pack
 &nbsp;
 ```
 
-The `dynamic` input data is used only for the dynamic GBP algorithm and contains factor nodes update scheme. 
+The `dynamic` input data is used only for the dynamic and ageing GBP algorithm and contains factor nodes update scheme. The dynamic framework requires four columns of input data, shown in the table below.
 
 | Column   | Description                                                                            |
 |:--------:|:---------------------------------------------------------------------------------------|    
@@ -74,6 +74,16 @@ The `dynamic` input data is used only for the dynamic GBP algorithm and contains
 | 2        | factor node index corresponding to the row number of the jacobian matrix               |
 | 3        | new observation value                                                                  |  
 | 4        | new variance value                                                                     | 
+
+The ageing framework requires additional five columns which define the mode of ageing measurements. We advise the reader to read the section [Ageing GBP algorithm] (@ref ageingGBP) which provides a detailed description of the input parameters.
+
+| Column   | Description                                                                            |
+|:--------:|:---------------------------------------------------------------------------------------|    
+| 5        | the growth model, where linear = 1, logarithmic = 2, exponential = 3                   |
+| 6        | the iteration number to which the variance maintains a constant value                  |
+| 7        | the parameter that controls the rate of the growth                                     |  
+| 8        | the parameter that controls the rate of the growth                                     | 
+| 9        | the variance upper limit value                                                         | 
 
 ---
 

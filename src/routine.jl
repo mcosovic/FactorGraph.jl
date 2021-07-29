@@ -19,6 +19,8 @@ struct FactorGraph
     facDyn::Dict{Int64,Array{Int64,1}}
     observationDyn::Array{Float64,1}
     varianceDyn::Array{Float64,1}
+    flagDown::Array{Bool,1}
+    flagUp::Array{Bool,1}
 end
 
 struct BeliefPropagation
@@ -81,12 +83,16 @@ function factors(system, settings)
         facDyn = Dict(node => Int64[] for node in collect(1:Nfac))  
         observationDyn = copy(system.observation)
         varianceDyn = copy(system.variance) 
+        flagDown = fill(true, Ndyn)
+        flagUp = fill(true, Ndyn)
     else
         Ndyn = 0
         dirDyn = Dict(1 => Int64[])
         facDyn = Dict(1 => Int64[])    
         observationDyn = [0.0]
         varianceDyn = [0.0]
+        flagDown = [false]
+        flagUp = [false]
     end
  
     idxT = findall(!iszero, system.jacobianTranspose)
@@ -126,7 +132,7 @@ function factors(system, settings)
     pushfirst!(rowptr, 1)
     colptr = cumsum(colptr)
 
-    return FactorGraph(row, col, rowptr, colptr, Mind, Vind, coeff, coeffInv, Mdir, Wdir, Nvar, Nfac, Ndir, Nind, Nlink, Ndyn, dirDyn, facDyn, observationDyn, varianceDyn)
+    return FactorGraph(row, col, rowptr, colptr, Mind, Vind, coeff, coeffInv, Mdir, Wdir, Nvar, Nfac, Ndir, Nind, Nlink, Ndyn, dirDyn, facDyn, observationDyn, varianceDyn, flagDown, flagUp)
 end
 
 
@@ -213,9 +219,7 @@ end
     while graph.Ndyn >= bp.flagDyn[1] && trunc(Int, system.dynamic[bp.flagDyn[1], 1]) == bp.iterCount[1]  
         u = bp.flagDyn[1]
         factor = trunc(Int, system.dynamic[u, 2])
-        mean = system.dynamic[u, 3] 
-        variance = system.dynamic[u, 4] 
-        
+
         if settings.outDisplay
             println("\n Update Factor Nodes")
             A = [system.dynamic[u, 1:2]; system.dynamic[u, 3:4]; graph.observationDyn[factor]; graph.varianceDyn[factor]]
@@ -223,30 +227,87 @@ end
             alignment=[:r, :r, :r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.0f","%3.3f", "%3.3e", "%3.3f", "%3.3e"], [1, 2, 3, 4, 5, 6]))
         end
 
-        graph.observationDyn[factor] = mean
-        graph.varianceDyn[factor] = variance
+        graph.observationDyn[factor] = system.dynamic[u, 3] 
+        graph.varianceDyn[factor] = system.dynamic[u, 4] 
 
-        if graph.facDyn[factor][1] == 2
-            i = graph.facDyn[factor][2]
-            @inbounds for k in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-                graph.Mind[k] = mean
-                graph.Vind[k] = variance
+        update_mean_variance(system, graph, factor)
+        bp.flagDyn[1] += 1
+    end
+end
+
+########## Ageing the GBP update ##########
+@inline function graph_ageing(system, graph, bp)
+    bp.iterCount[1] += 1 
+    for i = 1:graph.Ndyn
+        factor = trunc(Int, system.dynamic[i, 2])
+
+        if graph.flagDown[i] && system.dynamic[i, 1] <= bp.iterCount[1] < system.dynamic[i, 6]
+            graph.observationDyn[factor] = system.dynamic[i, 3]
+            graph.varianceDyn[factor] = system.dynamic[i, 4]
+            update_mean_variance(system, graph, factor)
+            graph.flagDown[i] = false
+        end   
+        if graph.flagUp[i] && bp.iterCount[1] >= system.dynamic[i, 6]
+            if system.dynamic[i, 5] == 1
+                graph.varianceDyn[factor] = system.dynamic[i, 7] * (bp.iterCount[1] - system.dynamic[i, 6]) + system.dynamic[i, 4]
+            elseif system.dynamic[i, 5] == 2
+                b = 1 + system.dynamic[i, 8]
+                graph.varianceDyn[factor] = system.dynamic[i, 7] * log10((bp.iterCount[1] - system.dynamic[i, 6] + b) / b) + system.dynamic[i, 4]
+            else
+                b = 1 + system.dynamic[i, 8]
+                graph.varianceDyn[factor] = system.dynamic[i, 4] * b^(system.dynamic[i, 7] * (bp.iterCount[1] - system.dynamic[i, 6]))
             end
-        else
-            variable = graph.facDyn[factor][2]
-            update_factors = graph.dirDyn[variable]
+            if graph.varianceDyn[factor] > system.dynamic[i, 9]
+                graph.varianceDyn[factor] =  system.dynamic[i, 9]   
+                graph.flagUp[i] = false
+            end
+            update_variance(system, graph, factor)
+        end
+    end
+end
 
-            graph.Mdir[variable] = mean * system.jacobianTranspose[variable, factor] / variance
-            graph.Wdir[variable] = system.jacobianTranspose[variable, factor]^2 / variance
+########## Update mean and variance of the factor node ##########
+@inline function update_mean_variance(system, graph, factor)
+    if graph.facDyn[factor][1] == 2
+        j = graph.facDyn[factor][2]
+        @inbounds for k in graph.rowptr[j]:(graph.rowptr[j + 1] - 1)
+            graph.Mind[k] = graph.observationDyn[factor]
+            graph.Vind[k] = graph.varianceDyn[factor]
+        end
+    else
+        variable = graph.facDyn[factor][2]
+        update_factors = graph.dirDyn[variable]
 
-            @inbounds for i in update_factors
-                if i != factor
-                    graph.Mdir[variable] += graph.observationDyn[i] * system.jacobianTranspose[variable, i] / graph.varianceDyn[i]
-                    graph.Wdir[variable] += (system.jacobianTranspose[variable, i]^2) / graph.varianceDyn[i]
-                end
+        graph.Mdir[variable] = graph.observationDyn[factor] * system.jacobianTranspose[variable, factor] / graph.varianceDyn[factor]
+        graph.Wdir[variable] = system.jacobianTranspose[variable, factor]^2 / graph.varianceDyn[factor]
+
+        @inbounds for i in update_factors
+            if i != factor
+                graph.Mdir[variable] += graph.observationDyn[i] * system.jacobianTranspose[variable, i] / graph.varianceDyn[i]
+                graph.Wdir[variable] += (system.jacobianTranspose[variable, i]^2) / graph.varianceDyn[i]
             end
         end
-        bp.flagDyn[1] += 1
+    end
+end
+
+########## Update variance of the factor node ##########
+@inline function update_variance(system, graph, factor)
+    if graph.facDyn[factor][1] == 2
+        j = graph.facDyn[factor][2]
+        @inbounds for k in graph.rowptr[j]:(graph.rowptr[j + 1] - 1)
+            graph.Vind[k] = graph.varianceDyn[factor]
+        end
+    else
+        variable = graph.facDyn[factor][2]
+        update_factors = graph.dirDyn[variable]
+
+        graph.Wdir[variable] = system.jacobianTranspose[variable, factor]^2 / graph.varianceDyn[factor]
+
+        @inbounds for i in update_factors
+            if i != factor
+                graph.Wdir[variable] += (system.jacobianTranspose[variable, i]^2) / graph.varianceDyn[i]
+            end
+        end
     end
 end
 

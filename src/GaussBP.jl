@@ -102,6 +102,33 @@ function gbp(
         end
     end
 
+    if algorithm == "vanillaAgeing" 
+        for iter = 1:bp.iterNative
+            graph_ageing(system, graph, bp)
+            vanilla_factor_to_variable(graph, bp)
+            vanilla_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDamp
+            graph_ageing(system, graph, bp)
+            vanilla_factor_to_variable_damp(graph, bp)
+            vanilla_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterBump
+            graph_ageing(system, graph, bp)
+            vanilla_factor_to_variable_mean(graph, bp)
+            vanilla_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDampBump
+            graph_ageing(system, graph, bp)
+            vanilla_factor_to_variable_mean_damp(graph, bp)
+            vanilla_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+    end
+
     if algorithm == "efficient" && !settings.outIterate
         for iter = 1:bp.iterNative
             efficient_factor_to_variable(graph, bp)
@@ -149,6 +176,33 @@ function gbp(
         end
     end
 
+    if algorithm == "efficientAgeing" 
+        for iter = 1:bp.iterNative
+            graph_ageing(system, graph, bp)
+            efficient_factor_to_variable(graph, bp)
+            efficient_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDamp
+            graph_ageing(system, graph, bp)
+            efficient_factor_to_variable_damp(graph, bp)
+            efficient_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterBump
+            graph_ageing(system, graph, bp)
+            efficient_factor_to_variable_mean(graph, bp)
+            efficient_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDampBump
+            graph_ageing(system, graph, bp)
+            efficient_factor_to_variable_mean_damp(graph, bp)
+            efficient_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+    end
+
     if algorithm == "kahan" && !settings.outIterate
         for iter = 1:bp.iterNative
             kahan_factor_to_variable(graph, bp)
@@ -190,6 +244,33 @@ function gbp(
         end
         for iter = 1:bp.iterDampBump
             graph_dynamic(settings, system, graph, bp)
+            kahan_factor_to_variable_mean_damp(graph, bp)
+            kahan_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+    end
+
+    if algorithm == "kahanAgeing" 
+        for iter = 1:bp.iterNative
+            graph_ageing(system, graph, bp)
+            kahan_factor_to_variable(graph, bp)
+            kahan_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDamp
+            graph_ageing(system, graph, bp)
+            kahan_factor_to_variable_damp(graph, bp)
+            kahan_variable_to_factor(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterBump
+            graph_ageing(system, graph, bp)
+            kahan_factor_to_variable_mean(graph, bp)
+            kahan_variable_to_factor_mean(graph, bp)
+            marginal(settings, system, graph, bp, results)
+        end
+        for iter = 1:bp.iterDampBump
+            graph_ageing(system, graph, bp)
             kahan_factor_to_variable_mean_damp(graph, bp)
             kahan_variable_to_factor_mean(graph, bp)
             marginal(settings, system, graph, bp, results)

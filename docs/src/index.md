@@ -7,11 +7,12 @@ The software package includes:
  - [Vanilla GBP algorithm] (@ref vanillaGBP);
  - [Computation-efficient GBP algorithm] (@ref efficientGBP);
  - [Computation-efficient GBP algorithm with Kahan–Babuška algorithm] (@ref kahanGBP);
- - [Dynamic GBP algorithm] (@ref dynamicGBP).
+ - [Dynamic GBP algorithm] (@ref dynamicGBP);
+ - [Ageing GBP algorithm] (@ref ageingGBP).
 ---
 
 
-### Requirements 
+### Requirement 
 GaussBP requires Julia 1.6 and higher. 
 
 ---
@@ -29,7 +30,7 @@ julia> using GaussBP
 ---
 
 
-###  Quick Start
+### Quick Start: The GBP Algorithm 
 ```julia-repl
 using GaussBP
 
@@ -53,23 +54,40 @@ plot(results.gbp.iteration, results.gbp.rmse)
 ```julia-repl
 using GaussBP
 
-H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
-z = [0.8; 4.1; 2.2]
-v = [1.0; 1.0; 1.0]     
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
+z = [0.5; 0.8; 4.1; 2.2]
+v = [0.1; 1.0; 1.0; 1.0]     
 
-results, settings = gbp(H, z, v; algorithm = "kahan", out = ["wls", "display"])
+results, system = gbp(H, z, v; algorithm = "kahan", out = ["wls", "display"])
 ```
+---
+
+### Quick Start: The GBP Algorithm with Dynamic Updates
 
 ```julia-repl
 using GaussBP
 
-H = [1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
-z = [0.8; 4.1; 2.2]
-v = [1.0; 1.0; 1.0]  
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
+z = [0.5; 0.8; 4.1; 2.2]
+v = [0.1; 1.0; 1.0; 1.0]  
 d = [2 3 2.4 1.5; 15 1 0.85 0.9]
 
-results, settings = gbp(H, z, v, d; algorithm = "vanillaDynamic", out = "display")
+results, system = gbp(H, z, v, d; algorithm = "vanillaDynamic", out = "display")
 ```
+---
+
+### Quick Start: The GBP Algorithm with Ageing Information 
+```julia-repl
+using GaussBP
+
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6; 2.6 8.1 0.4]
+z = [0.5; 0.8; 4.1; 2.2]
+v = [0.1; 1.0; 1.0; 1.0]  
+d = [2 3 2.45 1.5 1 3 0.5 0 50; 8 1 0.85 0.9 2 4 0.3 0 30]
+
+results, system = gbp(H, z, v, d; algorithm = "vanillaAgeing", out = "display")
+```
+
 ---
 
 ### More Information

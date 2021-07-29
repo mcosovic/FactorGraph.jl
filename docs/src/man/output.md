@@ -144,8 +144,8 @@ julia> results.gbp.wrss
 &nbsp;
 ```
 
-#### Compute means, variances and error metrics in the dynamic framework
-The dynamic framework allows computing only means and variances, and error metrics if we use the command `out = "error"`. In the dynamic framework, means, variances and/or error metrics are evaluated before each new measurement update. Thus, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. 
+#### Compute means, variances and error metrics in the dynamic or ageing framework
+The dynamic and ageing framework allows computing only means and variances, and error metrics if we use the command `out = "error"`. In the dynamic and ageing framework, means, variances and/or error metrics are evaluated before each new measurement update. Thus, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. 
 
 ```julia-repl
 results, ~ = gbp(H, z, v, d; algorithm = "vanillaDynamic")
@@ -171,7 +171,7 @@ julia> results.gbp.iteration
 &nbsp;
 ```
 
-#### Compute means, variances and error metrics in the dynamic framework through iteration
+#### Compute means, variances and error metrics in the dynamic and ageing framework through iteration
 Similar to before, using the keyword `out = "iterate"`, fields `mean` and `variance` are given as matrices, where each column contains mean and variance values in the corresponding iteration according to the vector `iteration`. In addition, using the keyword `out = ["iterate", "error"]` error metrics can be also evaluated through iterations. 
 
 ```julia-repl
@@ -275,8 +275,8 @@ julia> results.gbp.iteration
 &nbsp;
 ```
 
-#### Compute WLS solution and error metrics in the dynamic framework
-In the dynamic framework, means and error metrics are evaluated before each new measurement update. Thus, field `mean` is given as matrix, where each column contains mean values in the corresponding iteration according to the vector `results.gbp.iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. Also, error metrics are evaluated at the same iterations. 
+#### Compute WLS solution and error metrics in the dynamic and ageing framework
+In the dynamic and ageing framework, means and error metrics are evaluated before each new measurement update. Thus, field `mean` is given as matrix, where each column contains mean values in the corresponding iteration according to the vector `results.gbp.iteration`. Note that according to the variable `d`, updates occur in the fifth and eighth iteration. Also, error metrics are evaluated at the same iterations. 
 
 
 ```julia-repl
@@ -328,7 +328,7 @@ julia> results.gbp.iteration
 &nbsp;
 ```
 
-#### Compute means, variances and error metrics in the dynamic framework through iteration
+#### Compute means, variances and error metrics in the dynamic and ageing framework through iteration
 Using command `out = ["iterate", "wls"]`, variables `mean`, `rmse`, `mae` and `wrss` are still evaluated before each new measurement update. Further, variables `rmseGBPWLS` and `maeGBPWLS` are obtained for each GBP iteration, where each element is related to the elements of the vector `results.gbp.iteration`.
 
 ```julia-repl
@@ -384,4 +384,4 @@ Fields `rmseGBPWLS` and `maeGBPWLS` determine distance beetwen the GBP estimate 
     \text{mae} = {\cfrac{\sum_{i=1}^n \left|\hat{x}_{\text{wls},i} - \hat{x}_{{\text{gbp}},i}) \right|}{n}},
   \end{aligned}
 ```  
-where ``n`` is the number of state variabels.
+where ``n`` is the number of state variables.

@@ -61,3 +61,21 @@ end
     results, system = gbp("dataDynamic33_14.h5"; max = 1000, algorithm = "kahanDynamic", out = ["wls", "error", "iterate"])
     @test maximum(abs.(results.gbp.rmse[end] - results.wls.rmse[end])) < 1e-8
 end
+
+@testset "AgeingGBP" begin
+    H = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 3.0 2.0 -1.0]
+    z = [1.0; 2.0; 3.0; 11.0] 
+    v = [1.0; 1.0; 1.0; 1.0]    
+
+    d = [100 4 6.0 1.0 1 500 1e57 2 1e60]
+    results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
+    @test (results.gbp.mean[:, end] ≈ [1.0; 2.0; 3.0])
+
+    d = [100 4 6.0 1.0 2 500 1e57 0.00002 1e60]
+    results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
+    @test (results.gbp.mean[:, end] ≈ [1.0; 2.0; 3.0])
+
+    d = [100 4 6.0 1.0 3 100 0.08 2 1e60]
+    results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
+    @test (results.gbp.mean[:, end] ≈ [1.0; 2.0; 3.0])
+end

@@ -57,17 +57,16 @@ function check_keywords(maxIter, damp, bump, prob, alpha, mean, variance, algori
     end
    
     #### Check algorithm type
-    if !(algorithm in ["vanilla", "efficient", "kahan", "vanillaDynamic", "efficientDynamic", "kahanDynamic"])
+    if !(algorithm in ["vanilla", "efficient", "kahan", "vanillaDynamic", "efficientDynamic", "kahanDynamic", "vanillaAgeing", "efficientAgeing", "kahanAgeing"])
         error("Invalid ALGORITHM key.")
     end
 
-    #### Check dynamic model
+    #### Check dynamic or aging model
     dynamic = false
-    if algorithm in ["vanillaDynamic", "efficientDynamic", "kahanDynamic"]
+    if algorithm in ["vanillaDynamic", "efficientDynamic", "kahanDynamic", "vanillaAgeing", "efficientAgeing", "kahanAgeing"]
         dynamic = true
     end
 
-    
     #### Check output data
     if !isa(out, Array)
         out = [out]
