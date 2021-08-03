@@ -69,13 +69,13 @@ end
 
     d = [100 4 6.0 1.0 1 500 1e57 2 1e60]
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
-    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
+    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 
     d = [100 4 6.0 1.0 2 500 1e57 0.00002 1e60]
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
-    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
+    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 
     d = [100 4 6.0 1.0 3 100 0.08 2 1e60]
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
-    @test round.(results.gbp.mean[:, end], digits=3) ≈ [1.0; 2.0; 1.0]
+    @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 1.0]
 end
