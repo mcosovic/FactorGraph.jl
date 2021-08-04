@@ -243,6 +243,12 @@ end
             graph.observationDyn[factor] = system.dynamic[i, 3]
             graph.varianceDyn[factor] = system.dynamic[i, 4]
             update_mean_variance(system, graph, factor)
+
+            for j = (i-1):-1:1
+                if system.dynamic[j, 2] == factor
+                    graph.flagUp[j] = false
+                end
+            end
         end   
         if graph.flagUp[i] && bp.iterCount[1] >= system.dynamic[i, 6]
             if system.dynamic[i, 5] == 1

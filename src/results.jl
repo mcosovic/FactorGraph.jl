@@ -329,7 +329,7 @@ function display_update_ageing(graph, system, idx, factor)
         ageingModel = "exponential"
     end
 
-    A = [1 2 "$meanOld --> $meanNew" "$variOld --> $variNew" ageingModel]
+    A = [system.dynamic[idx, 1] system.dynamic[idx, 2] "$meanOld --> $meanNew" "$variOld --> $variNew" ageingModel]
 
     println("\n Update Factor Nodes")
     pretty_table(A, header = ["Iteration", "Factor Node", "Measurement Value Update", "Variance Value Update", "Ageing Model"],
