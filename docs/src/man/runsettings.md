@@ -7,8 +7,8 @@ Input arguments of the function `gbp()` describe the GBP algorithm settings. The
 gbp(DATA)
 gbp(DATA; ALGORITHM)
 gbp(DATA; ALGORITHM, ITERATION)
-gbp(DATA; ALGORITHM, ITERATION, INITIAL)
-gbp(DATA; ALGORITHM, ITERATION, INITIAL, OUT)
+gbp(DATA; ALGORITHM, ITERATION, VIRTUAL)
+gbp(DATA; ALGORITHM, ITERATION, VIRTUAL, OUT)
 ```
 ```@raw html
 &nbsp;
@@ -18,8 +18,8 @@ gbp(DATA; ALGORITHM, ITERATION, INITIAL, OUT)
 gbp(DATA) runs the GBP algorithm using DATA input 
 gbp(DATA; ALGORITHM) selects the type of the GBP algorithm 
 gbp(DATA; ALGORITHM, ITERATION) sets the iteration scheme
-gbp(DATA; ALGORITHM, ITERATION, INITIAL) sets initial value of messages
-gbp(DATA; ALGORITHM, ITERATION, INITIAL, OUT) controls output variable structure and display 
+gbp(DATA; ALGORITHM, ITERATION, VIRTUAL) sets virtual factor nodes
+gbp(DATA; ALGORITHM, ITERATION, VIRTUAL, OUT) controls output variable structure and display 
 ```
 ```@raw html
 &nbsp;
@@ -132,17 +132,18 @@ The GBP function `gbp()` receives a group of arguments by keyword: ALGORITHM, IT
 &nbsp;
 ```
 
-| INITIAL         | sets initial message values                                                 |
-|:----------------|:----------------------------------------------------------------------------|
-|                 |                                                                             |
-| **Command**     | `mean = value`                                                              |
-| **Description** |  the initial mean value of messages from variable nodes to factor nodes     |
-|                 |                                                                             |
-| **Command**     | `variance = value`                                                          |
-| **Description** |  the initial variance value of messages from variable nodes to factor nodes |
+| VIRTUAL         | sets virtual factor nodes                                                           |
+|:----------------|:------------------------------------------------------------------------------------|
+|                 |                                                                                     |
+| **Command**     | `mean = value`                                                                      |
+| **Description** |  the mean value of the virtual factor nodes, `default setting: mean = 0.0`          |
+|                 |                                                                                     |
+| **Command**     | `variance = value`                                                                  |
+| **Description** |  the variance value of the virtual factor nodes, `default setting: variance = 1e10` |
 
-!!! note "Initial Message Values"
-    The initial message values are only used across links incident with variable nodes if those are not directly observed. Otherwise, the initial messages are equal to the observed values.
+!!! note "Virtual Factor Nodes"
+    The virtual factor node is a singly-connected factor node used if the variable node is not directly observed. In a usual scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity. Using virtual factor nodes, we also improved convergence performance.
+    
 ```@raw html
 &nbsp;
 ```

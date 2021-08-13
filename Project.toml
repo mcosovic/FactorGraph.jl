@@ -1,7 +1,7 @@
 name = "GaussBP"
 uuid = "7e9f8bf2-99af-4218-abca-a9d13ed0f79b"
 authors = ["Mirsad Cosovic <mirsad.cosovic@gmail.com>"]
-version = "0.0.4"
+version = "0.0.5"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"

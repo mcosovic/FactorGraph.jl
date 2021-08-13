@@ -47,6 +47,7 @@ function factors(system, settings)
     Ndir = 0
     Nlink = 0
     var_in_column = 0
+    direct = fill(0, Nvar)
 
     ### Find number of links
     @inbounds for i = 1:Nfac
@@ -54,6 +55,8 @@ function factors(system, settings)
 
         if var_in_column == 1
             Ndir += var_in_column
+            row = system.jacobianTranspose.rowval[nzrange(system.jacobianTranspose, i)][1]
+            direct[row] = 1
         else
             Nlink += var_in_column
         end
@@ -124,7 +127,12 @@ function factors(system, settings)
                 idxr += 1
             end
         end
+        if direct[i[1]] == 0
+            Mdir[i[1]] = settings.mean / settings.variance
+            Wdir[i[1]] = 1 / settings.variance
+        end
     end
+
     pushfirst!(colptr, 1)
     pushfirst!(rowptr, 1)
     colptr = cumsum(colptr)
@@ -174,8 +182,8 @@ function initialize(graph, settings)
     ### Initialize arrays for messages
     Mfac_var = similar(graph.coeff)
     Wfac_var = similar(graph.coeff)
-    Mvar_fac = fill(settings.mean, graph.Nlink)
-    Vvar_fac = fill(settings.variance, graph.Nlink)
+    Mvar_fac = similar(graph.coeff)
+    Vvar_fac = similar(graph.coeff)
 
     ### Set damping parameters
     bernoulli_sample = randsubseq(collect(1:graph.Nlink), settings.prob)
@@ -196,16 +204,15 @@ function initialize(graph, settings)
     sort_row_idx = sortperm(new_row)
     to_var = temp[sort_row_idx]
 
-    ### Pass messages from singly-connected factor nodes to all corresponding indirect links
-    idx = findall(!iszero, graph.Wdir)
-    @inbounds for i in idx
+    ### Pass messages from singly-connected factor nodes to all indirect links
+    @inbounds for i = 1:graph.Nvar
         for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
             k = to_fac[j]
             Vvar_fac[k] = 1 / graph.Wdir[i]
             Mvar_fac[k] = graph.Mdir[i] * Vvar_fac[k]
         end
     end
-
+    
     return BeliefPropagation(iterNative, iterDamp, iterBump, iterDampBump, iterCount, flagDyn, updateCount, Mfac_var, Wfac_var, Mvar_fac, Vvar_fac, alpha1, alpha2, to_fac, to_var)
 end
 

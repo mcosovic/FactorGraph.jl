@@ -37,7 +37,7 @@ function gbp(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     mean::Float64 = 0.0,
-    variance::Float64 = 1e5,
+    variance::Float64 = 1e10,
     algorithm::String = "vanilla",
     out::Union{String, Array{String,1}} = "no")
     

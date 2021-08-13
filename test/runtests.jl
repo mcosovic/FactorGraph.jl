@@ -3,17 +3,17 @@ using SparseArrays
 using Test
 
 @testset "StaticGBP" begin
-    results, system = gbp("data33_14.xlsx"; max = 1000, damp = 50, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e5, algorithm = "vanilla", out = ["error", "wls", "display"])
+    results, system = gbp("data33_14.xlsx"; max = 1000, damp = 50, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e60, algorithm = "vanilla", out = ["error", "wls", "display"])
     @test maximum(results.gbp.mean ./ results.wls.mean) < 1.0000000009
 
     results, system = gbp("data33_14.h5"; max = 1000, damp = 50, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e60, algorithm = "kahan", out = ["error", "wls", "display"])
-    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.00000000000003
+    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.0000000000003
 
-    results, system = gbp("data33_14.h5"; max = 1000, damp = 50, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e5, algorithm = "efficient", out = ["error", "wls", "display"])
-    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.0000000009
+    results, system = gbp("data33_14.h5"; max = 1000, damp = 50, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e10, algorithm = "efficient", out = ["error", "wls", "display"])
+    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.00000000003
 
-    results, system = gbp("data33_14.h5"; max = 1000, damp = 50, bump = 500, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e5, algorithm = "efficient", out = ["error", "wls", "display"])
-    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.0000000009
+    results, system = gbp("data33_14.h5"; max = 1000, damp = 50, bump = 500, prob = 0.6, alpha = 0.4, mean = 0.0, variance = 1e10, algorithm = "efficient", out = ["error", "wls", "display"])
+    @test maximum(results.gbp.mean ./ results.wls.mean) < 1.00000000003
 
     results, system = gbp("data33_14.h5"; max = 500, damp = 50, algorithm = "vanilla", out = ["iterate", "wls"])
     @test maximum(results.gbp.mean[:, 500] ./ results.wls.mean) < 1.0000000009
@@ -28,9 +28,14 @@ using Test
     H = [3.0 2.0 -1.0; -2.0 2.0 1.0; 1.0 1.0 1.0]
     z = [6.0; 3.0; 4.0] 
     v = [1.0; 1.0; 1.0]    
-
     results, system = gbp(H, z, v; max = 2000, damp = 5, algorithm = "vanilla", out = "wls")
     @test round.(results.gbp.mean, digits=3) ≈ [1.0; 2.0; 1.0]
+
+    H = [1.0 0.0 0.0; 25 -25 0; -50 -40 90; 0 1 0]
+    z = [0; 1.795; 1.966; -0.066]
+    v = [1e-2; 1e-2; 1e-2; 1e-6]     
+    results, system = gbp(H, z, v; max = 30, variance = 1e60, algorithm = "kahan", out = ["display", "wls"]) 
+    @test round.(results.gbp.mean, digits=5) ≈ [0.00579; -0.066; -0.00427]
 end
 
 @testset "DynamicGBP" begin
@@ -66,7 +71,7 @@ end
     H = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 3.0 2.0 -1.0]
     z = [1.0; 2.0; 3.0; 11.0] 
     v = [1.0; 1.0; 1.0; 1.0]    
-
+    
     d = [100 4 6.0 1.0 1 500 1e57 2 1e60]
     results, system = gbp(H, z, v, d; max = 2000, damp = 5, algorithm = "vanillaAgeing", out = "display")     
     @test results.gbp.mean[:, end] ≈ [1.0; 2.0; 3.0]
