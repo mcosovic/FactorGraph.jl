@@ -148,7 +148,7 @@ end
     end
     dynamic = [1 6.0 1.0; 3 4.0 1.0; 2 3.0 1.0]
     dynamicInference(gbp, dynamic)
-    for iteration = 10:200
+    for iteration = 10:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
         marginal(gbp)
@@ -169,7 +169,7 @@ end
     end
     dynamic = [4 6.0 1.0 1 1e57 2 1e60]
     dynamicInference(gbp, dynamic)
-    for iteration = 99:200
+    for iteration = 101:1000
         ageingInference(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -185,7 +185,7 @@ end
     end
     dynamic = [4 6.0 1.0 2 1e57 0.00002 1e60]
     dynamicInference(gbp, dynamic)
-    for iteration = 99:200
+    for iteration = 101:1000
         ageingInference(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -201,7 +201,7 @@ end
     end
     dynamic =  [4 6.0 1.0 3 0.08 2 1e60]
     dynamicInference(gbp, dynamic)
-    for iteration = 99:500
+    for iteration = 101:1000
         ageingInference(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
