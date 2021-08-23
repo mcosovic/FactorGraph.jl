@@ -42,7 +42,7 @@ gbp = graphicalModel(H, z, v)
 The first step in solving/analysing the above system/system of equations is forming a factor graph, where set of variable nodes ``\mathcal{X} = \{x_1, x_2, x_3 \}`` is defined by state variables. The set of equations denotes the set of factor nodes ``\mathcal{F} = \{f_{x_1}, f_1, f_2, f_{x_3} \}``.
 
 ```@raw html
-<img src="../assets/factorgraph.png" class="center"/>
+<img src="../../assets/factorgraph.png" class="center"/>
 <figcaption>Figure 1: The factor graph with three variable nodes and four factor nodes.</figcaption>
 &nbsp;
 ```

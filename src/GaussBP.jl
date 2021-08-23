@@ -23,7 +23,7 @@ export messageFactorVariableEfficient, meanFactorVariableEfficient, varianceFact
        messageVariableFactorEfficient, meanVariableFactorEfficient, varianceVariableFactorEfficient
 
 ### Computation-efficient GBP algorithm with Kahan-Babuska algorithm
-include("KahanGBP.jl")
+include("kahanGBP.jl")
 export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariableKahan,
        messageDampFactorVariableKahan, meanDampFactorVariableKahan,
        messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
