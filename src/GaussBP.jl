@@ -18,7 +18,7 @@ export messageFactorVariableVanilla, meanFactorVariableVanilla, varianceFactorVa
 
 ### Computation-efficient GBP algorithm
 include("efficientGBP.jl")
-export messageFactorVariableEfficient, meanFactorVariableEfficient, varianceFactorVariableEfficient
+export messageFactorVariableEfficient, meanFactorVariableEfficient, varianceFactorVariableEfficient,
        messageDampFactorVariableEfficient, meanDampFactorVariableEfficient,
        messageVariableFactorEfficient, meanVariableFactorEfficient, varianceVariableFactorEfficient
 
