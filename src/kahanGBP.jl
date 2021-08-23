@@ -1,100 +1,129 @@
-########## Efficient GBP with Kahan-Babuska algorithm: Factor to variable messages ##########
-@inline function kahan_factor_to_variable(graph, bp)
-    @inbounds for i = 1:graph.Nind
+########## Efficient Kahan-Babuska GBP messages: Factor to variable ##########
+function messageFactorVariableKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
         Mrow = 0.0; Vrow = 0.0; errorV = 0.0; errorM = 0.0
 
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            summands = graph.coeff[j]^2 * bp.Vvar_fac[j]
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            summands = gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]
             Vrow, errorV = kahanbabuska(summands, Vrow, errorV)
 
-            summands = graph.coeff[j] * bp.Mvar_fac[j]
+            summands = gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - (Mrow - graph.coeff[j] * bp.Mvar_fac[j]) - errorM) * graph.coeffInv[j] 
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + errorV)
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
         end
     end
 end
 
-########## Efficient GBP with Kahan-Babuska algorithm: Factor to variable messages with damping ##########
-@inline function kahan_factor_to_variable_damp(graph, bp)
-    @inbounds for i = 1:graph.Nind
+# ########## Efficient Kahan-Babuska GBP means: Factor to variable ##########
+function meanFactorVariableKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        Mrow = 0.0; errorM = 0.0
+
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            summands = gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]
+            Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
+        end
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
+        end
+    end
+end
+
+########## Efficient Kahan-Babuska GBP variances: Factor to variable ##########
+function varianceFactorVariableKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        Vrow = 0.0; errorV = 0.0
+
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            summands = gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]
+            Vrow, errorV = kahanbabuska(summands, Vrow, errorV)
+        end
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
+        end
+    end
+end
+
+########## Efficient Kahan-Babuska GBP damp messages: Factor to variable ##########
+function messageDampFactorVariableKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
         Mrow = 0.0; Vrow = 0.0; errorV = 0.0; errorM = 0.0
 
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            summands = graph.coeff[j]^2 * bp.Vvar_fac[j]
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            summands = gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]
             Vrow, errorV = kahanbabuska(summands, Vrow, errorV)
 
-            summands = graph.coeff[j] * bp.Mvar_fac[j]
+            summands = gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * (graph.Mind[j] - (Mrow - graph.coeff[j] * bp.Mvar_fac[j]) - errorM) * graph.coeffInv[j] + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
-            bp.Wfac_var[bp.to_var[j]] = (graph.coeff[j]^2) / (graph.Vind[j] + (Vrow - graph.coeff[j]^2 * bp.Vvar_fac[j]) + errorV)
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
         end
     end
 end
 
-########## Efficient GBP with Kahan-Babuska algorithm: Factor to variable messages means only ##########
-@inline function kahan_factor_to_variable_mean(graph, bp)
-    @inbounds for i = 1:graph.Nind
+########## Efficient Kahan-Babuska GBP damp means: Factor to variable ##########
+function meanDampFactorVariableKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
         Mrow = 0.0; errorM = 0.0
 
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            summands = graph.coeff[j] * bp.Mvar_fac[j]
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            summands = gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = (graph.Mind[j] - (Mrow - graph.coeff[j] * bp.Mvar_fac[j]) - errorM) * graph.coeffInv[j] 
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
         end
     end
 end
 
-########## Efficient GBP with Kahan-Babuska algorithm: Factor to variable messages means only with damping ##########
-@inline function kahan_factor_to_variable_mean_damp(graph, bp)
-    @inbounds for i = 1:graph.Nind
-        Mrow = 0.0; errorM = 0.0
-
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            summands = graph.coeff[j] * bp.Mvar_fac[j]
-            Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
-        end
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * (graph.Mind[j] - (Mrow - graph.coeff[j] * bp.Mvar_fac[j]) - errorM) * graph.coeffInv[j] + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]
-        end
-    end
-end
-
-########## Efficient GBP with Kahan-Babuska algorithm: Variable to factor messages ##########
-@inline function kahan_variable_to_factor(graph, bp)
-    @inbounds for i = 1:graph.Nvar
+########## Efficient Kahan-Babuska GBP messages: Variable to factor ##########
+function messageVariableFactorKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
         Mcol = 0.0; Wcol = 0.0; errorV = 0.0; errorM = 0.0
 
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            Wcol, errorV = kahanbabuska(bp.Wfac_var[j], Wcol, errorV)
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            Wcol, errorV = kahanbabuska(1 / gbp.inference.varianceFactorVariable[j], Wcol, errorV)
 
-            summands = bp.Mfac_var[j] * bp.Wfac_var[j]
+            summands = gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
             Mcol, errorM = kahanbabuska(summands, Mcol, errorM)
         end
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            bp.Vvar_fac[bp.to_fac[j]] = 1 / ((Wcol - bp.Wfac_var[j]) + errorV + graph.Wdir[i])
-            bp.Mvar_fac[bp.to_fac[j]] = ((Mcol - bp.Mfac_var[j] * bp.Wfac_var[j]) + errorM + graph.Mdir[i]) * bp.Vvar_fac[bp.to_fac[j]]
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
+            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
         end
     end
 end
 
-########## Efficient GBP with Kahan-Babuska algorithm: Variable to factor messages means only ##########
-@inline function kahan_variable_to_factor_mean(graph, bp)
-    @inbounds for i = 1:graph.Nvar
+########## Efficient Kahan-Babuska GBP means: Variable to factor ##########
+function meanVariableFactorKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
         Mcol = 0.0; errorM = 0.0
 
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            summands = bp.Mfac_var[j] * bp.Wfac_var[j]
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            summands = gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
             Mcol, errorM = kahanbabuska(summands, Mcol, errorM)
         end
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            bp.Mvar_fac[bp.to_fac[j]] = ((Mcol - bp.Mfac_var[j] * bp.Wfac_var[j]) + errorM + graph.Mdir[i]) * bp.Vvar_fac[bp.to_fac[j]]
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
+        end
+    end
+end
+
+########## Efficient Kahan-Babuska GBP variances: Variable to factor ##########
+function varianceVariableFactorKahan(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
+        Wcol = 0.0; errorV = 0.0
+
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            Wcol, errorV = kahanbabuska(1 / gbp.inference.varianceFactorVariable[j], Wcol, errorV)
+        end
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
         end
     end
 end
@@ -108,6 +137,6 @@ end
         epsilon += (summands - t) + total
     end
     total = t
-    
+
     return total, epsilon
 end

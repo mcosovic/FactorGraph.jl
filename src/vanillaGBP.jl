@@ -1,95 +1,124 @@
-########## Vanilla GBP: Factor to variable messages ##########
-@inline function vanilla_factor_to_variable(graph, bp)
-    @inbounds for i = 1:graph.Nind
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            Mrow = graph.Mind[j]; Vrow = graph.Vind[j]
-            for k in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+function messageFactorVariableVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]
+            for k in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
                 if j != k
-                    Mrow -= (graph.coeff[k] * bp.Mvar_fac[k])
-                    Vrow += (graph.coeff[k]^2 * bp.Vvar_fac[k])
+                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
+                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            bp.Mfac_var[bp.to_var[j]] = Mrow * graph.coeffInv[j] 
-            bp.Wfac_var[bp.to_var[j]] = graph.coeff[j]^2 / Vrow
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = Mrow / gbp.graph.coefficient[j]
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
 
-########## Vanilla GBP: Factor to variable messages with damping ##########
-@inline function vanilla_factor_to_variable_damp(graph, bp)
-    @inbounds for i = 1:graph.Nind
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            Mrow = graph.Mind[j]; Vrow = graph.Vind[j]
-            for k in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+########## Vanilla GBP means: Factor to variable ##########
+function meanFactorVariableVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            Mrow = gbp.graph.meanIndirect[j]
+            for k in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
                 if j != k
-                    Mrow -= (graph.coeff[k] * bp.Mvar_fac[k])
-                    Vrow += (graph.coeff[k]^2 * bp.Vvar_fac[k])
+                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
                 end
             end
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * Mrow * graph.coeffInv[j] + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]  
-            bp.Wfac_var[bp.to_var[j]] = graph.coeff[j]^2 / Vrow
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = Mrow / gbp.graph.coefficient[j]
         end
     end
 end
 
-########## Vanilla GBP: Factor to variable means only ##########
-@inline function vanilla_factor_to_variable_mean(graph, bp)
-    @inbounds for i = 1:graph.Nind
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            Mrow = graph.Mind[j]
-            for k in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+########## Vanilla GBP variances: Factor to variable ##########
+function varianceFactorVariableVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            Vrow = gbp.graph.varianceIndirect[j]
+            for k in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
                 if j != k
-                    Mrow -= (graph.coeff[k] * bp.Mvar_fac[k])
+                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            bp.Mfac_var[bp.to_var[j]] = Mrow * graph.coeffInv[j] 
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
 
-########## Vanilla GBP: Factor to variable means only with damping ##########
-@inline function vanilla_factor_to_variable_mean_damp(graph, bp)
-    @inbounds for i = 1:graph.Nind
-        for j in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
-            Mrow = graph.Mind[j]
-            for k in graph.rowptr[i]:(graph.rowptr[i + 1] - 1)
+########## Vanilla GBP damp messages: Factor to variable ##########
+function messageDampFactorVariableVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]
+            for k in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
                 if j != k
-                    Mrow -= (graph.coeff[k] * bp.Mvar_fac[k])
+                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
+                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            bp.Mfac_var[bp.to_var[j]] = bp.alpha1[j] * Mrow * graph.coeffInv[j] + bp.alpha2[j] * bp.Mfac_var[bp.to_var[j]]  
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
+            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
 
-############# Vanilla GBP: Variable to factor messages ##########
-@inline function vanilla_variable_to_factor(graph, bp)
-    @inbounds for i = 1:graph.Nvar
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            Mcol = graph.Mdir[i]; Wcol = graph.Wdir[i]
-            for k in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+########## Vanilla GBP damp means: Factor to variable ##########
+function meanDampFactorVariableVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nindirect
+        for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
+            Mrow = gbp.graph.meanIndirect[j]
+            for k in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
                 if j != k
-                    Mcol += bp.Mfac_var[k] * bp.Wfac_var[k]
-                    Wcol += bp.Wfac_var[k]
+                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
                 end
             end
-            bp.Vvar_fac[bp.to_fac[j]] = 1 / Wcol
-            bp.Mvar_fac[bp.to_fac[j]] = Mcol * bp.Vvar_fac[bp.to_fac[j]]
+            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
         end
     end
 end
 
-########## Vanilla GBP: Variable to factor means only ##########
-@inline function vanilla_variable_to_factor_mean(graph, bp)
-    @inbounds for i = 1:graph.Nvar
-        for j in graph.colptr[i]:(graph.colptr[i + 1] - 1)
-            Mcol = graph.Mdir[i]
-            for k in graph.colptr[i]:(graph.colptr[i + 1] - 1)
+############# Vanilla GBP messages: Variable to factor ##########
+function messageVariableFactorVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
+            for k in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
                 if j != k
-                    Mcol += bp.Mfac_var[k] * bp.Wfac_var[k]
+                    Mcol += gbp.inference.meanFactorVariable[k] / gbp.inference.varianceFactorVariable[k]
+                    Wcol += 1 / gbp.inference.varianceFactorVariable[k]
                 end
             end
-            bp.Mvar_fac[bp.to_fac[j]] = Mcol * bp.Vvar_fac[bp.to_fac[j]]
+            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / Wcol
+            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = Mcol / Wcol
+        end
+    end
+end
+
+############# Vanilla GBP means: Variable to factor ##########
+function meanVariableFactorVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            Mcol = gbp.graph.meanDirect[i]
+            for k in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+                if j != k
+                    Mcol += gbp.inference.meanFactorVariable[k] / gbp.inference.varianceFactorVariable[k]
+                end
+            end
+            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = Mcol * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
+        end
+    end
+end
+
+############# Vanilla GBP variances: Variable to factor ##########
+function varianceVariableFactorVanilla(gbp::GraphicalModel)
+    @inbounds for i = 1:gbp.graph.Nvariable
+        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+            Wcol = gbp.graph.weightDirect[i]
+            for k in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
+                if j != k
+                    Wcol += 1 / gbp.inference.varianceFactorVariable[k]
+                end
+            end
+            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / Wcol
         end
     end
 end
