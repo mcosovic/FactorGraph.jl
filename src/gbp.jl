@@ -362,7 +362,7 @@ end
 end
 
 ######### Ageing the GBP update ##########
-@inline function ageingInference!(gbp::GraphicalModel; factor = 0::Int64, variance = 0, model = 0, a = 0, b = 0, limit = 0, iterate = 0)
+@inline function ageingInference!(gbp::GraphicalModel; factor = 0::Int64, variance = 0, model = 0::Int64, a = 0, b = 0, limit = 0, iterate = 0)
     if gbp.system.variance[factor] < limit
         if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
             idx = gbp.system.jacobianTranspose.colptr[factor]
@@ -397,7 +397,7 @@ end
 end
 
 ######### Freeze factor node ##########
-function freezeFactor!(gbp; factor = 0)
+function freezeFactor!(gbp; factor = 0::Int64)
     if factor == 0
         error("The keyword factor is missing.")
     elseif factor > gbp.graph.Nfactor
@@ -424,7 +424,7 @@ function freezeFactor!(gbp; factor = 0)
 end
 
 ######### Defreeze factor node ##########
-function defreezeFactor!(gbp; factor = 0)
+function defreezeFactor!(gbp; factor = 0::Int64)
     if factor == 0
         error("The keyword factor is missing.")
     elseif factor > gbp.graph.Nfactor
@@ -458,7 +458,7 @@ function defreezeFactor!(gbp; factor = 0)
 end
 
 ######### Freeze variable node ##########
-function freezeVariable!(gbp; variable = 0)
+function freezeVariable!(gbp; variable = 0::Int64)
     if variable == 0
         error("The keyword variable is missing.")
     elseif variable > gbp.graph.Nvariable
@@ -480,7 +480,7 @@ function freezeVariable!(gbp; variable = 0)
 end
 
 ######### Defreeze variable node ##########
-function defreezeVariable!(gbp; variable = 0)
+function defreezeVariable!(gbp; variable = 0::Int64)
     if variable == 0
         error("The keyword variable is missing.")
     elseif variable > gbp.graph.Nvariable
