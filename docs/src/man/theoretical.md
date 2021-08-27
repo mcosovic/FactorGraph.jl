@@ -195,9 +195,6 @@ The randomised damping parameter pairs lead to a trade-off between the number of
 
 ---
 
-
-
-
 ## [The Dynamic GBP Algorithm]  (@id dynamicGBP)
 To recall, each factor node is associated with the measurement value ``z_i`` and the measurement variance  ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurements from different measurement subsystems. Such measurements are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
 
@@ -216,37 +213,26 @@ GaussBP uses the above data according to the Table.
 ## [The Ageing GBP Algorithm]  (@id ageingGBP)
 The ageing framework represents an extension of the dynamic model and establishes a model for measurement arrival processes and for the process of measurement deterioration or ageing over time (or GBP iterations). We integrate these measurements regularly into the running instances of the GBP algorithm.
 
-Let ``\alpha`` denote iteration number when the factor node ``f_i`` receives the new measurement value ``z_i`` with the predefined variance ``v_{i}``. After iteration instant ``\alpha``, the ageing model increases variance value over iterations ``v_i(\tau)``. More precisely, we associate the Gaussian distribution ``\mathcal{N}(z_i|\mathcal{X}_i, v_i(\tau))`` to the corresponding factor node ``f_i``, where the variance ``v_i(\tau)`` increases its value starting from the predefined variance ``v_i(\tau) = v_i``. Finally, in practice ageing model requires defining a limit from above ``\bar {v}_i`` of a function ``v_i(\tau)``, instead of allowing variance to take on extremely large values.
+Let us assume that factor node ``f_i`` receives the new variance ``v_{i}``. After that moment, the ageing model increases variance value over iterations ``v_i(\tau)``. More precisely, we associate the Gaussian distribution ``\mathcal{N}(z_i|\mathcal{X}_i, v_i(\tau))`` to the corresponding factor node ``f_i``, where the variance ``v_i(\tau)`` increases its value starting from the predefined variance ``v_i(\tau) = v_i``. Finally, in practice ageing model requires defining a limit from above ``\bar {v}_i`` of a function ``v_i(\tau)``, instead of allowing variance to take on extremely large values.
 
-Depending on the measurements arriving dynamic, an adaptive mechanism for increasing the variance over the time ``v_i(t)`` can be derived. The logarithmic growth model represents a promising solution for systems with a high sampling rate of the measurements, where a rapid increase in variance is required:
+Depending on the measurements arriving dynamic, an adaptive mechanism for increasing the variance over iterations ``v_i(\tau)`` can be derived. The logarithmic growth model represents a promising solution for systems with a high sampling rate of the measurements, where a rapid increase in variance is required:
 ```math
     v_i(\tau) = \begin{cases}
-      a \, \text{log} \left(\cfrac{\tau - \rho + 1 + b}{1 + b} \right ) + v_i, & \alpha \leq \tau \leq \theta \\
+      a \, \text{log} \left(\cfrac{\tau + 1 + b}{1 + b} \right ) + v_i, & 1 \leq \tau \leq \theta \\
       \bar {v}_i, & \tau \geq \theta,
   \end{cases}
 ```
 where ``a`` and ``b`` control the rate of growth.  In contrast, the exponential growth model corresponds to systems with a low sampling rate of the measurements:
 ```math
     v_i(\tau) = \begin{cases}
-      v_i(1+b)^{a(\tau - \rho)}, & \alpha \leq \tau \leq \theta \\
+      v_i(1+b)^{a(\tau )}, & 1 \leq \tau \leq \theta \\
       \bar {v}_i, & \tau \geq \theta.
   \end{cases}
 ```
 Finally, the linear growth model can be observed as a compromise between logarithmic and exponential growth models:
 ```math
     v_i(\tau) = \begin{cases}
-      a(\tau-\rho) + v_i, & \alpha \leq \tau \leq \theta \\
+      a\tau + v_i, & 1 \leq \tau \leq \theta \\
       \bar {v}_i, & \tau \geq \theta.
   \end{cases}
 ```
-The ageing model uses the above data according to the Table.
-
-| Column   |  Label            | Description                                                                            |
-|:--------:|:-----------------:|:---------------------------------------------------------------------------------------|
-| 1        | ``i``             | factor node index corresponding to the row number of the jacobian matrix               |
-| 2        | ``z_i``           | new observation value                                                                  |
-| 3        | ``v_i``           | new variance value                                                                     |
-| 4        |   -               | the growth model, where linear = 1, logarithmic = 2, exponential = 3                   |
-| 5        | ``a``             | the parameter that controls the rate of the growth                                     |
-| 6        | ``b``             | the parameter that controls the rate of the growth                                     |
-| 7        | ``\bar {v}_i``    | the variance upper limit value                                                         |

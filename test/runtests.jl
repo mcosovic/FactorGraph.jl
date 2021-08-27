@@ -124,14 +124,13 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamic = [1 6.0 1.0; 3 4.0 1.0]
-    dynamicInference!(gbp, dynamic)
+    dynamicInference!(gbp; factor = 1, mean = 6, variance = 1)
+    dynamicInference!(gbp; factor = 3, mean = 4, variance = 1)
     for iteration = 10:99
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamic = [2 3.0 1.0]
-    dynamicInference!(gbp, dynamic)
+    dynamicInference!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 100:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -146,8 +145,9 @@ end
         messageVariableFactorVanilla(gbp)
         marginal(gbp)
     end
-    dynamic = [1 6.0 1.0; 3 4.0 1.0; 2 3.0 1.0]
-    dynamicInference!(gbp, dynamic)
+    dynamicInference!(gbp; factor = 1, mean = 6, variance = 1)
+    dynamicInference!(gbp; factor = 3, mean = 4, variance = 1)
+    dynamicInference!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 10:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -167,10 +167,8 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamic = [4 6.0 1.0 1 1e57 2 1e60]
-    dynamicInference!(gbp, dynamic)
-    for iteration = 101:1000
-        ageingInference!(gbp, dynamic)
+    for iteration = 1:900
+        ageingInference!(gbp; factor = 4, variance = 1, model = 1, a = 1e57, limit = 1e60, iterate = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -183,10 +181,8 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamic = [4 6.0 1.0 2 1e57 0.00002 1e60]
-    dynamicInference!(gbp, dynamic)
-    for iteration = 101:1000
-        ageingInference!(gbp, dynamic)
+    for iteration = 1:1000
+        ageingInference!(gbp; factor = 4, variance = 1, model = 2, a = 1e57, b = 0.00002, limit = 1e60, iterate = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -199,10 +195,8 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamic =  [4 6.0 1.0 3 0.08 2 1e60]
-    dynamicInference!(gbp, dynamic)
-    for iteration = 101:1000
-        ageingInference!(gbp, dynamic)
+    for iteration = 1:900
+        ageingInference!(gbp; factor = 4, variance = 1, model = 3, a = 0.08, b = 2, limit = 1e60, iterate = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end

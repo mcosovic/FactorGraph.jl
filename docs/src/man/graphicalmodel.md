@@ -52,6 +52,11 @@ gbp = graphicalModel(DATA; prob = value, alpha = value)
 ```
 The keyword `prob` represents the probability of the Bernoulli random variable, independently sampled for each mean value message from a factor node to a variable node, applied for randomised damping iteration scheme with `value` between 0 and 1. Default setting is set to `prob = 0.6`. The damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights `alpha = value` and `1 - alpha`, applied for randomised damping iteration scheme where `alpha` is between 0 and 1. Default setting is set to `alpha = 0.4`.
 
+Using the function `graphicalModel()`, the set of damp messages are fixed through GBP iterations. However, we provide the function that changes damp parameters `prob` and `alpha` on the fly:
+```julia-repl
+damping!(gbp; prob = value, alpha = value)
+```
+
 ---
 
 #### Freeze factor or variable nodes
