@@ -6,7 +6,7 @@ struct SystemModel
     data::String
 end
 
-struct FactorGraph
+mutable struct FactorGraph
     Nvariable::Int64
     Nfactor::Int64
     Nindirect::Int64
@@ -22,15 +22,19 @@ struct FactorGraph
     colptr::Array{Int64,1}
     alphaNew::Array{Float64,1}
     alphaOld::Array{Float64,1}
+    iterateFactor::Array{Int64,1}
+    iterateVariable::Array{Int64,1}
     dynamic::Array{Int64,1}
     ageing::Array{Int64,1}
 end
 
-struct Inference
-    FactorVariable::Array{Int64,2}
+mutable struct Inference
+    fromFactor::Array{Int64,1}
+    toVariable::Array{Int64,1}
     meanFactorVariable::Array{Float64,1}
     varianceFactorVariable::Array{Float64,1}
-    VariableFactor::Array{Int64,2}
+    fromVariable::Array{Int64,1}
+    toFactor::Array{Int64,1}
     meanVariableFactor::Array{Float64,1}
     varianceVariableFactor::Array{Float64,1}
     mean::Array{Float64,1}
@@ -228,7 +232,6 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     rowptr = fill(0, Nindirect)
     colptr = fill(0, Nvariable)
     idxi = 1; idxr = 1
-
     idxT = findall(!iszero, system.jacobianTranspose)
     @inbounds for i in idxT
         if (system.jacobianTranspose.colptr[i[2] + 1] - system.jacobianTranspose.colptr[i[2]]) == 1
@@ -271,15 +274,23 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     sortFactorIndex = sortperm(newFactorIndex)
     sendToVariable = temp[sortFactorIndex]
 
-    ### Indices for messages inference
+    ### Indices for messages inference output
+    lookup = Dict{Int, Int}()
+    for (k, i) in enumerate(dynamic)
+        if i != 0
+            lookup[i] = k
+        end
+    end
+
     factorIdx = similar(factorIndex)
     @inbounds for i = 1:Nindirect
         for j in rowptr[i]:(rowptr[i + 1] - 1)
-            factorIdx[sendToVariable[j]] = i
+            factorIdx[sendToVariable[j]] = lookup[i]
+            factorIndex[j] = lookup[i]
         end
     end
-    VariableFactor = [variableIndex factorIndex]
-    FactorVariable = [factorIdx variableIndex[sendToFactor]]
+    toVariable = variableIndex[sendToFactor]
+
 
     ### Initialize arrays for messages
     meanFactorVariable = similar(coefficient)
@@ -309,15 +320,18 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     mean = fill(0.0, Nvariable)
     variance = fill(0.0, Nvariable)
 
-    ### Ageing iteration counter
+    ### Iteration counters
     ageing = [0]
+    iterateFactor = collect(1:Nindirect)
+    iterateVariable = collect(1:Nvariable)
 
-    return FactorGraph(Nvariable, Nfactor, Nindirect, Nlink, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient, sendToVariable, sendToFactor, rowptr, colptr, alphaNew, alphaOld, dynamic, ageing),
-           Inference(FactorVariable, meanFactorVariable, varianceFactorVariable, VariableFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
+
+    return FactorGraph(Nvariable, Nfactor, Nindirect, Nlink, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient, sendToVariable, sendToFactor, rowptr, colptr, alphaNew, alphaOld, iterateFactor, iterateVariable, dynamic, ageing),
+           Inference(factorIdx, toVariable, meanFactorVariable, varianceFactorVariable, variableIndex, factorIndex, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
-### Set damping parameters
-function damping(gbp; prob::Float64 = 0.6, alpha::Float64 = 0.4)
+########## Set damping parameters ##########
+function damping!(gbp::GraphicalModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
     bernoulliSample = randsubseq(collect(1:gbp.graph.Nlink), prob)
     @inbounds for i in bernoulliSample
         gbp.graph.alphaNew[i] = 1.0 - alpha
@@ -326,7 +340,7 @@ function damping(gbp; prob::Float64 = 0.6, alpha::Float64 = 0.4)
 end
 
 ########## Dynamic the GBP update ##########
-@inline function dynamicInference(gbp, dynamic)
+@inline function dynamicInference!(gbp::GraphicalModel, dynamic)
     factor = trunc.(Int, dynamic[:, 1])
     @inbounds for (k, i) in enumerate(factor)
         if (gbp.system.jacobianTranspose.colptr[i + 1] - gbp.system.jacobianTranspose.colptr[i]) == 1
@@ -352,7 +366,7 @@ end
 end
 
 ######### Ageing the GBP update ##########
-@inline function ageingInference(gbp, dynamic)
+@inline function ageingInference!(gbp::GraphicalModel, dynamic)
     gbp.graph.ageing[1] += 1
     factor = trunc.(Int, dynamic[:, 1])
     @inbounds for (k, i) in enumerate(factor)
@@ -387,5 +401,62 @@ end
                 end
             end
         end
+    end
+end
+
+######### Freeze factor node ##########
+function freezeFactor!(gbp; factor = 2)
+    if factor > gbp.graph.Nfactor
+        error("The factor node does not exist.")
+    end
+
+    factorLocal = gbp.graph.dynamic[factor]
+    if factorLocal == 0
+        error("The singly connected factor node cannot be frozen.")
+    end
+
+    whereIs = 0
+    for i = 1:length(gbp.graph.iterateFactor)
+        if gbp.graph.iterateFactor[i] == factorLocal
+            whereIs = i
+            break
+        end
+    end
+    if whereIs == 0
+        error("The factor node does not exist or it is already frozen.")
+    end
+
+    deleteat!(gbp.graph.iterateFactor, whereIs)
+end
+
+######### Defreeze factor node ##########
+function defreezeFactor!(gbp; factor = 2)
+    if factor > gbp.graph.Nfactor
+        error("The factor node does not exist.")
+    end
+
+    factorLocal = gbp.graph.dynamic[factor]
+    if factorLocal == 0
+        error("The singly connected factor node cannot be defrozen.")
+    end
+
+    whereIs = 0
+    for i = 1:length(gbp.graph.iterateFactor)
+        if gbp.graph.iterateFactor[i] > factorLocal
+            whereIs = i
+            break
+        end
+    end
+
+    if whereIs != 0
+        if gbp.graph.iterateFactor[whereIs - 1] == factorLocal
+            error("The factor node is already defrozen.")
+        end
+        insert!(gbp.graph.iterateFactor, whereIs, factorLocal)
+    else
+        if gbp.graph.iterateFactor[end] == factorLocal
+            error("The factor node is already defrozen.")
+        end
+        push!(gbp.graph.iterateFactor, factorLocal)
     end
 end

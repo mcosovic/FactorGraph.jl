@@ -7,96 +7,65 @@ The GaussBP supports the composite type `GraphicalModel` with three fields:
 
 The subtype `FactorGraph` describes the factor graph obtained based on the input data. The GBP inference and marginal values are kept in the subtype `Inference`. The system of the linear equations being solved is preserved in the subtype `SystemModel`. Note that the function `graphicalModel()` returns the main GaussBP composite type `GraphicalModel` with all subtypes.
 
+In addition, we also provide several functions for factor graph manipulation.
+
 ---
 
-Input arguments of the function `graphicalModel()` describe the graphical model, while the function returns `GraphicalModel` type.  The order of inputs and their appearance is arbitrary, with only DATA input required. Still, for the methodological reasons, the syntax examples follow a certain order.
+#### Build graphical model
 
-#### Syntax
+Input arguments DATA of the function `graphicalModel()` describe the graphical model, while the function returns `GraphicalModel` type.
 ```julia-repl
-graphicalModel(DATA)
-graphicalModel(DATA; VIRTUAL)
-graphicalModel(DATA; VIRTUAL, DAMP)
-
+# loads the system data using h5-file from the package
+gbp = graphicalModel("data33_14.h5")
 ```
-```@raw html
-&nbsp;
-```
-#### Description
 ```julia-repl
-graphicalModel(DATA) forms the graphical model using DATA input
-graphicalModel(DATA; VIRTUAL) sets virtual factor nodes
-graphicalModel(DATA; VIRTUAL, DAMP) sets damping parameters
+# loads the system data using xlsx-file from the package
+gbp = graphicalModel("data33_14.xlsx")
 ```
-```@raw html
-&nbsp;
-```
-#### Output
 ```julia-repl
-gbp = graphicalModel() returns the graphical model
+# loads the system data from a custom path
+gbp = graphicalModel("C:/name.h5")
+```
+```julia-repl
+# loads the system data passing arguments directly
+gbp = graphicalModel(jacobian, observation, variances)
 ```
 
 ---
 
-#### Variable arguments
-The function `graphicalModel()` receives the variable argument DATA.
+#### Virtual factor nodes
 
+The GBP function `graphicalModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref schedule) which provides a detailed description of the virtual factor nodes.
 
-| DATA            | input system data                                                           |
-|:----------------|:----------------------------------------------------------------------------|
-|                 |                                                                             |
-| **Example**     | `"data33_14.h5"`                                                            |
-| **Description** | loads the system data using h5-file from the package                        |
-|                 |                                                                             |
-| **Example**     | `"data33_14.xlsx"`                                                          |
-| **Description** |  loads the system data using xlsx-file from the package                     |
-|                 |                                                                             |
-| **Example**     | `"C:/name.h5"`                                                              |
-| **Description** | loads the system data using h5-file from a custom path                      |
-|                 |                                                                             |
-| **Example**     | `"C:/name.xlsx"`                                                            |
-| **Description** | loads the system data using xlsx-file from a custom path                    |
-|                 |                                                                             |
-| **Example**     | `jacobian, observation, variances`                                          |
-| **Description** | loads the system data passing arguments directly                            |
-
+```julia-repl
+gbp = graphicalModel(DATA; mean = value, variance = value)
+```
+Default setting of the mean value is `mean = 0.0`, while the default variance is equal to `variance = 1e10`.
 
 ---
 
-#### Keyword arguments
-The GBP function `graphicalModel()` receives a group of arguments by keyword: VIRTUAL and DAMP.
+#### Randomized damping parametars
 
-| VIRTUAL         | sets virtual factor nodes                                                           |
-|:----------------|:------------------------------------------------------------------------------------|
-|                 |                                                                                     |
-| **Command**     | `mean = value`                                                                      |
-| **Description** |  the mean value of the virtual factor nodes, `default setting: mean = 0.0`          |
-|                 |                                                                                     |
-| **Command**     | `variance = value`                                                                  |
-| **Description** |  the variance value of the virtual factor nodes, `default setting: variance = 1e10` |
-
-We advise the reader to read the section [message passing schedule] (@ref schedule) which provides a detailed description of the virtual factor nodes.
-
-```@raw html
-&nbsp;
+The GBP function `graphicalModel()` receives arguments by keyword to set damping parametars. We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
+```julia-repl
+gbp = graphicalModel(DATA; prob = value, alpha = value)
 ```
+The keyword `prob` represents the probability of the Bernoulli random variable, independently sampled for each mean value message from a factor node to a variable node, applied for randomised damping iteration scheme with `value` between 0 and 1. Default setting is set to `prob = 0.6`. The damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights `alpha = value` and `1 - alpha`, applied for randomised damping iteration scheme where `alpha` is between 0 and 1. Default setting is set to `alpha = 0.4`.
 
-| DAMP            | sets damping parameters                                                     |
-|:----------------|:----------------------------------------------------------------------------|
-| **Command**     | `prob = value`                                                              |
-| **Description** |  a Bernoulli random variable with probability `prob = value` independently sampled for each mean value message from a factor node to a variable node, applied for randomised damping iteration scheme with `value` between 0 and 1, `default setting: prob = 0.6`     |
-|                 |                                                                             |
-| **Command**     | `alpha = value`                                                             |
-| **Description** |  the damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights `alpha = value` and `1 - alpha`, applied for randomised damping iteration scheme where `alpha` is between 0 and 1, `default setting: alpha = 0.4` |
+---
 
-We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
+#### Freeze factor nodes
+The function freezes the target factor node, whereby all messages sent by the factor node retain the values that were at the time of freezing.
+```julia-repl
+freezeFactor!(gbp; factor = value)
+```
+The function accepts the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix.
 
+---
 
-
-
-
-
-
-
-
-
-
+#### Defreeze factor nodes
+The function refreezes the target factor node which was frozen, whereby the factor node begins to calculate outgoing messages.
+```julia-repl
+defreezeFactor!(gbp; factor = value)
+```
+The function accepts the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix. Defreeze node.

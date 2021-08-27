@@ -1,6 +1,6 @@
 ########## Efficient Kahan-Babuska GBP messages: Factor to variable ##########
 function messageFactorVariableKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0; errorV = 0.0; errorM = 0.0
 
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
@@ -19,7 +19,7 @@ end
 
 # ########## Efficient Kahan-Babuska GBP means: Factor to variable ##########
 function meanFactorVariableKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; errorM = 0.0
 
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
@@ -34,7 +34,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP variances: Factor to variable ##########
 function varianceFactorVariableKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Vrow = 0.0; errorV = 0.0
 
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
@@ -49,7 +49,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP damp messages: Factor to variable ##########
 function messageDampFactorVariableKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0; errorV = 0.0; errorM = 0.0
 
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
@@ -68,7 +68,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP damp means: Factor to variable ##########
 function meanDampFactorVariableKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; errorM = 0.0
 
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)

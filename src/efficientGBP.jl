@@ -1,6 +1,6 @@
 ########## Efficient GBP messages: Factor to variable ##########
 function messageFactorVariableEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
             Mrow += (gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j])
@@ -15,7 +15,7 @@ end
 
 ########## Efficient GBP means: Factor to variable ##########
 function meanFactorVariableEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
             Mrow += (gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j])
@@ -28,7 +28,7 @@ end
 
 ########## Efficient GBP variances: Factor to variable ##########
 function varianceFactorVariableEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Vrow = 0.0
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
             Vrow += (gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j])
@@ -41,7 +41,7 @@ end
 
 ########## Efficient GBP damp messages: Factor to variable ##########
 function messageDampFactorVariableEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
             Mrow += (gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j])
@@ -56,7 +56,7 @@ end
 
 ########## Efficient GBP damp means: Factor to variable ##########
 function meanDampFactorVariableEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nindirect
+    @inbounds for i in gbp.graph.iterateFactor
         Mrow = 0.0
         for j in gbp.graph.rowptr[i]:(gbp.graph.rowptr[i + 1] - 1)
             Mrow += (gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j])

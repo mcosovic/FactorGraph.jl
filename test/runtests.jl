@@ -125,13 +125,13 @@ end
         messageVariableFactorVanilla(gbp)
     end
     dynamic = [1 6.0 1.0; 3 4.0 1.0]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 10:99
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
     dynamic = [2 3.0 1.0]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 100:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -147,7 +147,7 @@ end
         marginal(gbp)
     end
     dynamic = [1 6.0 1.0; 3 4.0 1.0; 2 3.0 1.0]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 10:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -168,9 +168,9 @@ end
         messageVariableFactorVanilla(gbp)
     end
     dynamic = [4 6.0 1.0 1 1e57 2 1e60]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 101:1000
-        ageingInference(gbp, dynamic)
+        ageingInference!(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -184,9 +184,9 @@ end
         messageVariableFactorVanilla(gbp)
     end
     dynamic = [4 6.0 1.0 2 1e57 0.00002 1e60]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 101:1000
-        ageingInference(gbp, dynamic)
+        ageingInference!(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -200,12 +200,47 @@ end
         messageVariableFactorVanilla(gbp)
     end
     dynamic =  [4 6.0 1.0 3 0.08 2 1e60]
-    dynamicInference(gbp, dynamic)
+    dynamicInference!(gbp, dynamic)
     for iteration = 101:1000
-        ageingInference(gbp, dynamic)
+        ageingInference!(gbp, dynamic)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 3.0]
+end
+
+@testset "GraphicalModel" begin
+    ### Freeze factor node
+    gbp = graphicalModel("data33_14.h5")
+    for i = 1:2
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    beforeFreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
+    idx = T.fromFactor .== 10
+    beforeFreeze = beforeFreeze[idx, :]
+    freezeFactor!(gbp; factor = 10)
+    for i = 1:20
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    afterFreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
+    afterFreeze = afterFreeze[idx, :]
+    @test sum(beforeFreeze[:, 3] - afterFreeze[:, 3]) == 0
+    @test sum(beforeFreeze[:, 4] - afterFreeze[:, 4]) == 0
+
+    ### Defreeze factor node
+    defreezeFactor!(gbp; factor = 10)
+    for i = 1:20
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    afterDefreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
+    afterDefreeze = afterDefreeze[idx, :]
+    @test sum(afterDefreeze[:, 3] - afterFreeze[:, 3]) != 0
+    @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 end

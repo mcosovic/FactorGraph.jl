@@ -118,7 +118,7 @@ for iteration = 1:200                       # the GBP inference
 end
 
 dynamic = [1 0.85 1e-10; 3 2.4 1e-10]       # factor nodes change the mean and variance values
-dynamicInference(gbp, dynamic)              # integrate changes in the running GBP
+dynamicInference!(gbp, dynamic)             # integrate changes in the running GBP
 for iteration = 201:400                     # continues the GBP inference
     messageFactorVariableVanilla(gbp)       # compute message using the native GBP
     messageVariableFactorVanilla(gbp)       # compute message using the native GBP
@@ -143,9 +143,9 @@ for iteration = 1:200                       # the GBP inference
 end
 
 dynamic = [1 0.85 1.0 1 0.05 0 50]          # factor node with the linear ageing
-dynamicInference(gbp, dynamic)              # integrate changes in the running GBP
+dynamicInference!(gbp, dynamic)             # integrate changes in the running GBP
 for iteration = 201:400                     # continues the GBP inference
-    ageingInference(gbp, dynamic)           # integrate variance ageing
+    ageingInference!(gbp, dynamic)          # integrate variance ageing
     messageFactorVariableVanilla(gbp)       # compute message using the native GBP
     messageVariableFactorVanilla(gbp)       # compute message using the native GBP
 end
