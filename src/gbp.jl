@@ -377,7 +377,7 @@ end
         elseif model == 2
             gbp.system.variance[factor] = a * log10((iterate + 1 + b) / (1 + b)) + variance
         elseif model == 3
-            gbp.system.variance[i] = variance * (1 + b)^(a * iterate)
+            gbp.system.variance[factor] = variance * (1 + b)^(a * iterate)
         end
 
         if gbp.system.variance[factor] > limit
