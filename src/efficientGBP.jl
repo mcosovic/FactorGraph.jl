@@ -69,7 +69,7 @@ end
 
 ########## Efficient GBP messages: Variable to factor ##########
 function messageVariableFactorEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
             Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
@@ -84,7 +84,7 @@ end
 
 ########## Efficient GBP means: Variable to factor ##########
 function meanVariableFactorEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Mcol = gbp.graph.meanDirect[i]
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
             Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
@@ -97,7 +97,7 @@ end
 
 ########## Efficient GBP variances: Variable to factor ##########
 function varianceVariableFactorEfficient(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Wcol = gbp.graph.weightDirect[i]
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
             Wcol += 1 / gbp.inference.varianceFactorVariable[j]

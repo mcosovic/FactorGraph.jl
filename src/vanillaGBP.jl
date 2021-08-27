@@ -95,7 +95,7 @@ end
 
 ############# Vanilla GBP means: Variable to factor ##########
 function meanVariableFactorVanilla(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
             Mcol = gbp.graph.meanDirect[i]
             for k in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
@@ -110,7 +110,7 @@ end
 
 ############# Vanilla GBP variances: Variable to factor ##########
 function varianceVariableFactorVanilla(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
             Wcol = gbp.graph.weightDirect[i]
             for k in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)

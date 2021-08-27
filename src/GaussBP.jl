@@ -8,7 +8,8 @@ using Printf
 
 ### Form a factor graph and initialize messages and marginals
 include("gbp.jl")
-export graphicalModel, dynamicInference!, ageingInference!, damping!, freezeFactor!, defreezeFactor!
+export graphicalModel, dynamicInference!, ageingInference!, damping!,
+       freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!
 
 ### Vanilla GBP algorithm
 include("vanillaGBP.jl")

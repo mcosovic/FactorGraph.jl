@@ -54,18 +54,24 @@ The keyword `prob` represents the probability of the Bernoulli random variable, 
 
 ---
 
-#### Freeze factor nodes
-The function freezes the target factor node, whereby all messages sent by the factor node retain the values that were at the time of freezing.
+#### Freeze factor or variable nodes
+The functions freeze the target factor or variable node, whereby all messages sent by the factor or variable node retain the values that were at the time of freezing.
 ```julia-repl
 freezeFactor!(gbp; factor = value)
 ```
-The function accepts the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix.
+```julia-repl
+freezeVariable!(gbp; variable = value)
+```
+The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix, or the variable node index corresponding to the column number of the jacobian matrix.
 
 ---
 
-#### Defreeze factor nodes
-The function refreezes the target factor node which was frozen, whereby the factor node begins to calculate outgoing messages.
+#### Defreeze factor or variable nodes
+The functions refreeze the target frozen factor node or frozen variable node, whereby the factor or variable node begins to calculate outgoing messages.
 ```julia-repl
 defreezeFactor!(gbp; factor = value)
 ```
-The function accepts the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix. Defreeze node.
+```julia-repl
+defreezeVariable!(gbp; variable = value)
+```
+The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix, or the variable node index corresponding to the column number of the jacobian matrix.

@@ -405,8 +405,10 @@ end
 end
 
 ######### Freeze factor node ##########
-function freezeFactor!(gbp; factor = 2)
-    if factor > gbp.graph.Nfactor
+function freezeFactor!(gbp; factor = 0)
+    if factor == 0
+        error("The keyword factor is missing.")
+    elseif factor > gbp.graph.Nfactor
         error("The factor node does not exist.")
     end
 
@@ -430,8 +432,10 @@ function freezeFactor!(gbp; factor = 2)
 end
 
 ######### Defreeze factor node ##########
-function defreezeFactor!(gbp; factor = 2)
-    if factor > gbp.graph.Nfactor
+function defreezeFactor!(gbp; factor = 0)
+    if factor == 0
+        error("The keyword factor is missing.")
+    elseif factor > gbp.graph.Nfactor
         error("The factor node does not exist.")
     end
 
@@ -449,7 +453,7 @@ function defreezeFactor!(gbp; factor = 2)
     end
 
     if whereIs != 0
-        if gbp.graph.iterateFactor[whereIs - 1] == factorLocal
+        if whereIs != 1 && gbp.graph.iterateFactor[whereIs - 1] == factorLocal || gbp.graph.iterateFactor[1] == factorLocal
             error("The factor node is already defrozen.")
         end
         insert!(gbp.graph.iterateFactor, whereIs, factorLocal)
@@ -458,5 +462,56 @@ function defreezeFactor!(gbp; factor = 2)
             error("The factor node is already defrozen.")
         end
         push!(gbp.graph.iterateFactor, factorLocal)
+    end
+end
+
+######### Freeze variable node ##########
+function freezeVariable!(gbp; variable = 0)
+    if variable == 0
+        error("The keyword variable is missing.")
+    elseif variable > gbp.graph.Nvariable
+        error("The variable node does not exist.")
+    end
+
+    whereIs = 0
+    for i = 1:length(gbp.graph.iterateVariable)
+        if gbp.graph.iterateVariable[i] == variable
+            whereIs = i
+            break
+        end
+    end
+    if whereIs == 0
+        error("The variable node does not exist or it is already frozen.")
+    end
+
+    deleteat!(gbp.graph.iterateVariable, whereIs)
+end
+
+######### Defreeze variable node ##########
+function defreezeVariable!(gbp; variable = 0)
+    if variable == 0
+        error("The keyword variable is missing.")
+    elseif variable > gbp.graph.Nvariable
+        error("The variable node does not exist.")
+    end
+
+    whereIs = 0
+    for i = 1:length(gbp.graph.iterateVariable)
+        if gbp.graph.iterateVariable[i] > variable
+            whereIs = i
+            break
+        end
+    end
+
+    if whereIs != 0
+        if whereIs != 1 && gbp.graph.iterateVariable[whereIs - 1] == variable || gbp.graph.iterateVariable[1] == variable
+            error("The variable node is already defrozen.")
+        end
+        insert!(gbp.graph.iterateVariable, whereIs, variable)
+    else
+        if gbp.graph.iterateVariable[end] == variable
+            error("The variable node is already defrozen.")
+        end
+        push!(gbp.graph.iterateVariable, variable)
     end
 end

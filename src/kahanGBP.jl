@@ -83,7 +83,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP messages: Variable to factor ##########
 function messageVariableFactorKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Mcol = 0.0; Wcol = 0.0; errorV = 0.0; errorM = 0.0
 
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
@@ -101,7 +101,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP means: Variable to factor ##########
 function meanVariableFactorKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Mcol = 0.0; errorM = 0.0
 
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
@@ -116,7 +116,7 @@ end
 
 ########## Efficient Kahan-Babuska GBP variances: Variable to factor ##########
 function varianceVariableFactorKahan(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateVariable
         Wcol = 0.0; errorV = 0.0
 
         for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)

@@ -243,4 +243,37 @@ end
     afterDefreeze = afterDefreeze[idx, :]
     @test sum(afterDefreeze[:, 3] - afterFreeze[:, 3]) != 0
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
+
+    ### Freeze variable node
+    gbp = graphicalModel("data33_14.h5")
+    for i = 1:2
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    beforeFreeze = [T.fromVariable T.toFactor T.meanVariableFactor T.varianceVariableFactor]
+    idx = T.fromVariable .== 9
+    beforeFreeze = beforeFreeze[idx, :]
+    freezeVariable!(gbp; variable = 9)
+    for i = 1:20
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    afterFreeze = [T.fromVariable T.toFactor T.meanVariableFactor T.varianceVariableFactor]
+    afterFreeze = afterFreeze[idx, :]
+    @test sum(beforeFreeze[:, 3] - afterFreeze[:, 3]) == 0
+    @test sum(beforeFreeze[:, 4] - afterFreeze[:, 4]) == 0
+
+    ### Defreeze variable node
+    defreezeVariable!(gbp; variable = 9)
+    for i = 1:20
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    T = gbp.inference
+    afterDefreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
+    afterDefreeze = afterDefreeze[idx, :]
+    @test sum(afterDefreeze[:, 3] - afterFreeze[:, 3]) != 0
+    @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 end
