@@ -5,7 +5,6 @@ using HDF5, XLSX
 using Random
 using PrettyTables
 using Printf
-using Test
 
 ### Form a factor graph and initialize messages and marginals
 include("graphicalmodel.jl")
