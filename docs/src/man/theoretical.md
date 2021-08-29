@@ -200,14 +200,6 @@ To recall, each factor node is associated with the measurement value ``z_i`` and
 
 Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the Jacobian matrix, should include all possible measurements. Measurements that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to measurement variances whose values are much smaller than ``10^{60}``.
 
-GaussBP uses the above data according to the Table.
-
-| Column   | Description                                                                            |
-|:--------:|:---------------------------------------------------------------------------------------|
-| 1        | factor node index corresponding to the row number of the jacobian matrix               |
-| 2        | new observation value                                                                  |
-| 3        | new variance value                                                                     |
-
 ---
 
 ## [The Ageing GBP Algorithm]  (@id ageingGBP)
@@ -225,7 +217,7 @@ Depending on the measurements arriving dynamic, an adaptive mechanism for increa
 where ``a`` and ``b`` control the rate of growth.  In contrast, the exponential growth model corresponds to systems with a low sampling rate of the measurements:
 ```math
     v_i(\tau) = \begin{cases}
-      v_i(1+b)^{a(\tau )}, & 1 \leq \tau \leq \theta \\
+      v_i(1+b)^{a\tau}, & 1 \leq \tau \leq \theta \\
       \bar {v}_i, & \tau \geq \theta.
   \end{cases}
 ```

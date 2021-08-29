@@ -5,7 +5,6 @@ makedocs(
     modules = [GaussBP],
     clean = false,
     doctest = false,
-    format = Documenter.HTML(assets=["assets/style.css"]),
     pages = [
         "Home" => "index.md",
         "Input Data" => "man/input.md",

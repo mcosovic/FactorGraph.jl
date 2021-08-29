@@ -5,11 +5,20 @@ using HDF5, XLSX
 using Random
 using PrettyTables
 using Printf
+using Test
 
 ### Form a factor graph and initialize messages and marginals
-include("gbp.jl")
-export graphicalModel, dynamicInference!, ageingInference!, damping!,
-       freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!
+include("graphicalmodel.jl")
+export graphicalModel, damping!
+
+### Factor graph manipulation
+include("graphmanipulation.jl")
+export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
+       freezeVariableFactor!, freezeFactorVariable!
+
+### Inference
+include("inference.jl")
+export marginal, dynamicFactor!, ageingVariance!
 
 ### Vanilla GBP algorithm
 include("vanillaGBP.jl")
@@ -30,7 +39,7 @@ export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariab
        messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
 
 # Compute and show results
-include("results.jl")
-export marginal, wls, errorMetric, displayData
+include("utility.jl")
+export wls, errorMetric, displayData
 
 end # GaussBP

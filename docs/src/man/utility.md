@@ -24,18 +24,23 @@ The function returns the composite type `ErrorMetricWiden` with fields `rmse`, `
 
 ----
 #### Display results
-The function shows data display in the Julia REPL, and can provide different views depending on the input variables. The following function can be used to show GBP results:
+The function shows data display in the Julia REPL, and can provide different views depending on the input variables.
+
+The following function can be used to show GBP results:
 ```julia-repl
 displayData(gbp)
 ```
+
 To show the GBP results and error metric use:
 ```julia-repl
 displayData(gbp, evaluation)
 ```
+
 To show the GBP and WLS results use:
 ```julia-repl
 displayData(gbp, exact)
 ```
+
 To show the GBP and WLS results, and error metrics use:
 ```julia-repl
 displayData(gbp, exact, evaluation)

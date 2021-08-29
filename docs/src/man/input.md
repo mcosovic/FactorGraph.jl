@@ -41,45 +41,23 @@ The type and structure of the arguments must be:
 ---
 
 #### Data structure
-The GaussBP package uses `jacobian` input data format for all analyses. Jacobian input data contains coefficients of the linear system of the equations. The structure of the `jacobian` variable being loaded from HDF5 or XLSX input files is given in the table below, while passing data directly via command-line arguments allows the use of a sparse or full matrix to describe the `jacobian` variable.
+The GaussBP package uses `jacobian` input data format for all analyses. Jacobian input data contains coefficients of the linear system of the equations. The structure of the `jacobian` variable being loaded from HDF5 or XLSX input files is given below:
+- column 1: row indices of the corresponding jacobian matrix;
+- column 2: column indices of the corresponding jacobian matrix;
+- column 3: coefficient values of the corresponding jacobian matrix.
+Passing data directly via command-line arguments allows the use of a sparse or full matrix to describe the `jacobian` variable.
 
-| Column   | Description                                               |
-|:--------:|:----------------------------------------------------------|
-| 1        | row indices of the corresponding jacobian matrix          |
-| 2        | column indices of the corresponding jacobian matrix       |
-| 3        | coefficient values of the corresponding jacobian matrix   |
-
-```@raw html
-&nbsp;
-```
-The `observation` input data is used for all analyses available in the GaussBP package and contains measurement mean values.
-
-| Column   | Description                                               |
-|:--------:|:----------------------------------------------------------|
-| 1        | measurement mean value                                    |
-
-```@raw html
-&nbsp;
-```
-The `variance` input data is used for all analyses available in the GaussBP package and contains measurement variance values.
-
-| Column   | Description                                               |
-|:--------:|:----------------------------------------------------------|
-| 1        | measurement variance value                                |
+The `observation` and `variance` input data are used for all analyses available in the GaussBP package and contains measurement mean and variance values.
 
 ---
 
-
 #### Use cases
-The pre-defined data are located in the `src/example` as the `.h5` or `.xlsx` files.
-
-| Case                        | Variables     | Equations |
-|:----------------------------|--------------:|----------:|
-| data33_14.xlsx              | 14            | 33        |
-| data33_14.h5                | 33            | 14        |
-| data897_300.h5              | 300           | 897       |
-| data3119_1354.h5            | 1354          | 3119      |
-| data5997_2000.h5            | 2000          | 5997      |
-| data7149_2000.h5            | 2000          | 7149      |
-| data29997_10000.h5          | 10000         | 29997     |
-| data283803_70000.h5         | 70000         | 283803    |
+The pre-defined data are located in the `src/example` as the `.h5` or `.xlsx` files:
+- data33_14.xlsx;
+- data33_14.h5;
+- data897_300.h5;
+- data3119_1354.h5;
+- data5997_2000.h5;
+- data7149_2000.h5;
+- data29997_10000.h5;
+- data283803_70000.h5.

@@ -116,7 +116,7 @@ for iteration = 1:200                       # the GBP inference
     messageVariableFactorVanilla(gbp)       # compute message using the native GBP
 end
 
-dynamicInference!(gbp;                      # integrate changes in the running GBP
+dynamicFactor!(gbp;                         # integrate changes in the running GBP
     factor = 1,
     mean = 0.85,
     variance = 1e-10)
@@ -144,13 +144,13 @@ for iteration = 1:200                       # the GBP inference
 end
 
 for iteration = 1:400                       # continues the GBP inference
-    ageingInference!(gbp;                   # integrate changes in the running GBP
+    ageingVariance!(gbp;                    # integrate changes in the running GBP
         factor = 4,
-        variance = 1,
+        initial = 1,
+        limit = 50,
         model = 1,
         a = 0.05,
-        limit = 50,
-        iterate = iteration)
+        tau = iteration)
     messageFactorVariableVanilla(gbp)       # compute message using the native GBP
     messageVariableFactorVanilla(gbp)       # compute message using the native GBP
 end

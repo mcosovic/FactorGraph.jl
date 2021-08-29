@@ -19,22 +19,6 @@ struct ErrorMetricWiden
     maeGBPWLS::Float64
 end
 
-
-########## Compute the GBP marginal vector ##########
-function marginal(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
-        Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
-
-        for j in gbp.graph.colptr[i]:(gbp.graph.colptr[i + 1] - 1)
-            Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
-            Wcol += 1 / gbp.inference.varianceFactorVariable[j]
-        end
-        gbp.inference.variance[i] = 1 / Wcol
-        gbp.inference.mean[i] = Mcol * gbp.inference.variance[i]
-    end
-end
-
-
 ########## Compute the GBP error metrics ##########
 function errorMetric(gbp::GraphicalModel)
     observationGBP = gbp.system.jacobian * gbp.inference.mean

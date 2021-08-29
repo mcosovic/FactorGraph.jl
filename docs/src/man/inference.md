@@ -56,9 +56,9 @@ Same as before, the function accepts only the composite type `GraphicalModel`.
 ---
 
 #### Dynamic inference
-This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurement mean and variance values. More precisely, in each GBP iteration user can change the mean and variance values of the corresponding factor nodes and continue the GBP iteration process.
+This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurement mean and variance values. More precisely, in each GBP iteration user can change the mean and variance values of the corresponding factor nodes and continue the GBP iteration process. We advise the reader to read the section [dynamic GBP algorithm] (@ref dynamicGBP) which provides a detailed description of the input parameters.
 ```julia-repl
-dynamicInference!(gbp; factor = value, mean = value, variance = value)
+dynamicFactor!(gbp; factor = value, mean = value, variance = value)
 ```
 The function accepts the composite type `GraphicalModel` and keywords `factor`, `mean` and `variance`, which defines the dynamic update scheme of the factor nodes. The factor node index corresponding to the row number of the jacobian matrix. Note that during each function call, `SystemModel.observation` and `SystemModel.variance` variables also change values according to the scheme.
 
@@ -67,6 +67,7 @@ The function accepts the composite type `GraphicalModel` and keywords `factor`, 
 #### Dynamic inference with variance ageing
 The ageing framework represents an extension of the dynamic model and establishes a model for measurement arrival processes and for the process of measurement deterioration or ageing over time (or GBP iterations). We integrate these measurements regularly into the running instances of the GBP algorithm. We advise the reader to read the section [ageing GBP algorithm] (@ref ageingGBP) which provides a detailed description of the input parameters.
 ```julia-repl
-ageingInference!(gbp; factor = value, variance = value, model = value, a = value, b = value, limit = value, iterate = value)
+ageingVariance!(gbp; factor = value, initial = value, limit = value,
+                model = value, a = value, b = value, tau = value)
 ```
-This function should be integrated into the iteration loop to ensure variance ageing over iterations. The function accepts the composite type `GraphicalModel` and the keywords `factor`, `variance`, `model`, `a`, `b`, `limit` and `iterate`. The variance growth model can be linear `model = 1`, logarithmic `model = 2` and exponential `model = 3`, where parameters `a` and `b` control the rate of the growth. The `variance` defines the initial value of the variance, while the variance upper limit value is defined according to `limit`. The ageing model increases the value of variance over iterations, thus the current iteration step should be forwarded using `iterate` keyword. Also, during each function call, `SystemModel.variance` variable changes values according to the ageing model.
+This function should be integrated into the iteration loop to ensure variance ageing over iterations. The function accepts the composite type `GraphicalModel` and the keywords `factor`, `initial`, `limit`, `model`, `a`, `b` and `tau`. The variance growth model can be linear `model = 1`, logarithmic `model = 2` and exponential `model = 3`, where parameters `a` and `b` control the rate of the growth. The `initial` defines the initial value of the variance, while the variance upper limit value is defined according to `limit`. The ageing model increases the value of variance over iterations, thus the current iteration step should be forwarded using `tau` keyword. Also, during each function call, `SystemModel.variance` variable changes values according to the ageing model.

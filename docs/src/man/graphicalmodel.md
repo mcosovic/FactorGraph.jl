@@ -14,20 +14,24 @@ In addition, we also provide several functions for factor graph manipulation.
 #### Build graphical model
 
 Input arguments DATA of the function `graphicalModel()` describe the graphical model, while the function returns `GraphicalModel` type.
+
+Loads the system data using h5-file from the package:
 ```julia-repl
-# loads the system data using h5-file from the package
 gbp = graphicalModel("data33_14.h5")
 ```
+
+Loads the system data using xlsx-file from the package:
 ```julia-repl
-# loads the system data using xlsx-file from the package
 gbp = graphicalModel("data33_14.xlsx")
 ```
+
+Loads the system data from a custom path:
 ```julia-repl
-# loads the system data from a custom path
 gbp = graphicalModel("C:/name.h5")
 ```
+
+Loads the system data passing arguments directly:
 ```julia-repl
-# loads the system data passing arguments directly
 gbp = graphicalModel(jacobian, observation, variances)
 ```
 
@@ -59,7 +63,7 @@ damping!(gbp; prob = value, alpha = value)
 
 ---
 
-#### Freeze factor or variable nodes
+#### Freeze factor node, variable node or edge
 The functions freeze the target factor or variable node, whereby all messages sent by the factor or variable node retain the values that were at the time of freezing.
 ```julia-repl
 freezeFactor!(gbp; factor = value)
@@ -68,6 +72,15 @@ freezeFactor!(gbp; factor = value)
 freezeVariable!(gbp; variable = value)
 ```
 The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix, or the variable node index corresponding to the column number of the jacobian matrix.
+
+Additionally, we provide functions that freeze the target edge. More precisely, the function freezes the message from variable node to factor node or the message from factor node to variable node. Hence, the frozen message retains the value that was at the time of freezing.
+```julia-repl
+freezeVariableFactor!(gbp; variable = value, factor = value)
+```
+```julia-repl
+freezeFactorVariable!(gbp; factor = value, variable = value)
+```
+The variable node index corresponding to the column number of the jacobian matrix.
 
 ---
 

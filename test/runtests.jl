@@ -124,13 +124,13 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamicInference!(gbp; factor = 1, mean = 6, variance = 1)
-    dynamicInference!(gbp; factor = 3, mean = 4, variance = 1)
+    dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
+    dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
     for iteration = 10:99
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    dynamicInference!(gbp; factor = 2, mean = 3, variance = 1)
+    dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 100:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -145,9 +145,9 @@ end
         messageVariableFactorVanilla(gbp)
         marginal(gbp)
     end
-    dynamicInference!(gbp; factor = 1, mean = 6, variance = 1)
-    dynamicInference!(gbp; factor = 3, mean = 4, variance = 1)
-    dynamicInference!(gbp; factor = 2, mean = 3, variance = 1)
+    dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
+    dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
+    dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 10:1000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -168,7 +168,7 @@ end
         messageVariableFactorVanilla(gbp)
     end
     for iteration = 1:900
-        ageingInference!(gbp; factor = 4, variance = 1, model = 1, a = 1e57, limit = 1e60, iterate = iteration)
+        ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 1, a = 1e57, tau = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -182,7 +182,7 @@ end
         messageVariableFactorVanilla(gbp)
     end
     for iteration = 1:1000
-        ageingInference!(gbp; factor = 4, variance = 1, model = 2, a = 1e57, b = 0.00002, limit = 1e60, iterate = iteration)
+        ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 2, a = 1e57, b = 0.00002, tau = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -196,7 +196,7 @@ end
         messageVariableFactorVanilla(gbp)
     end
     for iteration = 1:900
-        ageingInference!(gbp; factor = 4, variance = 1, model = 3, a = 0.08, b = 2, limit = 1e60, iterate = iteration)
+        ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 3, a = 0.08, b = 2, tau = iteration)
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
@@ -270,4 +270,38 @@ end
     afterDefreeze = afterDefreeze[idx, :]
     @test sum(afterDefreeze[:, 3] - afterFreeze[:, 3]) != 0
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
+
+    ### Freeze message variable node to factor node
+    gbp = graphicalModel("data33_14.h5")
+    for iteration = 1:5
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    beforeFreeze6 = copy(gbp.inference.meanVariableFactor[6])
+    beforeFreeze57 = copy(gbp.inference.meanVariableFactor[57])
+    freezeVariableFactor!(gbp; variable = 9, factor = 29)
+    freezeVariableFactor!(gbp; variable = 2, factor = 10)
+    for iteration = 1:100
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    @test beforeFreeze6 == gbp.inference.meanVariableFactor[6]
+    @test beforeFreeze57 == gbp.inference.meanVariableFactor[57]
+
+    ### Freeze message factor node to variable node
+    gbp = graphicalModel("data33_14.h5")
+    for iteration = 1:5
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    beforeFreeze6 = copy(gbp.inference.meanFactorVariable[6])
+    beforeFreeze57 = copy(gbp.inference.meanFactorVariable[57])
+    freezeFactorVariable!(gbp; variable = 2, factor = 11)
+    freezeFactorVariable!(gbp; variable = 14, factor = 25)
+    for iteration = 1:100
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    @test beforeFreeze6 == gbp.inference.meanFactorVariable[6]
+    @test beforeFreeze57 == gbp.inference.meanFactorVariable[57]
 end
