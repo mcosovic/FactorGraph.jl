@@ -116,10 +116,9 @@ function freezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor 
         error("The keyword variable or factor is missing.")
     elseif variable > gbp.graph.Nvariable || factor > gbp.graph.Nfactor
         error("The variable or factor node does not exist.")
-    end
-
-    value = gbp.system.jacobian[factor, variable]
-    if value == 0
+    elseif gbp.graph.dynamic[factor] == 0
+        error("The singly connected factor node cannot be frozen.")
+    elseif gbp.system.jacobian[factor, variable] == 0
         error("The edge does not exist.")
     end
 
@@ -135,16 +134,41 @@ function freezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor 
     deleteat!(gbp.graph.colptr[variable], whereIs)
 end
 
+######### Defreeze Egdge: From variable to factor node ##########
+function defreezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor = 0::Int64)
+    if variable == 0 || factor == 0
+        error("The keyword variable or factor is missing.")
+    elseif variable > gbp.graph.Nvariable || factor > gbp.graph.Nfactor
+        error("The variable or factor node does not exist.")
+    elseif gbp.graph.dynamic[factor] == 0
+        error("The singly connected factor node cannot be defrozen.")
+    elseif gbp.system.jacobian[factor, variable] == 0
+        error("The edge does not exist.")
+    end
+
+    @inbounds for i = 1:gbp.graph.Nlink
+        if gbp.inference.fromFactor[i] == factor && gbp.inference.toVariable[i] == variable
+            for j in gbp.graph.colptr[variable]
+                if j == i
+                    error("The edge is already defrozen.")
+                end
+            end
+            push!(gbp.graph.colptr[variable], i)
+            break
+        end
+    end
+    sort!(gbp.graph.colptr[variable])
+end
+
 ######### Freeze Egdge: From factor to variable node ##########
 function freezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable = 0::Int64)
     if variable == 0 || factor == 0
         error("The keyword variable or factor is missing.")
     elseif variable > gbp.graph.Nvariable || factor > gbp.graph.Nfactor
         error("The variable or factor node does not exist.")
-    end
-
-    value = gbp.system.jacobian[factor, variable]
-    if value == 0
+    elseif gbp.graph.dynamic[factor] == 0
+        error("The singly connected factor node cannot be frozen.")
+    elseif gbp.system.jacobian[factor, variable] == 0
         error("The edge does not exist.")
     end
 
@@ -161,3 +185,29 @@ function freezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable 
     deleteat!(gbp.graph.rowptr[factorLocal], whereIs)
 end
 
+######### Defreeze Egdge: From factor to variable node ##########
+function defreezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable = 0::Int64)
+    if variable == 0 || factor == 0
+        error("The keyword variable or factor is missing.")
+    elseif variable > gbp.graph.Nvariable || factor > gbp.graph.Nfactor
+        error("The variable or factor node does not exist.")
+    elseif gbp.graph.dynamic[factor] == 0
+        error("The singly connected factor node cannot be defrozen.")
+    elseif gbp.system.jacobian[factor, variable] == 0
+        error("The edge does not exist.")
+    end
+
+    factorLocal = gbp.graph.dynamic[factor]
+    @inbounds for i = 1:gbp.graph.Nlink
+        if gbp.inference.fromVariable[i] == variable && gbp.inference.toFactor[i] == factor
+            for j in gbp.graph.rowptr[factorLocal]
+                if j == i
+                    error("The edge is already defrozen.")
+                end
+            end
+            push!(gbp.graph.rowptr[factorLocal], i)
+            break
+        end
+    end
+    sort!(gbp.graph.rowptr[factorLocal])
+end

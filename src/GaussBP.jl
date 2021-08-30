@@ -13,7 +13,7 @@ export graphicalModel, damping!
 ### Factor graph manipulation
 include("graphmanipulation.jl")
 export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
-       freezeVariableFactor!, freezeFactorVariable!
+       freezeVariableFactor!, defreezeVariableFactor!, freezeFactorVariable!, defreezeFactorVariable!
 
 ### Inference
 include("inference.jl")

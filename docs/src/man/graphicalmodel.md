@@ -84,7 +84,7 @@ The variable node index corresponding to the column number of the jacobian matri
 
 ---
 
-#### Defreeze factor or variable nodes
+#### Defreeze factor node, variable node or edge
 The functions refreeze the target frozen factor node or frozen variable node, whereby the factor or variable node begins to calculate outgoing messages.
 ```julia-repl
 defreezeFactor!(gbp; factor = value)
@@ -93,3 +93,12 @@ defreezeFactor!(gbp; factor = value)
 defreezeVariable!(gbp; variable = value)
 ```
 The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the jacobian matrix, or the variable node index corresponding to the column number of the jacobian matrix.
+
+Also, we provide functions that refreeze the target edge, whereby the message from variable node to factor node or the message from factor node to variable node begins to calculate.
+```julia-repl
+defreezeVariableFactor!(gbp; variable = value, factor = value)
+```
+```julia-repl
+defreezeFactorVariable!(gbp; factor = value, variable = value)
+```
+Same as before, the variable node index corresponding to the column number of the jacobian matrix.

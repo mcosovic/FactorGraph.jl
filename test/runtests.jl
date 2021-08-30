@@ -271,7 +271,7 @@ end
     @test sum(afterDefreeze[:, 3] - afterFreeze[:, 3]) != 0
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 
-    ### Freeze message variable node to factor node
+    ### Freeze and defreeze message variable node to factor node
     gbp = graphicalModel("data33_14.h5")
     for iteration = 1:5
         messageFactorVariableVanilla(gbp)
@@ -285,10 +285,20 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    @test beforeFreeze6 == gbp.inference.meanVariableFactor[6]
-    @test beforeFreeze57 == gbp.inference.meanVariableFactor[57]
+    afterFreeze6 = copy(gbp.inference.meanVariableFactor[6])
+    afterFreeze57 = copy(gbp.inference.meanVariableFactor[57])
+    @test beforeFreeze6 == afterFreeze6
+    @test beforeFreeze57 == afterFreeze57
+    defreezeVariableFactor!(gbp; variable = 9, factor = 29)
+    defreezeVariableFactor!(gbp; variable = 2, factor = 10)
+    for iteration = 1:100
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    @test afterFreeze6 != gbp.inference.meanVariableFactor[6]
+    @test afterFreeze57 != gbp.inference.meanVariableFactor[57]
 
-    ### Freeze message factor node to variable node
+    ### Freeze and defreeze message factor node to variable node
     gbp = graphicalModel("data33_14.h5")
     for iteration = 1:5
         messageFactorVariableVanilla(gbp)
@@ -302,6 +312,16 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    @test beforeFreeze6 == gbp.inference.meanFactorVariable[6]
-    @test beforeFreeze57 == gbp.inference.meanFactorVariable[57]
+    afterFreeze6 = copy(gbp.inference.meanFactorVariable[6])
+    afterFreeze57 = copy(gbp.inference.meanFactorVariable[57])
+    @test beforeFreeze6 == afterFreeze6
+    @test beforeFreeze57 == afterFreeze57
+    defreezeFactorVariable!(gbp; variable = 2, factor = 11)
+    defreezeFactorVariable!(gbp; variable = 14, factor = 25)
+    for iteration = 1:100
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    @test afterFreeze6 != gbp.inference.meanFactorVariable[6]
+    @test afterFreeze57 != gbp.inference.meanFactorVariable[57]
 end
