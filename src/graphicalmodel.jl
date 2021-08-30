@@ -300,6 +300,8 @@ end
 
 ########## Set damping parameters ##########
 function damping!(gbp::GraphicalModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
+    gbp.graph.alphaNew = fill(1.0, gbp.graph.Nlink)
+    gbp.graph.alphaOld = fill(0.0, gbp.graph.Nlink)
     bernoulliSample = randsubseq(collect(1:gbp.graph.Nlink), prob)
     @inbounds for i in bernoulliSample
         gbp.graph.alphaNew[i] = 1.0 - alpha
