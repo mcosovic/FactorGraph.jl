@@ -64,49 +64,49 @@ damping!(gbp; prob = value, alpha = value)
 ---
 
 #### Freeze factor node, variable node or edge
-The functions freeze the target factor or variable node, whereby all messages sent by the factor or variable node keep the values that were at the time of freezing.
+The functions freeze target factor or variable node, whereby all messages sent by the factor or variable node retain latest obtained values at the time of freezing.
 ```julia-repl
-freezeFactor!(gbp; factor = value)
+freezeFactor!(gbp; factor = index)
 ```
 ```julia-repl
-freezeVariable!(gbp; variable = value)
+freezeVariable!(gbp; variable = index)
 ```
 
-We provide functions that freeze the target edge. More precisely, the function freezes the message from variable node to factor node, or the message from factor node to variable node. Hence, the frozen message keeps the value that was at the time of freezing.
+We provide functions that freeze the target edge. More precisely, the function freezes the message from variable node to factor node, or the message from factor node to variable node. Hence, the frozen message keeps the last value obtained at the time of freezing.
 ```julia-repl
-freezeVariableFactor!(gbp; variable = value, factor = value)
+freezeVariableFactor!(gbp; variable = index, factor =index)
 ```
 ```julia-repl
-freezeFactorVariable!(gbp; factor = value, variable = value)
+freezeFactorVariable!(gbp; factor = index, variable =index)
 ```
-The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the Jacobian matrix, while the variable node index corresponding to the column number of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they certainly always send the same message.
+The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row number of the Jacobian matrix; and the variable node index corresponding to the column number of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
 
 ---
 
 #### Defreeze factor node, variable node or edge
-The functions refreeze the target frozen factor node or frozen variable node, whereby the factor or variable node calculates outgoing messages.
+The functions unfreeze the target frozen factor node or frozen variable node, allowing the factor or variable node to calculate outgoing messages.
 ```julia-repl
-defreezeFactor!(gbp; factor = value)
+defreezeFactor!(gbp; factor = index)
 ```
 ```julia-repl
-defreezeVariable!(gbp; variable = value)
-```
-
-Also, we provide functions that refreeze the target edge, whereby the message from variable node to factor node or the message from factor node to variable node calculates.
-```julia-repl
-defreezeVariableFactor!(gbp; variable = value, factor = value)
-```
-```julia-repl
-defreezeFactorVariable!(gbp; factor = value, variable = value)
+defreezeVariable!(gbp; variable = index)
 ```
 
-The functions accept the composite type `GraphicalModel` and the factor node index corresponding to the row number of the Jacobian matrix, while the variable node index corresponding to the column number of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be refreeze.
+Also, we provide functions that unfreeze the target edge, starting the calculation of messages either from variable node to factor node or from factor node to variable node calculates.
+```julia-repl
+defreezeVariableFactor!(gbp; variable = index, factor = index)
+```
+```julia-repl
+defreezeFactorVariable!(gbp; factor = index, variable = index)
+```
+
+The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row number of the Jacobian matrix; and the variable node index corresponding to the column number of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
 
 ---
 
 #### Hide factor node
-The function through a hiding mechanism allows the factor node to be softly deleted. Hence, the function obliterates the target factor node from the graph during the calculation. Soft delete actually removes the node, while preserved node numbering and keep the same dimensions of the internal variables.
+Utilising a hiding mechanism, the function softly deletes factor node. Hence, the function obliterates the target factor node from the graph during the calculation. Soft delete actually removes the node, while preserving node numbering and keeping the same dimensions of the internal variables.
 ```julia-repl
-hideFactor!(gbp; factor = value)
+hideFactor!(gbp; factor = index)
 ```
-If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. Where there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function `hideFactor!() ` also affects `SystemModel.observation`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` variables by setting non-zero elements to zero.
+If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function `hideFactor!() ` also affects `SystemModel.observation`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` fields by setting non-zero elements to zero.
