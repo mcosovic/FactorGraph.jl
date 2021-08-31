@@ -1,4 +1,4 @@
-struct SystemModel
+mutable struct SystemModel
     jacobian::SparseMatrixCSC{Float64,Int64}
     jacobianTranspose::SparseMatrixCSC{Float64,Int64}
     observation::Array{Float64,1}
@@ -11,6 +11,8 @@ mutable struct FactorGraph
     Nfactor::Int64
     Nindirect::Int64
     Nlink::Int64
+    virtualMean::Float64
+    virtualVariance::Float64
     meanDirect::Array{Float64,1}
     weightDirect::Array{Float64,1}
     meanIndirect::Array{Float64,1}
@@ -20,11 +22,12 @@ mutable struct FactorGraph
     sendToFactor::Array{Int64,1}
     rowptr::Vector{Vector{Int64}}
     colptr::Vector{Vector{Int64}}
-    colptrConcrete::Vector{Vector{Int64}}
+    colptrMarginal::Vector{Vector{Int64}}
     alphaNew::Array{Float64,1}
     alphaOld::Array{Float64,1}
     iterateFactor::Array{Int64,1}
     iterateVariable::Array{Int64,1}
+    iterateMarginal::Array{Int64,1}
     dynamic::Array{Int64,1}
 end
 
@@ -270,6 +273,7 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
             idxi += 1
         end
     end
+    colptrMarginal = deepcopy(colptr)
 
     ### Message send indices
     sendToFactor = sortperm(fromVariable)
@@ -291,9 +295,12 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     ### Iteration counters
     iterateFactor = collect(1:Nindirect)
     iterateVariable = collect(1:Nvariable)
+    iterateMarginal = copy(iterateVariable)
 
-    return FactorGraph(Nvariable, Nfactor, Nindirect, Nlink, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient,
-                       sendToVariable, sendToFactor, rowptr, colptr, copy(colptr), alphaNew, alphaOld, iterateFactor, iterateVariable, dynamic),
+    return FactorGraph(Nvariable, Nfactor, Nindirect, Nlink,
+                        meanVirtual, varianceVirtual, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient,
+                        sendToVariable, sendToFactor, rowptr, colptr, colptrMarginal, alphaNew, alphaOld,
+                        iterateFactor, iterateVariable, iterateMarginal, dynamic),
            Inference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
                      fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end

@@ -24,7 +24,7 @@ function errorMetric(gbp::GraphicalModel)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:gbp.graph.Nfactor
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
@@ -40,7 +40,7 @@ end
     observationGBP = gbp.system.jacobian * gbp.inference.mean
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:gbp.graph.Nfactor
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
@@ -70,15 +70,14 @@ function wls(gbp::GraphicalModel)
 
     observationWLS = gbp.system.jacobian * x
 
-    Nfac = length(gbp.system.observation)
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:Nfac
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationWLS[i])^2
         mae += abs(gbp.system.observation[i] - observationWLS[i])
         wrss += (gbp.system.observation[i] - observationWLS[i]) / gbp.system.variance[i]
     end
-    rmse = (rmse / Nfac)^(1/2)
-    mae = mae / Nfac
+    rmse = (rmse / gbp.graph.Nfactor)^(1/2)
+    mae = mae / gbp.graph.Nfactor
 
     return WeightedLeastSquares(x, rmse, mae, wrss)
 end

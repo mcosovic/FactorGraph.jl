@@ -1,9 +1,9 @@
 ########## Compute the GBP marginal vector ##########
 function marginal(gbp::GraphicalModel)
-    @inbounds for i = 1:gbp.graph.Nvariable
+    @inbounds for i in gbp.graph.iterateMarginal
         Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
 
-        for j in gbp.graph.colptrConcrete[i]
+        for j in gbp.graph.colptrMarginal[i]
             Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
             Wcol += 1 / gbp.inference.varianceFactorVariable[j]
         end

@@ -324,4 +324,39 @@ end
     end
     @test afterFreeze6 != gbp.inference.meanFactorVariable[6]
     @test afterFreeze57 != gbp.inference.meanFactorVariable[57]
+
+    ### Hide factor node
+    H = [1.5 0.0 1.0;
+         2.0 3.1 4.6;
+         2.0 1.1 0.6;
+         1.0 0.0 0.0;
+         1.0 0.0 0.0]
+    z = [0.5; 0.8; 4.1; 5.1; 10]
+    v = [0.1; 1.0; 1.0; 0.0002;  0.0001]
+    gbp = graphicalModel(H,z,v)
+    hideFactor!(gbp; factor = 2)
+    for iteration = 1:200
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
+
+    H = [1.5 0.0 1.0;
+         2.0 3.1 4.6;
+         2.0 1.1 0.6;
+         1.0 0.0 0.0;
+         1.0 0.0 0.0]
+    z = [0.5; 0.8; 4.1; 5.1; 10]
+    v = [0.1; 1.0; 1.0; 0.0002;  0.0001]
+    gbp = graphicalModel(H,z,v)
+    hideFactor!(gbp; factor = 4)
+    for iteration = 1:200
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
 end
