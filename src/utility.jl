@@ -23,14 +23,18 @@ end
 function errorMetric(gbp::GraphicalModel)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
 
+    dropzeros!(gbp.system.jacobian)
+    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
+    NactiveRows = length(activeRows)
+
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:length(gbp.system.observation)
+    @inbounds for i in activeRows
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
     end
-    rmse = (rmse / gbp.graph.Nfactor)^(1/2)
-    mae = mae / gbp.graph.Nfactor
+    rmse = (rmse / NactiveRows)^(1/2)
+    mae = mae / NactiveRows
 
     return ErrorMetric(rmse, mae, wrss)
 end
@@ -39,14 +43,18 @@ end
 @inline function errorMetric(gbp::GraphicalModel, wls::WeightedLeastSquares)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
 
+    dropzeros!(gbp.system.jacobian)
+    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
+    NactiveRows = length(activeRows)
+
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:length(gbp.system.observation)
+    @inbounds for i in activeRows
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
     end
-    rmse = (rmse / gbp.graph.Nfactor)^(1/2)
-    mae = mae / gbp.graph.Nfactor
+    rmse = (rmse / NactiveRows)^(1/2)
+    mae = mae / NactiveRows
 
     rmseGBPWLS = 0.0; maeGBPWLS = 0.0
     @inbounds for i = 1:gbp.graph.Nvariable
@@ -70,14 +78,18 @@ function wls(gbp::GraphicalModel)
 
     observationWLS = gbp.system.jacobian * x
 
+    dropzeros!(gbp.system.jacobian)
+    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
+    NactiveRows = length(activeRows)
+
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i = 1:length(gbp.system.observation)
+    @inbounds for i in activeRows
         rmse += (gbp.system.observation[i] - observationWLS[i])^2
         mae += abs(gbp.system.observation[i] - observationWLS[i])
         wrss += (gbp.system.observation[i] - observationWLS[i]) / gbp.system.variance[i]
     end
-    rmse = (rmse / gbp.graph.Nfactor)^(1/2)
-    mae = mae / gbp.graph.Nfactor
+    rmse = (rmse / NactiveRows)^(1/2)
+    mae = mae / NactiveRows
 
     return WeightedLeastSquares(x, rmse, mae, wrss)
 end

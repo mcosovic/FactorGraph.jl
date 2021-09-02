@@ -11,8 +11,8 @@ function messageFactorVariableKahan(gbp::GraphicalModel)
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
         for j in gbp.graph.rowptr[i]
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -27,7 +27,7 @@ function meanFactorVariableKahan(gbp::GraphicalModel)
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
         for j in gbp.graph.rowptr[i]
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]
         end
     end
 end
@@ -42,7 +42,7 @@ function varianceFactorVariableKahan(gbp::GraphicalModel)
             Vrow, errorV = kahanbabuska(summands, Vrow, errorV)
         end
         for j in gbp.graph.rowptr[i]
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -60,8 +60,8 @@ function messageDampFactorVariableKahan(gbp::GraphicalModel)
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
         for j in gbp.graph.rowptr[i]
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]]
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.varianceIndirect[j] + (Vrow - gbp.graph.coefficient[j]^2 * gbp.inference.varianceVariableFactor[j]) + errorV) / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -76,7 +76,7 @@ function meanDampFactorVariableKahan(gbp::GraphicalModel)
             Mrow, errorM = kahanbabuska(summands, Mrow, errorM)
         end
         for j in gbp.graph.rowptr[i]
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = (gbp.graph.alphaNew[j] * (gbp.graph.meanIndirect[j] - (Mrow - gbp.graph.coefficient[j] * gbp.inference.meanVariableFactor[j]) - errorM) / gbp.graph.coefficient[j]) + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]]
         end
     end
 end
@@ -93,8 +93,8 @@ function messageVariableFactorKahan(gbp::GraphicalModel)
             Mcol, errorM = kahanbabuska(summands, Mcol, errorM)
         end
         for j in gbp.graph.colptr[i]
-            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
-            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
+            gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
+            gbp.inference.meanVariableFactor[gbp.graph.toFactor.nzval[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]]
         end
     end
 end
@@ -109,7 +109,7 @@ function meanVariableFactorKahan(gbp::GraphicalModel)
             Mcol, errorM = kahanbabuska(summands, Mcol, errorM)
         end
         for j in gbp.graph.colptr[i]
-            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
+            gbp.inference.meanVariableFactor[gbp.graph.toFactor.nzval[j]] = ((Mcol - gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]) + errorM + gbp.graph.meanDirect[i]) * gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]]
         end
     end
 end
@@ -123,7 +123,7 @@ function varianceVariableFactorKahan(gbp::GraphicalModel)
             Wcol, errorV = kahanbabuska(1 / gbp.inference.varianceFactorVariable[j], Wcol, errorV)
         end
         for j in gbp.graph.colptr[i]
-            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
+            gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]] = 1 / ((Wcol - 1 / gbp.inference.varianceFactorVariable[j]) + errorV + gbp.graph.weightDirect[i])
         end
     end
 end

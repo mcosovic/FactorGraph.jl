@@ -359,4 +359,37 @@ end
     marginal(gbp)
     exact = wls(gbp)
     @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
+
+    ### Add factor node
+    gbp = graphicalModel("data33_14.h5")
+    for iteration = 1:15
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    addFactor!(gbp; mean = 2.0, variance = 0.001, variable = [2 3.0; 3 0.5])
+    addFactor!(gbp; mean = 4.0, variance = 0.001, variable = [1 2.1; 14 0.4; 13 0.2])
+    for iteration = 1:200
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
+
+    ### Hide and add factor node
+    gbp = graphicalModel("data33_14.h5")
+    for iteration = 1:15
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    hideFactor!(gbp; factor = 2)
+    addFactor!(gbp; mean = 2.0, variance = 0.001, variable = [2 3.0; 3 0.5])
+    addFactor!(gbp; mean = 4.0, variance = 0.001, variable = [1 2.1; 12 0.4; 14 0.2])
+    for iteration = 1:200
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    display(round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4))
 end

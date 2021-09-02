@@ -79,7 +79,7 @@ freezeVariableFactor!(gbp; variable = index, factor =index)
 ```julia-repl
 freezeFactorVariable!(gbp; factor = index, variable =index)
 ```
-The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row number of the Jacobian matrix; and the variable node index corresponding to the column number of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
+The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
 
 ---
 
@@ -100,7 +100,7 @@ defreezeVariableFactor!(gbp; variable = index, factor = index)
 defreezeFactorVariable!(gbp; factor = index, variable = index)
 ```
 
-The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row number of the Jacobian matrix; and the variable node index corresponding to the column number of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
+The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
 
 ---
 
@@ -109,4 +109,14 @@ Utilising a hiding mechanism, the function softly deletes factor node. Hence, th
 ```julia-repl
 hideFactor!(gbp; factor = index)
 ```
-If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function `hideFactor!() ` also affects `SystemModel.observation`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` fields by setting non-zero elements to zero.
+If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function also affects `SystemModel.observation`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` fields by setting non-zero elements to zero.
+
+---
+
+#### Add factor node
+The function adds the new factor node to the existing factor graph.
+```julia-repl
+addFactor!(gbp; mean = value, variance = value, variable = [index1 coefficent1; index2 coefficent2; ...])
+```
+The functions accept the following parameters: composite type `GraphicalModel`; the `mean` and `variance` of the corresponding equation that defines the new factor node. The keyword `variable` defines factor node connections to the variable nodes with corresponding coefficients. Variable node indices corresponding to the column indices of the Jacobian matrix. Further, the function also initializes messages from variable nodes to the new factor node using results from the last GBP iteration. Note that the function also affects `SystemModel.observation`, `SystemModel.variance`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose`.
+

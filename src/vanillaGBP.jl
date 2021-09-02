@@ -8,8 +8,8 @@ function messageFactorVariableVanilla(gbp::GraphicalModel)
                     Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = Mrow / gbp.graph.coefficient[j]
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = Mrow / gbp.graph.coefficient[j]
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -24,7 +24,7 @@ function meanFactorVariableVanilla(gbp::GraphicalModel)
                     Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
                 end
             end
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = Mrow / gbp.graph.coefficient[j]
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = Mrow / gbp.graph.coefficient[j]
         end
     end
 end
@@ -39,7 +39,7 @@ function varianceFactorVariableVanilla(gbp::GraphicalModel)
                     Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -55,8 +55,8 @@ function messageDampFactorVariableVanilla(gbp::GraphicalModel)
                     Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
                 end
             end
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
-            gbp.inference.varianceFactorVariable[gbp.graph.sendToVariable[j]] = Vrow / (gbp.graph.coefficient[j]^2)
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]]
+            gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = Vrow / (gbp.graph.coefficient[j]^2)
         end
     end
 end
@@ -71,7 +71,7 @@ function meanDampFactorVariableVanilla(gbp::GraphicalModel)
                     Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
                 end
             end
-            gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.sendToVariable[j]]
+            gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]]
         end
     end
 end
@@ -87,8 +87,8 @@ function messageVariableFactorVanilla(gbp::GraphicalModel)
                     Wcol += 1 / gbp.inference.varianceFactorVariable[k]
                 end
             end
-            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / Wcol
-            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = Mcol / Wcol
+            gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]] = 1 / Wcol
+            gbp.inference.meanVariableFactor[gbp.graph.toFactor.nzval[j]] = Mcol / Wcol
         end
     end
 end
@@ -103,7 +103,7 @@ function meanVariableFactorVanilla(gbp::GraphicalModel)
                     Mcol += gbp.inference.meanFactorVariable[k] / gbp.inference.varianceFactorVariable[k]
                 end
             end
-            gbp.inference.meanVariableFactor[gbp.graph.sendToFactor[j]] = Mcol * gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]]
+            gbp.inference.meanVariableFactor[gbp.graph.toFactor.nzval[j]] = Mcol * gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]]
         end
     end
 end
@@ -118,7 +118,7 @@ function varianceVariableFactorVanilla(gbp::GraphicalModel)
                     Wcol += 1 / gbp.inference.varianceFactorVariable[k]
                 end
             end
-            gbp.inference.varianceVariableFactor[gbp.graph.sendToFactor[j]] = 1 / Wcol
+            gbp.inference.varianceVariableFactor[gbp.graph.toFactor.nzval[j]] = 1 / Wcol
         end
     end
 end

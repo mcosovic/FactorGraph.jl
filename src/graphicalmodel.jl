@@ -18,8 +18,8 @@ mutable struct FactorGraph
     meanIndirect::Array{Float64,1}
     varianceIndirect::Array{Float64,1}
     coefficient::Array{Float64,1}
-    sendToVariable::Array{Int64,1}
-    sendToFactor::Array{Int64,1}
+    toVariable::SparseMatrixCSC{Int64, Int64}
+    toFactor::SparseMatrixCSC{Int64, Int64}
     rowptr::Vector{Vector{Int64}}
     colptr::Vector{Vector{Int64}}
     colptrMarginal::Vector{Vector{Int64}}
@@ -276,8 +276,9 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     colptrMarginal = deepcopy(colptr)
 
     ### Message send indices
-    sendToFactor = sortperm(fromVariable)
-    sendToVariable = sortperm(sendToFactor)
+    links = collect(1:idxi - 1)
+    sendToFactor = sparse(toFactor, fromVariable, links, Nfactor, Nvariable)
+    sendToVariable = sparse(toVariable, fromFactor, links, Nvariable, Nfactor)
 
     ### Set damping parameters
     alphaNew = fill(1.0, Nlink)

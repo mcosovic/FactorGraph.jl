@@ -60,7 +60,7 @@ This framework is an extension to the real-time model that operates continuously
 ```julia-repl
 dynamicFactor!(gbp; factor = index, mean = value, variance = value)
 ```
-The function accepts the composite type `GraphicalModel` and keywords `factor`, `mean` and `variance`, which defines the dynamic update scheme of the factor nodes. The factor node index corresponding to the row number of the jacobian matrix. Note that during each function call, `SystemModel.observation` and `SystemModel.variance` fields also change values according to the scheme.
+The function accepts the composite type `GraphicalModel` and keywords `factor`, `mean` and `variance`, which defines the dynamic update scheme of the factor nodes. The factor node index corresponding to the row index of the jacobian matrix. Note that during each function call, `SystemModel.observation` and `SystemModel.variance` fields also change values according to the scheme.
 
 ---
 
