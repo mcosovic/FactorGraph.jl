@@ -116,7 +116,7 @@ If the function targets the singly connected factor node, the function obliterat
 #### Add factor node
 The function adds the new factor node to the existing factor graph.
 ```julia-repl
-addFactor!(gbp; mean = value, variance = value, variable = [index1 coefficent1; index2 coefficent2; ...])
+addFactor!(gbp; mean = value, variance = value, variable = [index1 coefficent1; ...])
 ```
 The functions accept the following parameters: composite type `GraphicalModel`; the `mean` and `variance` of the corresponding equation that defines the new factor node. The keyword `variable` defines factor node connections to the variable nodes with corresponding coefficients. Variable node indices corresponding to the column indices of the Jacobian matrix. Further, the function also initializes messages from variable nodes to the new factor node using results from the last GBP iteration. Note that the function also affects `SystemModel.observation`, `SystemModel.variance`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose`.
 
