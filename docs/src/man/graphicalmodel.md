@@ -74,10 +74,10 @@ freezeVariable!(gbp; variable = index)
 
 We provide functions that freeze the target edge. More precisely, the function freezes the message from variable node to factor node, or the message from factor node to variable node. Hence, the frozen message keeps the last value obtained at the time of freezing.
 ```julia-repl
-freezeVariableFactor!(gbp; variable = index, factor =index)
+freezeVariableFactor!(gbp; variable = index, factor = index)
 ```
 ```julia-repl
-freezeFactorVariable!(gbp; factor = index, variable =index)
+freezeFactorVariable!(gbp; factor = index, variable = index)
 ```
 The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
 
