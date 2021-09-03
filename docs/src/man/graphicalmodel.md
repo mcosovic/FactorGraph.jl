@@ -114,7 +114,7 @@ If the function targets the singly connected factor node, the function obliterat
 ---
 
 #### Add factor nodes
-The function adds a new factor node to the existing factor graph.
+The function adds new factor nodes to the existing factor graph.
 ```julia-repl
 addFactors!(gbp; mean = vactor, variance = vector, jacobian = matrix)
 ```
