@@ -218,98 +218,127 @@ function hideFactor!(gbp::GraphicalModel; factor = 0::Int64)
 end
 
 ######### Add factor node ##########
-function addFactor!(gbp::GraphicalModel; mean = 0.0:Float64, variance = 0.0::Float64, variable = [])
-    Nvariables = size(variable, 1)
-    for i = 1:Nvariables
-        errorNodeIndex(variable[i, 1], gbp.graph.Nvariable; name = "variable")
-    end
-    gbp.graph.Nfactor += 1
-
-    ## Update system model
-    push!(gbp.system.observation, mean)
-    push!(gbp.system.variance, variance)
-    newRow = sparse(ones(Nvariables), variable[:, 1], variable[:, 2], 1, gbp.graph.Nvariable)
-    gbp.system.jacobian = [gbp.system.jacobian; newRow]
+function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian = [])
+    ### Update system model
+    append!(gbp.system.observation, mean)
+    append!(gbp.system.variance, variance)
+    newFactors = sparse(jacobian)
+    newFactorsTranspose = copy(transpose(newFactors))
+    gbp.system.jacobian = [gbp.system.jacobian; newFactors]
     gbp.system.jacobianTranspose = copy(transpose(gbp.system.jacobian))
 
-    ### Add singly connected factor node
-    if Nvariables == 1
-        vari = trunc(Int, variable[1, 1]); coef = variable[1, 2]
-        if gbp.graph.weightDirect[vari] == 1 / gbp.graph.virtualVariance &&  gbp.graph.meanDirect[vari] == gbp.graph.virtualMean /  gbp.graph.virtualVariance
-            gbp.graph.meanDirect[vari] = mean * coef / variance
-            gbp.graph.weightDirect[vari] = coef^2 / variance
+    ### Add singly connected factor nodes and update dynamic vector
+    Nfactor = length(mean)
+    Nlink = 0; Nindirect = 0
+    append!(gbp.graph.dynamic, fill(0, Nfactor))
+    @inbounds for i = 1:Nfactor
+        NvariableInRow = newFactorsTranspose.colptr[i + 1] - newFactorsTranspose.colptr[i]
+        if NvariableInRow == 1
+            variable = newFactorsTranspose.rowval[newFactorsTranspose.colptr[i]]
+            if gbp.graph.weightDirect[variable] == 1 / gbp.graph.virtualVariance &&  gbp.graph.meanDirect[variable] == gbp.graph.virtualMean /  gbp.graph.virtualVariance
+                gbp.graph.meanDirect[variable] = 0.0
+                gbp.graph.weightDirect[variable] = 0.0
+            end
+            gbp.graph.meanDirect[variable] += mean[i] * newFactors[i, variable] / variance[i]
+            gbp.graph.weightDirect[variable] += newFactors[i, variable]^2 / variance[i]
         else
-            gbp.graph.meanDirect[vari] += mean * coef / variance
-            gbp.graph.weightDirect[vari] += coef^2 / variance
+            Nlink += NvariableInRow
+            Nindirect += 1
+            gbp.graph.dynamic[i + gbp.graph.Nfactor] = Nindirect + gbp.graph.Nindirect
         end
-        push!(gbp.graph.dynamic, 0)
     end
 
-    ### Add indirect factor node
-    if Nvariables != 1
-        # Compute target marginals for initial messages and set new links from variable to factor node
-        idx = sortperm(variable[:, 1])
-        vari = trunc.(Int, variable[idx, 1]); coeff = variable[idx, 2]
+    ### Update vectors related with indirect factor nodes
+    toFactorLocal = fill(0, Nlink); temp = fill(0.0, Nlink)
+    append!(gbp.graph.rowptr, [Int[] for i = 1:Nindirect])
+    append!(gbp.graph.coefficient, temp)
+    append!(gbp.graph.meanIndirect, temp)
+    append!(gbp.graph.varianceIndirect, temp)
+    append!(gbp.inference.toFactor, toFactorLocal)
+    append!(gbp.inference.fromVariable, toFactorLocal)
+    append!(gbp.inference.meanVariableFactor, temp)
+    append!(gbp.inference.varianceVariableFactor, temp)
+    append!(gbp.graph.alphaOld, temp)
+    append!(gbp.graph.alphaNew, fill(1.0, Nlink))
 
-        append!(gbp.graph.coefficient, coeff)
-        append!(gbp.inference.fromVariable, vari)
-        append!(gbp.inference.toFactor, fill(gbp.graph.Nfactor, Nvariables))
-        append!(gbp.graph.meanIndirect, fill(mean, Nvariables))
-        append!(gbp.graph.varianceIndirect, fill(variance, Nvariables))
-        append!(gbp.graph.alphaNew, fill(1.0, Nvariables))
-        append!(gbp.graph.alphaOld, fill(0.0, Nvariables))
+    varianceInitial = fill(0.0, gbp.graph.Nvariable)
+    meanInitial = fill(0.0, gbp.graph.Nvariable)
+    idx = findall(!iszero, newFactorsTranspose)
+    idxr = gbp.graph.Nindirect + 1
+    idxi = gbp.graph.Nlink + 1
+    prev = 1
+    @inbounds for i in idx
+        if (newFactorsTranspose.colptr[i[2] + 1] - newFactorsTranspose.colptr[i[2]]) != 1
+            gbp.graph.coefficient[idxi] = newFactorsTranspose[i]
+            gbp.graph.meanIndirect[idxi] = mean[i[2]]
+            gbp.graph.varianceIndirect[idxi] = variance[i[2]]
+            gbp.inference.toFactor[idxi] = i[2] + gbp.graph.Nfactor
+            gbp.inference.fromVariable[idxi] = i[1]
 
-        @inbounds for (k, i) in enumerate(vari)
-            Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
-            for j in gbp.graph.colptrMarginal[i]
-                Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
-                Wcol += 1 / gbp.inference.varianceFactorVariable[j]
+            toFactorLocal[idxi - gbp.graph.Nlink] = i[2]
+            push!(gbp.graph.rowptr[idxr], idxi)
+
+            if meanInitial[i[1]] == 0 && varianceInitial[i[1]] == 0
+                Mcol = gbp.graph.meanDirect[i[1]]; Wcol = gbp.graph.weightDirect[i[1]]
+                for j in gbp.graph.colptrMarginal[i[1]]
+                    Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
+                    Wcol += 1 / gbp.inference.varianceFactorVariable[j]
+                end
+                varianceInitial[i[1]] = 1 / Wcol
+                meanInitial[i[1]] = Mcol * varianceInitial[i[1]]
             end
-            varianceInitial = 1 / Wcol
-            meanInitial = Mcol * gbp.inference.variance[i]
 
-            push!(gbp.inference.meanVariableFactor, meanInitial)
-            push!(gbp.inference.varianceVariableFactor, varianceInitial)
-        end
-        push!(gbp.graph.rowptr, collect(gbp.graph.Nlink + 1:(gbp.graph.Nlink + Nvariables)))
-
-        # Set new links from factor to variable
-        increment = 0; last = 0
-        @inbounds for (k, i) in enumerate(gbp.inference.toVariable)
-            if !isempty(vari) && (i - 1) == vari[1]
-                insert!(gbp.inference.toVariable, k, vari[1])
-                insert!(gbp.inference.fromFactor, k, gbp.graph.Nfactor)
-                insert!(gbp.inference.meanFactorVariable, k, 0.0)
-                insert!(gbp.inference.varianceFactorVariable, k, gbp.graph.virtualVariance)
-                push!(gbp.graph.colptr[vari[1]], k)
-                deleteat!(vari, 1)
-                increment += 1
+            idxi += 1
+            if idx[newFactorsTranspose.colptr[i[2] + 1] - 1] == i
+                idxr += 1
             end
-
-            if last != i  gbp.graph.colptr[i] .+= increment end
-            last = i
         end
-        if !isempty(vari)
-            push!(gbp.inference.toVariable, vari[1])
-            push!(gbp.inference.fromFactor, gbp.graph.Nfactor)
-            push!(gbp.inference.meanFactorVariable, 0.0)
-            push!(gbp.inference.varianceFactorVariable, gbp.graph.virtualVariance)
-            push!(gbp.graph.colptr[vari[1]], length(gbp.inference.toVariable))
-        end
-        gbp.graph.Nlink += Nvariables
-        gbp.graph.colptrMarginal = deepcopy(gbp.graph.colptr)
-
-        # Add other parameters
-        gbp.graph.Nindirect += 1
-
-        push!(gbp.graph.iterateFactor, gbp.graph.Nindirect)
-        push!(gbp.graph.dynamic, gbp.graph.Nindirect)
-
-        links = collect(1:gbp.graph.Nlink)
-        vari = trunc.(Int, variable[idx, 1])
-        gbp.graph.toVariable = sparse(gbp.inference.toVariable, gbp.inference.fromFactor, links, gbp.graph.Nvariable, gbp.graph.Nfactor)
-        gbp.graph.toFactor = [gbp.graph.toFactor; sparse(fill(1, length(gbp.graph.rowptr[end])), vari, gbp.graph.rowptr[end], 1, gbp.graph.Nvariable)]
     end
+
+    @inbounds for i = gbp.graph.Nlink + 1:gbp.graph.Nlink + Nlink
+        vari = gbp.inference.fromVariable[i]
+        gbp.inference.meanVariableFactor[i] = meanInitial[vari]
+        gbp.inference.varianceVariableFactor[i] = varianceInitial[vari]
+    end
+
+    start = gbp.graph.Nlink + 1
+    last = length(gbp.inference.toFactor)
+    links = collect(start:last)
+    sendToFactor = sparse(toFactorLocal, gbp.inference.fromVariable[start:last], links, Nfactor, gbp.graph.Nvariable)
+    gbp.graph.toFactor = [gbp.graph.toFactor; sendToFactor]
+
+    ### Update vectors related with variable nodes
+    append!(gbp.inference.toVariable, toFactorLocal)
+    append!(gbp.inference.fromFactor, toFactorLocal)
+    dropzeros!(gbp.system.jacobian)
+    idx = findall(!iszero, gbp.system.jacobian); idxi = 1; prev = 1
+    @inbounds for i in idx
+        if gbp.system.jacobianTranspose.colptr[i[1] + 1] - gbp.system.jacobianTranspose.colptr[i[1]] != 1
+            if prev == i[2]
+                gbp.graph.colptr[i[2]] = Int64[]
+                gbp.graph.colptrMarginal[i[2]] = Int64[]
+            end
+            prev = i[2] + 1
+
+            push!(gbp.graph.colptr[i[2]], idxi)
+            push!(gbp.graph.colptrMarginal[i[2]], idxi)
+            gbp.inference.toVariable[idxi] = i[2]
+            gbp.inference.fromFactor[idxi] = i[1]
+            idxi += 1
+        end
+    end
+
+    links = collect(1:idxi - 1)
+    gbp.graph.toVariable = sparse(gbp.inference.toVariable, gbp.inference.fromFactor, links, gbp.graph.Nvariable, gbp.graph.Nfactor + Nfactor)
+
+    append!(gbp.inference.meanFactorVariable, temp)
+    append!(gbp.inference.varianceFactorVariable, temp)
+    append!(gbp.graph.iterateFactor, collect(gbp.graph.Nindirect + 1:gbp.graph.Nindirect + Nindirect))
+
+    ### Update factor graf statistics
+    gbp.graph.Nfactor += Nfactor
+    gbp.graph.Nindirect += Nindirect
+    gbp.graph.Nlink += Nlink
 end
 
 

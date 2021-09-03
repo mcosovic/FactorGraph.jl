@@ -366,8 +366,13 @@ end
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
-    addFactor!(gbp; mean = 2.0, variance = 0.001, variable = [2 3.0; 3 0.5])
-    addFactor!(gbp; mean = 4.0, variance = 0.001, variable = [1 2.1; 14 0.4; 13 0.2])
+    mean = [2.2; 3.1; 0.5]
+    variance = [0.001; 0.001; 0.001]
+    jacobian = zeros(3, 14)
+    jacobian[1, 5] = 2.0
+    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
+    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
     for iteration = 1:200
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
@@ -383,13 +388,18 @@ end
         messageVariableFactorVanilla(gbp)
     end
     hideFactor!(gbp; factor = 2)
-    addFactor!(gbp; mean = 2.0, variance = 0.001, variable = [2 3.0; 3 0.5])
-    addFactor!(gbp; mean = 4.0, variance = 0.001, variable = [1 2.1; 12 0.4; 14 0.2])
+    mean = [2.2; 3.1; 0.5]
+    variance = [0.001; 0.001; 0.001]
+    jacobian = zeros(3, 14)
+    jacobian[1, 5] = 2.0
+    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
+    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
     for iteration = 1:200
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
-    display(round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4))
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
 end
