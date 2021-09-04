@@ -226,21 +226,24 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
 
     ### Pass through the columns
     colptr = [Int[] for i = 1:Nvariable]
+    colptrMarginal = [Int[] for i = 1:Nvariable]
     toVariable = fill(0, Nlink)
     fromFactor = similar(toVariable)
-
-    idx = findall(!iszero, system.jacobian); idxi = 1
-    @inbounds for i in idx
-        NvariableInRow = system.jacobianTranspose.colptr[i[1] + 1] - system.jacobianTranspose.colptr[i[1]]
-
-        if NvariableInRow == 1
-            meanDirect[i[2]] += system.observation[i[1]] * system.jacobian[i] / system.variance[i[1]]
-            weightDirect[i[2]] += system.jacobian[i]^2 / system.variance[i[1]]
-        else
-            push!(colptr[i[2]], idxi)
-            toVariable[idxi] = i[2]
-            fromFactor[idxi] = i[1]
-            idxi += 1
+    idxi = 1
+    @inbounds for col = 1:Nvariable
+        for i = system.jacobian.colptr[col]:(system.jacobian.colptr[col + 1] - 1)
+            row = system.jacobian.rowval[i]
+            NvariableInRow = system.jacobianTranspose.colptr[row + 1] - system.jacobianTranspose.colptr[row]
+            if NvariableInRow == 1
+                meanDirect[col] += system.observation[row] * system.jacobian[row, col] / system.variance[row]
+                weightDirect[col] += system.jacobian[row, col]^2 / system.variance[row]
+            else
+                push!(colptr[col], idxi)
+                push!(colptrMarginal[col], idxi)
+                toVariable[idxi] = col
+                fromFactor[idxi] = row
+                idxi += 1
+            end
         end
     end
 
@@ -256,24 +259,25 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     fromVariable = fill(0, Nlink)
     toFactor = similar(fromVariable)
     rowptr = [Int[] for i = 1:Nindirect]
+    idxi = 1
+    @inbounds for col = 1:Nfactor
+        for i = system.jacobianTranspose.colptr[col]:(system.jacobianTranspose.colptr[col + 1] - 1)
+            row = system.jacobianTranspose.rowval[i]
+            if (system.jacobianTranspose.colptr[col + 1] - system.jacobianTranspose.colptr[col]) != 1
+                coefficient[idxi] = system.jacobianTranspose[row, col]
+                meanIndirect[idxi] = system.observation[col]
+                varianceIndirect[idxi] = system.variance[col]
 
-    idx = findall(!iszero, system.jacobianTranspose); idxi = 1
-    @inbounds for i in idx
-        if (system.jacobianTranspose.colptr[i[2] + 1] - system.jacobianTranspose.colptr[i[2]]) != 1
-            coefficient[idxi] = system.jacobianTranspose[i]
-            meanIndirect[idxi] = system.observation[i[2]]
-            varianceIndirect[idxi] = system.variance[i[2]]
+                toFactor[idxi] = col
+                fromVariable[idxi] = row
+                push!(rowptr[dynamic[col]], idxi)
 
-            toFactor[idxi] = i[2]
-            fromVariable[idxi] = i[1]
-            push!(rowptr[dynamic[i[2]]], idxi)
-
-            varianceVariableFactor[idxi] = 1 / weightDirect[i[1]]
-            meanVariableFactor[idxi] = meanDirect[i[1]] * varianceVariableFactor[idxi]
-            idxi += 1
+                varianceVariableFactor[idxi] = 1 / weightDirect[row]
+                meanVariableFactor[idxi] = meanDirect[row] * varianceVariableFactor[idxi]
+                idxi += 1
+            end
         end
     end
-    colptrMarginal = deepcopy(colptr)
 
     ### Message send indices
     links = collect(1:idxi - 1)
