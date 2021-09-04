@@ -260,10 +260,11 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     toFactor = similar(fromVariable)
     rowptr = [Int[] for i = 1:Nindirect]
     idxi = 1
-    @inbounds for col = 1:Nfactor
-        for i = system.jacobianTranspose.colptr[col]:(system.jacobianTranspose.colptr[col + 1] - 1)
-            row = system.jacobianTranspose.rowval[i]
-            if (system.jacobianTranspose.colptr[col + 1] - system.jacobianTranspose.colptr[col]) != 1
+    @inbounds for (col, val) in enumerate(dynamic)
+        if val != 0
+            for i = system.jacobianTranspose.colptr[col]:(system.jacobianTranspose.colptr[col + 1] - 1)
+                row = system.jacobianTranspose.rowval[i]
+
                 coefficient[idxi] = system.jacobianTranspose[row, col]
                 meanIndirect[idxi] = system.observation[col]
                 varianceIndirect[idxi] = system.variance[col]
