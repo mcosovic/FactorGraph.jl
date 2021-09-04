@@ -263,34 +263,38 @@ function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian =
 
     varianceInitial = fill(0.0, gbp.graph.Nvariable)
     meanInitial = fill(0.0, gbp.graph.Nvariable)
-    idx = findall(!iszero, newFactorsTranspose)
     idxr = gbp.graph.Nindirect + 1
     idxi = gbp.graph.Nlink + 1
     prev = 1
-    @inbounds for i in idx
-        if (newFactorsTranspose.colptr[i[2] + 1] - newFactorsTranspose.colptr[i[2]]) != 1
-            gbp.graph.coefficient[idxi] = newFactorsTranspose[i]
-            gbp.graph.meanIndirect[idxi] = mean[i[2]]
-            gbp.graph.varianceIndirect[idxi] = variance[i[2]]
-            gbp.inference.toFactor[idxi] = i[2] + gbp.graph.Nfactor
-            gbp.inference.fromVariable[idxi] = i[1]
+    @inbounds for col = 1:Nfactor
+        if (newFactorsTranspose.colptr[col + 1] - newFactorsTranspose.colptr[col]) != 1
+            for i = newFactorsTranspose.colptr[col]:(newFactorsTranspose.colptr[col + 1] - 1)
+                row = newFactorsTranspose.rowval[i]
 
-            toFactorLocal[idxi - gbp.graph.Nlink] = i[2]
-            push!(gbp.graph.rowptr[idxr], idxi)
+                gbp.graph.coefficient[idxi] = newFactorsTranspose[row, col]
+                gbp.graph.meanIndirect[idxi] = mean[col]
+                gbp.graph.varianceIndirect[idxi] = variance[col]
+                gbp.inference.toFactor[idxi] = col + gbp.graph.Nfactor
+                gbp.inference.fromVariable[idxi] = row
 
-            if meanInitial[i[1]] == 0 && varianceInitial[i[1]] == 0
-                Mcol = gbp.graph.meanDirect[i[1]]; Wcol = gbp.graph.weightDirect[i[1]]
-                for j in gbp.graph.colptrMarginal[i[1]]
-                    Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
-                    Wcol += 1 / gbp.inference.varianceFactorVariable[j]
+                toFactorLocal[idxi - gbp.graph.Nlink] = col
+                push!(gbp.graph.rowptr[idxr], idxi)
+
+                if meanInitial[row] == 0 && varianceInitial[row] == 0
+                    Mcol = gbp.graph.meanDirect[row]; Wcol = gbp.graph.weightDirect[row]
+                    for j in gbp.graph.colptrMarginal[row]
+                        Mcol += gbp.inference.meanFactorVariable[j] / gbp.inference.varianceFactorVariable[j]
+                        Wcol += 1 / gbp.inference.varianceFactorVariable[j]
+                    end
+                    varianceInitial[row] = 1 / Wcol
+                    meanInitial[row] = Mcol * varianceInitial[row]
                 end
-                varianceInitial[i[1]] = 1 / Wcol
-                meanInitial[i[1]] = Mcol * varianceInitial[i[1]]
-            end
 
-            idxi += 1
-            if idx[newFactorsTranspose.colptr[i[2] + 1] - 1] == i
-                idxr += 1
+                idxi += 1
+                rown = newFactorsTranspose.rowval[newFactorsTranspose.colptr[col + 1] - 1]
+                if CartesianIndex(rown, col) == CartesianIndex(row, col)
+                    idxr += 1
+                end
             end
         end
     end
@@ -311,20 +315,23 @@ function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian =
     append!(gbp.inference.toVariable, toFactorLocal)
     append!(gbp.inference.fromFactor, toFactorLocal)
     dropzeros!(gbp.system.jacobian)
-    idx = findall(!iszero, gbp.system.jacobian); idxi = 1; prev = 1
-    @inbounds for i in idx
-        if gbp.system.jacobianTranspose.colptr[i[1] + 1] - gbp.system.jacobianTranspose.colptr[i[1]] != 1
-            if prev == i[2]
-                gbp.graph.colptr[i[2]] = Int64[]
-                gbp.graph.colptrMarginal[i[2]] = Int64[]
-            end
-            prev = i[2] + 1
+    idxi = 1; prev = 1
+    @inbounds for col = 1:gbp.graph.Nvariable
+        for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
+            row = gbp.system.jacobian.rowval[i]
+            if gbp.system.jacobianTranspose.colptr[row + 1] - gbp.system.jacobianTranspose.colptr[row] != 1
+                if prev == col
+                    gbp.graph.colptr[col] = Int64[]
+                    gbp.graph.colptrMarginal[col] = Int64[]
+                end
+                prev = col + 1
 
-            push!(gbp.graph.colptr[i[2]], idxi)
-            push!(gbp.graph.colptrMarginal[i[2]], idxi)
-            gbp.inference.toVariable[idxi] = i[2]
-            gbp.inference.fromFactor[idxi] = i[1]
-            idxi += 1
+                push!(gbp.graph.colptr[col], idxi)
+                push!(gbp.graph.colptrMarginal[col], idxi)
+                gbp.inference.toVariable[idxi] = col
+                gbp.inference.fromFactor[idxi] = row
+                idxi += 1
+            end
         end
     end
 
