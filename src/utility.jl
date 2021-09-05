@@ -22,13 +22,10 @@ end
 ########## Compute the GBP error metrics ##########
 function errorMetric(gbp::GraphicalModel)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
-
-    dropzeros!(gbp.system.jacobian)
-    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
-    NactiveRows = length(activeRows)
+    NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i in activeRows
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
@@ -42,13 +39,10 @@ end
 ########## Compute the GBP error metrics and error according to the WLS ##########
 @inline function errorMetric(gbp::GraphicalModel, wls::WeightedLeastSquares)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
-
-    dropzeros!(gbp.system.jacobian)
-    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
-    NactiveRows = length(activeRows)
+    NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i in activeRows
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
         wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
@@ -77,13 +71,10 @@ function wls(gbp::GraphicalModel)
     x = G \ b
 
     observationWLS = gbp.system.jacobian * x
-
-    dropzeros!(gbp.system.jacobian)
-    activeRows = intersect(Set(1:size(gbp.system.jacobian, 1)), Set(gbp.system.jacobian.rowval))
-    NactiveRows = length(activeRows)
+    NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
-    @inbounds for i in activeRows
+    @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationWLS[i])^2
         mae += abs(gbp.system.observation[i] - observationWLS[i])
         wrss += (gbp.system.observation[i] - observationWLS[i]) / gbp.system.variance[i]
@@ -162,4 +153,18 @@ function displayData(args...)
         pretty_table(A, header = ["State Variable", "Belief Propagation Estimate", "Weighted Least-squares Estimate", "Estimates Ratio"],
         columns_width = [15, 28, 32, 20], alignment=[:r, :r, :r, :r], formatters = ft_printf(["%3.0f", "%3.6f", "%3.6f", "%3.6e"], [1, 2, 3, 4]))
     end
+end
+
+########## Find number of nonzeros rows ##########
+function activeRows(gbp)
+    NactiveRows = length(gbp.system.observation)
+    for (k, i) in enumerate(gbp.system.observation)
+        if i == 0.0
+            if all(gbp.system.jacobianTranspose[:, k] .== 0.0)
+                NactiveRows -= 1
+            end
+        end
+    end
+
+    return NactiveRows
 end
