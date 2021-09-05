@@ -33,10 +33,10 @@ function defreezeFactor!(gbp::GraphicalModel; factor = 0::Int64)
     end
 
     if whereIs != 0
-        errorInside(whereIs, gbp.graph.iterateFactor, factorLocal; name = "factor node")
+        errorInside(whereIs, gbp.graph.iterateFactor, factorLocal; name = "factor node", state = "defrozen")
         insert!(gbp.graph.iterateFactor, whereIs, factorLocal)
     else
-        errorLast(gbp.graph.iterateFactor, factorLocal; name = " factor node")
+        errorLast(gbp.graph.iterateFactor, factorLocal; name = " factor node", state = "defrozen")
         push!(gbp.graph.iterateFactor, factorLocal)
     end
 end
@@ -70,10 +70,10 @@ function defreezeVariable!(gbp::GraphicalModel; variable = 0::Int64)
     end
 
     if whereIs != 0
-        errorInside(whereIs, gbp.graph.iterateVariable, variable; name = "variable node")
+        errorInside(whereIs, gbp.graph.iterateVariable, variable; name = "variable node", state = "defrozen")
         insert!(gbp.graph.iterateVariable, whereIs, variable)
     else
-        errorLast(gbp.graph.iterateVariable, variable; name = "variable node")
+        errorLast(gbp.graph.iterateVariable, variable; name = "variable node", state = "defrozen")
         push!(gbp.graph.iterateVariable, variable)
     end
 end
@@ -94,6 +94,7 @@ function freezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor 
     errorWhereIs(whereIs; name = "edge", state = "frozen")
 
     deleteat!(gbp.graph.colptr[variable], whereIs)
+    gbp.graph.toFactor[factor, variable] = 0
 end
 
 ######### Defreeze Egdge: From variable to factor node ##########
@@ -111,6 +112,13 @@ function defreezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, facto
                 end
             end
             push!(gbp.graph.colptr[variable], i)
+            break
+        end
+    end
+
+    @inbounds for i = 1:gbp.graph.Nlink
+        if gbp.inference.fromVariable[i] == variable && gbp.inference.toFactor[i] == factor
+            gbp.graph.toFactor[factor, variable] = i
             break
         end
     end
@@ -135,6 +143,7 @@ function freezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable 
     errorWhereIs(whereIs; name = "edge", state = "frozen")
 
     deleteat!(gbp.graph.rowptr[factorLocal], whereIs)
+    gbp.graph.toVariable[variable, factor] = 0
 end
 
 ######### Defreeze Egdge: From factor to variable node ##########
@@ -154,6 +163,13 @@ function defreezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variabl
                 end
             end
             push!(gbp.graph.rowptr[factorLocal], i)
+            break
+        end
+    end
+
+    @inbounds for i = 1:gbp.graph.Nlink
+        if gbp.inference.fromFactor[i] == factor && gbp.inference.toVariable[i] == variable
+            gbp.graph.toVariable[variable, factor] = i
             break
         end
     end
@@ -214,6 +230,7 @@ function hideFactor!(gbp::GraphicalModel; factor = 0::Int64)
         col = gbp.system.jacobianTranspose.rowval[i]
         gbp.system.jacobianTranspose.nzval[i] = 0.0
         gbp.system.jacobian[factor, col] = 0.0
+        gbp.graph.toFactor[factor, col] = 0
     end
 end
 
@@ -314,7 +331,7 @@ function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian =
     ### Update vectors related with variable nodes
     append!(gbp.inference.toVariable, toFactorLocal)
     append!(gbp.inference.fromFactor, toFactorLocal)
-    dropzeros!(gbp.system.jacobian)
+    gbp.graph.toVariable = [gbp.graph.toVariable transpose(sendToFactor)]
     idxi = 1; prev = 1
     @inbounds for col = 1:gbp.graph.Nvariable
         for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
@@ -326,18 +343,20 @@ function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian =
                 end
                 prev = col + 1
 
-                push!(gbp.graph.colptr[col], idxi)
-                push!(gbp.graph.colptrMarginal[col], idxi)
+                if gbp.graph.toFactor[row, col] != 0
+                    push!(gbp.graph.colptr[col], idxi)
+                    push!(gbp.graph.colptrMarginal[col], idxi)
+                end
                 gbp.inference.toVariable[idxi] = col
                 gbp.inference.fromFactor[idxi] = row
+
+                if gbp.graph.toVariable[col, row] != 0
+                    gbp.graph.toVariable[col, row] = idxi
+                end
                 idxi += 1
             end
         end
     end
-
-    links = collect(1:idxi - 1)
-    gbp.graph.toVariable = sparse(gbp.inference.toVariable, gbp.inference.fromFactor, links, gbp.graph.Nvariable, gbp.graph.Nfactor + Nfactor)
-
     append!(gbp.inference.meanFactorVariable, temp)
     append!(gbp.inference.varianceFactorVariable, temp)
     append!(gbp.graph.iterateFactor, collect(gbp.graph.Nindirect + 1:gbp.graph.Nindirect + Nindirect))
@@ -371,16 +390,16 @@ end
 end
 
 ######### Error inside ##########
-@inline function errorInside(whereIs, iterate, node; name = "")
+@inline function errorInside(whereIs, iterate, node; name = "", state = "")
     if whereIs != 1 && iterate[whereIs - 1] == node || iterate[1] == node
-        error("The $name is already defrozen.")
+        error("The $name is already $state.")
     end
 end
 
 ######### Error last ##########
-@inline function errorLast(iterate, node; name = "")
+@inline function errorLast(iterate, node; name = "", state = "")
     if iterate[end] == node
-        error("The $name is already defrozen.")
+        error("The $name is already $state.")
     end
 end
 
