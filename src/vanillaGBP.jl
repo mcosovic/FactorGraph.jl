@@ -4,8 +4,8 @@ function messageFactorVariableVanilla(gbp::GraphicalModel)
             Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]
             for k in gbp.graph.rowptr[i]
                 if j != k
-                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
-                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
+                    Mrow -= gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k]
+                    Vrow += gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k]
                 end
             end
             gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = Mrow / gbp.graph.coefficient[j]
@@ -21,7 +21,7 @@ function meanFactorVariableVanilla(gbp::GraphicalModel)
             Mrow = gbp.graph.meanIndirect[j]
             for k in gbp.graph.rowptr[i]
                 if j != k
-                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
+                    Mrow -= gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k]
                 end
             end
             gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = Mrow / gbp.graph.coefficient[j]
@@ -36,7 +36,7 @@ function varianceFactorVariableVanilla(gbp::GraphicalModel)
             Vrow = gbp.graph.varianceIndirect[j]
             for k in gbp.graph.rowptr[i]
                 if j != k
-                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
+                    Vrow += gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k]
                 end
             end
             gbp.inference.varianceFactorVariable[gbp.graph.toVariable.nzval[j]] = Vrow / (gbp.graph.coefficient[j]^2)
@@ -51,8 +51,8 @@ function messageDampFactorVariableVanilla(gbp::GraphicalModel)
             Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]
             for k in gbp.graph.rowptr[i]
                 if j != k
-                    Mrow -= (gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k])
-                    Vrow += (gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k])
+                    Mrow -= gbp.graph.coefficient[k] * gbp.inference.meanVariableFactor[k]
+                    Vrow += gbp.graph.coefficient[k]^2 * gbp.inference.varianceVariableFactor[k]
                 end
             end
             gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]] = gbp.graph.alphaNew[j] * Mrow / gbp.graph.coefficient[j] + gbp.graph.alphaOld[j] * gbp.inference.meanFactorVariable[gbp.graph.toVariable.nzval[j]]

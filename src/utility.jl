@@ -156,9 +156,9 @@ function displayData(args...)
 end
 
 ########## Find number of nonzeros rows ##########
-function activeRows(gbp)
+@inline function activeRows(gbp)
     NactiveRows = length(gbp.system.observation)
-    for (k, i) in enumerate(gbp.system.observation)
+    @inbounds for (k, i) in enumerate(gbp.system.observation)
         if i == 0.0
             if all(gbp.system.jacobianTranspose[:, k] .== 0.0)
                 NactiveRows -= 1
