@@ -1,7 +1,7 @@
 # [Graphical Model](@id graphicalModel)
 
 The GaussBP supports the composite type `GraphicalModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
-- `FactorGraphTree`;
+- `FactorGraph`;
 - `Inference`;
 - `SystemModel`.
 

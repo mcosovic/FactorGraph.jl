@@ -39,7 +39,7 @@ export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariab
        messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
 
 # Tree factor graph
-include("inferencetree.jl")
+include("treeGBP.jl")
 export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable
 
 # Compute and show results
