@@ -152,7 +152,6 @@ while gbp.graph.backward                    # inference from the root to leaves
 end
 marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
-
 ```
 
 

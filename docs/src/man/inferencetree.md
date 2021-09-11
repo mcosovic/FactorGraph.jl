@@ -25,6 +25,6 @@ backwardFactorVariable(gbp)
 #### Marginal inference
 To compute marginals the GaussBP provides the function:
 ```julia-repl
-marginalTree(gbp)
+marginal(gbp)
 ```
-Same as before, the function accepts only the composite type `GraphicalModelTree`.
+Same as before, the function accepts the composite type `GraphicalModelTree`.
