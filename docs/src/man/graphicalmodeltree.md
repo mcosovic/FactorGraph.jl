@@ -1,4 +1,4 @@
-# [Graphical Model Tree](@id graphicalModel)
+# [Graphical Model Tree](@id graphicalModelTree)
 
 The GaussBP supports the composite type `GraphicalModelTree` related with the [forward–backward message passing] (@ref treeGBP), with three fields:
 - `FactorGraphTree`;

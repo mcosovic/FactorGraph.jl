@@ -109,7 +109,7 @@ function checkKeywords(prob, alpha, variance)
         error("Invalid alpha value.")
     end
 
-    #### Check initial messages
+    #### Check initial variance
     if variance < 0.0
         error("Invalid variance value.")
     end

@@ -79,7 +79,7 @@ julia> [T.fromVariable  T.toFactor  T.meanVariableFactor T.varianceVariableFacto
 ```
 The first row defines the message from variable node ``x_2`` to factor node ``f_2``, the second row keeps the message from variable node ``x_4`` to factor node ``f_3``. Zero rows are initialized for messages to be calculated in the next forward and backward steps.
 
-The second forward recursion step computes messages from factor nodes ``f_3`` to the variable node ``x_1``, using incoming message from variable node ``x_4,``.
+The second forward recursion step computes the message from factor node ``f_3`` to the variable node ``x_1``, using incoming message from variable node ``x_4,``.
 
 ```julia-repl
 forwardFactorVariable(gbp)
@@ -105,7 +105,7 @@ end
 ---
 
 #### Backward messages the root node to the leaf nodes
-The GBP first backward recursion step starts by computing messages from root variable nodes ``x_3`` to the factor node ``f_2``, using incoming messages from factor node ``f_4``.
+The GBP first backward recursion step starts by computing message from the root variable node ``x_3`` to the factor node ``f_2``, using incoming message from factor node ``f_4``.
 ```julia-repl
 backwardVariableFactor(gbp)
 
@@ -120,7 +120,7 @@ julia> [T.fromVariable  T.toFactor  T.meanVariableFactor T.varianceVariableFacto
 ```
 The first three rows are obtained using forward steps. The fourth row defines the message from variable node ``x_3`` to factor node ``f_2``.
 
-The secand backward recursion step computes message from factor nodes ``f_2`` to the variable nodes ``\{x_1, x_2\}``, using incoming message from variable node ``x_3,``.
+The secand backward recursion step computes messages from factor node ``f_2`` to variable nodes ``\{x_1, x_2\}``, using incoming message from variable node ``x_3,``.
 ```julia-repl
 backwardFactorVariable(gbp)
 

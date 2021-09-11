@@ -234,7 +234,7 @@ function hideFactor!(gbp::GraphicalModel; factor = 0::Int64)
     end
 end
 
-######### Add factor node ##########
+######### Add factor nodes ##########
 function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian = [])
     ### Update system model
     append!(gbp.system.observation, mean)

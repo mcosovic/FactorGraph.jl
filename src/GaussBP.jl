@@ -7,11 +7,11 @@ using PrettyTables
 using Printf
 
 ### Form a factor graph and initialize messages and marginals
-include("graphicalmodel.jl")
+include("graphicalModel.jl")
 export graphicalModel, graphicalModelTree, damping!, isTree
 
 ### Factor graph manipulation
-include("graphmanipulation.jl")
+include("graphManipulation.jl")
 export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
        freezeVariableFactor!, defreezeVariableFactor!, freezeFactorVariable!, defreezeFactorVariable!,
        hideFactor!, addFactors!
