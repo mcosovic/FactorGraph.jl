@@ -424,7 +424,7 @@ end
     ### isTree
     gbp = graphicalModel(H, z, v)
     tree = isTree(gbp)
-    @test tree = true
+    @test tree == true
 
     gbp = graphicalModel("data33_14.h5")
     tree = isTree(gbp)
