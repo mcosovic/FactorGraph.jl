@@ -408,8 +408,8 @@ function graphicalModelTree(system, virtualMean, virtualVariance, root)
             row = system.jacobian.rowval[i]
             NvariableInRow = system.jacobianTranspose.colptr[row + 1] - system.jacobianTranspose.colptr[row]
             if NvariableInRow == 1
-                meanDirect[col] += z[row] * system.jacobian[row, col] / v[row]
-                weightDirect[col] += system.jacobian[row, col]^2 / v[row]
+                meanDirect[col] += system.observation[row] * system.jacobian[row, col] / system.variance[row]
+                weightDirect[col] += system.jacobian[row, col]^2 / system.variance[row]
             else
                 push!(colForward[col], row)
                 push!(colBackward[col], row)

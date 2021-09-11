@@ -38,7 +38,7 @@ function forwardFactorVariable(gbp::GraphicalModelTree)
         gbp.inference.fromFactor[gbp.graph.passFactorVariable] = factor
         gbp.inference.toVariable[gbp.graph.passFactorVariable] = variable
 
-        Mrow = z[factor]; Vrow = v[factor]
+        Mrow = gbp.system.observation[factor]; Vrow = gbp.system.variance[factor]
         for j in gbp.graph.incomingToFactor[factor]
             coeff = gbp.system.jacobian[gbp.inference.toFactor[j], gbp.inference.fromVariable[j]]
             Mrow -= coeff * gbp.inference.meanVariableFactor[j]
@@ -105,7 +105,7 @@ function backwardFactorVariable(gbp::GraphicalModelTree)
             gbp.inference.fromFactor[gbp.graph.passFactorVariable] = factor
             gbp.inference.toVariable[gbp.graph.passFactorVariable] = variable
 
-            Mrow = z[factor]; Vrow = v[factor]
+            Mrow = gbp.system.observation[factor]; Vrow = gbp.system.variance[factor]
             for j in gbp.graph.incomingToFactor[factor]
                 if gbp.inference.fromVariable[j] != variable
                     coeff = gbp.system.jacobian[factor, gbp.inference.fromVariable[j]]
