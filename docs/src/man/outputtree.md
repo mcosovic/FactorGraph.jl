@@ -79,7 +79,7 @@ julia> [T.fromVariable  T.toFactor  T.meanVariableFactor T.varianceVariableFacto
 ```
 The first row defines the message from variable node ``x_2`` to factor node ``f_2``, the second row keeps the message from variable node ``x_4`` to factor node ``f_3``. Zero rows are initialized for messages to be calculated in the next forward and backward steps.
 
-The second forward recursion step computes the message from factor node ``f_3`` to the variable node ``x_1``, using incoming message from variable node ``x_4,``.
+The second forward recursion step computes the message from factor node ``f_3`` to the variable node ``x_1``, using incoming message from variable node ``x_4``.
 
 ```julia-repl
 forwardFactorVariable(gbp)
@@ -120,7 +120,7 @@ julia> [T.fromVariable  T.toFactor  T.meanVariableFactor T.varianceVariableFacto
 ```
 The first three rows are obtained using forward steps. The fourth row defines the message from variable node ``x_3`` to factor node ``f_2``.
 
-The secand backward recursion step computes messages from factor node ``f_2`` to variable nodes ``\{x_1, x_2\}``, using incoming message from variable node ``x_3,``.
+The secand backward recursion step computes messages from factor node ``f_2`` to variable nodes ``\{x_1, x_2\}``.
 ```julia-repl
 backwardFactorVariable(gbp)
 
@@ -133,9 +133,9 @@ julia> [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
  2.0  2.0   1.375      0.5125
  0.0  0.0   0.0        0.0
 ```
-The first two rows are obtained using forward steps. The third row defines the message from factor node ``f_2`` to variable node ``x_1``, the fourth row keeps the message from factor node ``f_2`` to variable node ``x_2``
+The first two rows are obtained using forward steps. The third row defines the message from factor node ``f_2`` to variable node ``x_1``, the fourth row keeps the message from factor node ``f_2`` to variable node ``x_2``.
 
-Thus, the backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves. The GaussBP keeps flag `gbp.graph.backward` to signal that moment. Therefore, a complete forward step can be done using:
+Thus, the backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves. The GaussBP keeps flag `gbp.graph.backward` to signal that moment. Therefore, a complete backward step can be done using:
 ```julia-repl
 while gbp.graph.backward
     backwardVariableFactor(gbp)
