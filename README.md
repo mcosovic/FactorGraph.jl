@@ -150,7 +150,7 @@ while gbp.graph.backward                    # inference from the root to leaves
      backwardVariableFactor(gbp)            # compute backward messages
      backwardFactorVariable(gbp)            # compute backward messages
 end
-marginalTree(gbp)                           # compute marginals
+marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 
 ```
