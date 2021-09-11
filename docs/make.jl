@@ -18,9 +18,9 @@ makedocs(
             "Output Data" => "man/output.md",
         ],
         "Tree Factor Graph" => [
-            "Graphical Model" => "man/graphicalmodelTree.md",
-            "Inference" => "man/inferenceTree.md",
-            "Output Data" => "man/outputTree.md",
+            "Graphical Model" => "man/graphicalmodeltree.md",
+            "Inference" => "man/inferencetree.md",
+            "Output Data" => "man/outputtree.md",
         ],
         "Utility Functions" => "man/utility.md",
         "Theoretical Background" => "man/theoretical.md",
