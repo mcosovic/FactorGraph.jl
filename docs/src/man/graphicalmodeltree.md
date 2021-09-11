@@ -37,7 +37,7 @@ gbp = graphicalModelTree(jacobian, observation, variances)
 
 #### Virtual factor nodes
 
-The GBP function `graphicalModelTree()` receives arguments by keyword to set the mean and variance of the virtual factor nodes to initiate messages from the leaves variable nodes if the corresponding variable node does not have a singly connected factor node.
+The GBP function `graphicalModelTree()` receives arguments by keyword to set the mean and variance of the virtual factor nodes to initiate messages from leaf variable nodes if the corresponding variable node does not have a singly connected factor node.
 
 ```julia-repl
 gbp = graphicalModelTree(DATA; mean = value, variance = value)

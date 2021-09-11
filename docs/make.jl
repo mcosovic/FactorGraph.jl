@@ -6,6 +6,7 @@ makedocs(
     clean = false,
     doctest = false,
     format = Documenter.HTML(
+        assets = ["assets/style.css"],
         prettyurls = prettyurls = get(ENV, "CI", nothing) == "true",
         collapselevel = 1,
     ),
