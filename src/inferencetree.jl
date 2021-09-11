@@ -19,7 +19,6 @@ function forwardVariableFactor(gbp::GraphicalModelTree)
         for (k, variables) in enumerate(gbp.graph.rowForward[factor])
             if variable == variables
                 deleteat!(gbp.graph.rowForward[factor], k)
-                deleteat!(gbp.graph.colForward[variable], 1)
             end
         end
         if length(gbp.graph.rowForward[factor]) == 1
@@ -51,7 +50,6 @@ function forwardFactorVariable(gbp::GraphicalModelTree)
         for (k, factors) in enumerate(gbp.graph.colForward[variable])
             if factor == factors
                 deleteat!(gbp.graph.colForward[variable], k)
-                deleteat!(gbp.graph.rowForward[factor], 1)
             end
         end
         if length(gbp.graph.colForward[variable]) == 1 && variable != gbp.graph.root

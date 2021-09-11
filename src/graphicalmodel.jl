@@ -481,16 +481,17 @@ function isTree(gbp::Union{GraphicalModel, GraphicalModelTree})
 
     ## Pilling the factor graph
     hasSingleVariable = true; hasSingleFactor = true;
-    @inbounds while hasSingleVariable || hasSingleFactor
-        for i in iterateVariable
-            for (k, j) in enumerate(rowptr[colptr[i][1]])
-                if i == j
-                    deleteat!(rowptr[colptr[i][1]], k)
-                    deleteat!(colptr[i], 1)
+    @inbounds while hasSingleFactor || hasSingleVariable
+        for variable in iterateVariable
+            factor = colptr[variable][1]
+            for (k, variables) in enumerate(rowptr[factor])
+                if variable == variables
+                    deleteat!(rowptr[factor], k)
+                    deleteat!(colptr[variable], 1)
                 end
             end
-            if length(rowptr[colptr[i][1]]) == 1
-                push!(iterateFactor, colptr[i][1])
+            if length(rowptr[factor]) == 1
+                push!(iterateFactor, factor)
             end
         end
         if isempty(iterateFactor)
@@ -498,17 +499,27 @@ function isTree(gbp::Union{GraphicalModel, GraphicalModelTree})
         end
         iterateVariable = Int64[]
 
-        for i in iterateFactor
-            for (k, j) in enumerate(colptr[rowptr[i][1]])
-                if i == j
-                    deleteat!(colptr[rowptr[i][1]], k)
-                    deleteat!(rowptr[i], 1)
+        for factor in iterateFactor
+            variable = rowptr[factor][1]
+            for (k, factors) in enumerate(colptr[variable])
+                if factor == factors
+                    deleteat!(colptr[variable], k)
+                    deleteat!(rowptr[factor], 1)
                 end
             end
-            if length(colptr[rowptr[i][1]]) == 1
-                push!(iterateVariable, rowptr[i][1])
+            if length(colptr[variable]) == 1
+                push!(iterateVariable, variable)
             end
         end
+
+        flag = true
+        for i in colptr[iterateVariable]
+            if !isempty(i)
+                flag = false
+            end
+        end
+        if flag break end
+
         if isempty(iterateVariable)
             hasSingleVariable = false
         end
