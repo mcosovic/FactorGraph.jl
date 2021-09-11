@@ -1,6 +1,6 @@
 # [Input Data](@id inputdata)
 
-The GaussBP package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The function `graphicalModel()` accepts `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
+The GaussBP package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The functions `graphicalModel()` and `graphicalModelTree()` accept `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
 
 
 
@@ -61,3 +61,5 @@ The pre-defined data are located in the `src/example` as the `.h5` or `.xlsx` fi
 - data7149_2000.h5;
 - data29997_10000.h5;
 - data283803_70000.h5.
+- data12_11.h5;
+- data13_11.xlsx.

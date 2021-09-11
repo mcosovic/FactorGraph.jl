@@ -31,6 +31,29 @@ mutable struct FactorGraph
     dynamic::Array{Int64,1}
 end
 
+mutable struct FactorGraphTree
+    Nvariable::Int64
+    Nfactor::Int64
+    Nlink::Int64
+    root::Int64
+    virtualMean::Float64
+    virtualVariance::Float64
+    meanDirect::Array{Float64,1}
+    weightDirect::Array{Float64,1}
+    rowForward::Vector{Vector{Int64}}
+    rowBackward::Vector{Vector{Int64}}
+    colForward::Vector{Vector{Int64}}
+    colBackward::Vector{Vector{Int64}}
+    incomingToFactor::Vector{Vector{Int64}}
+    incomingToVariable::Vector{Vector{Int64}}
+    iterateFactor::Array{Int64,1}
+    iterateVariable::Array{Int64,1}
+    passFactorVariable::Int64
+    passVariableFactor::Int64
+    forward::Bool
+    backward::Bool
+end
+
 mutable struct Inference
     fromFactor::Array{Int64,1}
     toVariable::Array{Int64,1}
@@ -46,6 +69,12 @@ end
 
 struct GraphicalModel
     graph::FactorGraph
+    inference::Inference
+    system::SystemModel
+end
+
+struct GraphicalModelTree
+    graph::FactorGraphTree
     inference::Inference
     system::SystemModel
 end
@@ -320,4 +349,179 @@ function damping!(gbp::GraphicalModel; prob::Float64 = 0.6, alpha::Float64 = 0.4
         gbp.graph.alphaNew[i] = 1.0 - alpha
         gbp.graph.alphaOld[i] = alpha
     end
+end
+
+########## Form a tree factor graph and initialize messages ##########
+function graphicalModelTree(
+    args...;
+    mean::Float64 = 0.0,
+    variance::Float64 = 1e10,
+    root::Int64 = 1)
+
+    if checkSystemInputs(args)
+        system = juliaOut(args)
+    else
+        system = juliaIn(args)
+    end
+
+    graph, inference = graphicalModelTree(system, mean, variance, root)
+
+    return GraphicalModelTree(graph, inference, system)
+end
+
+########## Produce the graphical model ##########
+function graphicalModelTree(system, virtualMean, virtualVariance, root)
+    ### Number of factor and variable nodes
+    Nfactor, Nvariable = size(system.jacobian)
+
+    ### Find graph numbers, set the direct mean and variance, set factor numeration and pass through the rows
+    Nlink = 0; Nindirect = 0
+    meanDirect = fill(virtualMean / virtualVariance, Nvariable)
+    weightDirect = fill(1 / virtualVariance, Nvariable)
+
+    rowForward = [Int[] for i = 1:Nfactor]; rowBackward = [Int[] for i = 1:Nfactor]
+    incomingToVariable = [Int[] for i = 1:Nvariable]
+    @inbounds for i = 1:Nfactor
+        NvariableInRow = system.jacobianTranspose.colptr[i + 1] - system.jacobianTranspose.colptr[i]
+        if NvariableInRow == 1
+            variable = system.jacobianTranspose.rowval[system.jacobianTranspose.colptr[i]]
+            meanDirect[variable] = 0.0
+            weightDirect[variable] = 0.0
+        else
+            Nlink += NvariableInRow
+            Nindirect += 1
+            for j = system.jacobianTranspose.colptr[i]:(system.jacobianTranspose.colptr[i + 1] - 1)
+                row = system.jacobianTranspose.rowval[j]
+                push!(rowForward[i], row)
+                push!(rowBackward[i], row)
+            end
+        end
+    end
+
+    ## Pass through the columns
+    iterateVariable = fill(0, Nvariable)
+    counter = 0
+    colForward = [Int[] for i = 1:Nvariable]; colBackward = [Int[] for i = 1:Nvariable]
+    incomingToFactor = [Int[] for i = 1:Nfactor]
+    @inbounds for col = 1:Nvariable
+        for i = system.jacobian.colptr[col]:(system.jacobian.colptr[col + 1] - 1)
+            row = system.jacobian.rowval[i]
+            NvariableInRow = system.jacobianTranspose.colptr[row + 1] - system.jacobianTranspose.colptr[row]
+            if NvariableInRow == 1
+                meanDirect[col] += z[row] * system.jacobian[row, col] / v[row]
+                weightDirect[col] += system.jacobian[row, col]^2 / v[row]
+            else
+                push!(colForward[col], row)
+                push!(colBackward[col], row)
+            end
+        end
+        if length(colForward[col]) == 1 && col != root
+            counter += 1
+            iterateVariable[counter] = col
+        end
+    end
+    resize!(iterateVariable, counter)
+
+    ### Initialize data
+    fromVariable = fill(0, Nlink)
+    toFactor = fill(0, Nlink)
+    meanVariableFactor = fill(0.0, Nlink)
+    varianceVariableFactor = fill(0.0, Nlink)
+
+    fromFactor = fill(0, Nlink)
+    toVariable = fill(0, Nlink)
+    meanFactorVariable = fill(0.0, Nlink)
+    varianceFactorVariable = fill(0.0, Nlink)
+
+    mean = fill(0, Nvariable)
+    variance = fill(0, Nvariable)
+
+    passFactorVariable = 0
+    passVariableFactor = 0
+    iterateFactor = Int64[]
+
+    return FactorGraphTree(Nvariable, Nfactor, Nlink, root, virtualMean, virtualVariance, meanDirect, weightDirect,
+            rowForward, rowBackward, colForward, colBackward, incomingToFactor, incomingToVariable,
+            iterateFactor, iterateVariable, passFactorVariable, passVariableFactor, true, true),
+        Inference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
+            fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
+end
+
+########## Check that the factor graph has a tree structure ##########
+function isTree(gbp::Union{GraphicalModel, GraphicalModelTree})
+    ## Pass through the rows
+    rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
+    iterateFactor = Int64[]
+    @inbounds for i = 1:gbp.graph.Nfactor
+        if gbp.system.jacobianTranspose.colptr[i + 1] - gbp.system.jacobianTranspose.colptr[i] != 1
+            for j = gbp.system.jacobianTranspose.colptr[i]:(gbp.system.jacobianTranspose.colptr[i + 1] - 1)
+                row = gbp.system.jacobianTranspose.rowval[j]
+                push!(rowptr[i], row)
+            end
+        end
+    end
+
+    ## Pass through the columns
+    iterateVariable = fill(0, gbp.graph.Nvariable)
+    colptr = [Int[] for col = 1:gbp.graph.Nvariable]
+    counter = 0
+    @inbounds for col = 1:gbp.graph.Nvariable
+        for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
+            row = gbp.system.jacobian.rowval[i]
+            if gbp.system.jacobianTranspose.colptr[row + 1] - gbp.system.jacobianTranspose.colptr[row] != 1
+                push!(colptr[col], row)
+            end
+        end
+        if length(colptr[col]) == 1
+            counter += 1
+            iterateVariable[counter] = col
+        end
+    end
+    resize!(iterateVariable, counter)
+
+    ## Pilling the factor graph
+    hasSingleVariable = true; hasSingleFactor = true;
+    @inbounds while hasSingleVariable || hasSingleFactor
+        for i in iterateVariable
+            for (k, j) in enumerate(rowptr[colptr[i][1]])
+                if i == j
+                    deleteat!(rowptr[colptr[i][1]], k)
+                    deleteat!(colptr[i], 1)
+                end
+            end
+            if length(rowptr[colptr[i][1]]) == 1
+                push!(iterateFactor, colptr[i][1])
+            end
+        end
+        if isempty(iterateFactor)
+            hasSingleFactor = false
+        end
+        iterateVariable = Int64[]
+
+        for i in iterateFactor
+            for (k, j) in enumerate(colptr[rowptr[i][1]])
+                if i == j
+                    deleteat!(colptr[rowptr[i][1]], k)
+                    deleteat!(rowptr[i], 1)
+                end
+            end
+            if length(colptr[rowptr[i][1]]) == 1
+                push!(iterateVariable, rowptr[i][1])
+            end
+        end
+        if isempty(iterateVariable)
+            hasSingleVariable = false
+        end
+        iterateFactor = Int64[]
+    end
+
+    isTree = true
+    @inbounds for i in colptr
+        if length(i) != 0
+            isTree = false
+            break
+        end
+    end
+
+    return isTree
 end

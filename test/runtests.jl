@@ -403,3 +403,77 @@ end
     exact = wls(gbp)
     @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
 end
+
+
+@testset "GraphicalModelTree" begin
+    H = [2 3 0 0 0 0 0 0 0 0 0;
+         0 4 6 8 2 3 0 0 0 0 0;
+         0 0 0 5 0 0 0 0 0 0 0;
+         0 0 0 0 2 0 0 0 0 0 0;
+         0 0 0 0 0 8 0 2 0 1 0;
+         0 0 0 0 0 4 0 0 0 0 0;
+         0 0 0 0 0 3 7 0 2 0 0;
+         0 0 0 0 0 0 0 5 0 0 0;
+         0 0 0 0 0 0 0 3 0 0 0;
+         2 0 0 0 0 0 0 0 0 0 0;
+         2 0 0 0 0 0 0 0 0 0 0;
+         1 0 0 0 0 0 0 0 0 0 2]
+    z = [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12]
+    v = [3; 4; 2; 5; 1; 8; 9; 1; 2; 3; 8; 4]
+
+    ### isTree
+    gbp = graphicalModel(H, z, v)
+    tree = isTree(gbp)
+    @test tree = true
+
+    gbp = graphicalModel("data33_14.h5")
+    tree = isTree(gbp)
+    @test tree == false
+
+    # Forward-backward algorithm
+    gbp = graphicalModel(H, z, v)
+    for iteration = 1:100
+        messageFactorVariableVanilla(gbp)
+        messageVariableFactorVanilla(gbp)
+    end
+    marginal(gbp)
+    mean = copy(gbp.inference.mean)
+
+    gbp = graphicalModelTree(H, z, v; root = 1)
+    while gbp.graph.forward
+        forwardVariableFactor(gbp)
+        forwardFactorVariable(gbp)
+    end
+    while gbp.graph.backward
+        backwardVariableFactor(gbp)
+        backwardFactorVariable(gbp)
+    end
+    marginal(gbp)
+    @test sum(round.(mean - gbp.inference.mean, digits = 4)) == 0
+
+    # Forward-backward algorithm - new root
+    gbp = graphicalModelTree(H, z, v; root = 8)
+    while gbp.graph.forward
+        forwardVariableFactor(gbp)
+        forwardFactorVariable(gbp)
+    end
+    while gbp.graph.backward
+        backwardVariableFactor(gbp)
+        backwardFactorVariable(gbp)
+    end
+    marginal(gbp)
+    @test sum(round.(mean - gbp.inference.mean, digits = 4)) == 0
+
+    # Forward-backward algorithm - new root
+    gbp = graphicalModelTree(H, z, v; root = 2)
+    while gbp.graph.forward
+        forwardVariableFactor(gbp)
+        forwardFactorVariable(gbp)
+    end
+    while gbp.graph.backward
+        backwardVariableFactor(gbp)
+        backwardFactorVariable(gbp)
+    end
+    marginal(gbp)
+    @test sum(round.(mean - gbp.inference.mean, digits = 4)) == 0
+end

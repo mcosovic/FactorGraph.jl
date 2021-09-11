@@ -49,14 +49,14 @@ The first step in solving/analysing the above system/system of equations is form
 &nbsp;
 ```
 
-Additionaly, we include the virtual factor node ``f_{v_2}``, where factor node ``f_{v_2}`` is a singly connected factor node used when the variable node is not directly measured, hence having variance ``v_{x_2} \to \infty`` or a priori given mean and variance of state variables. To change defualt values of virtual factor nodes use:
+Additionaly, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is a singly connected factor node used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. To change defualt values of virtual factor nodes use:
 ```julia-repl
 gbp = graphicalModel(H, z, v; mean = 0.1, variance = 1e60)
 ```
 ---
 
 #### Messages initialization
-The initialization step starts with messages from local factor nodes ``\{f_1, f_{v_2}, f_4 \}`` to variable nodes ``\mathcal{X}``. Then, variable nodes ``\mathcal{X}`` forward the incoming messages received from local factor nodes along remaining edges defined by ``\{f_2, f_3\}`` and ``\mathcal{X}``.
+The initialization step starts with messages from local factor nodes ``\{f_1, f_{v_1}, f_4 \}`` to variable nodes ``\mathcal{X}``. Then, variable nodes ``\mathcal{X}`` forward the incoming messages received from local factor nodes along remaining edges defined by ``\{f_2, f_3\}`` and ``\mathcal{X}``.
 
 ---
 
@@ -102,7 +102,6 @@ The first row defines the message from variable node ``x_1`` to factor node ``f_
 The marginal of variable nodes ``\mathcal{X}`` can be obtained using messages from factor nodes ``\mathcal{F}`` to variable nodes ``\mathcal{X}``. Note that the mean value of marginal is adopted as the estimated value of the state variable. Thus, after 100 iterations, we obtain:
 ```julia-repl
 marginal(gbp)
-
 
 julia> [gbp.inference.mean gbp.inference.variance]
 3×2 Matrix{Float64}:

@@ -5,13 +5,24 @@ makedocs(
     modules = [GaussBP],
     clean = false,
     doctest = false,
+    format = Documenter.HTML(
+        prettyurls = prettyurls = get(ENV, "CI", nothing) == "true",
+        collapselevel = 1,
+    ),
     pages = [
         "Home" => "index.md",
         "Input Data" => "man/input.md",
-        "Graphical Model" => "man/graphicalmodel.md",
-        "Inference" => "man/inference.md",
+        "General Factor Graph" => [
+            "Graphical Model" => "man/graphicalmodel.md",
+            "Inference" => "man/inference.md",
+            "Output Data" => "man/output.md",
+        ],
+        "Tree Factor Graph" => [
+            "Graphical Model" => "man/graphicalmodeltree.md",
+            "Inference" => "man/inferencetree.md",
+            "Output Data" => "man/outputtree.md",
+        ],
         "Utility Functions" => "man/utility.md",
-        "Output Data" => "man/output.md",
         "Theoretical Background" => "man/theoretical.md",
     ],
 )

@@ -1,11 +1,11 @@
 # [Inference](@id vanilla)
 
-We advise the reader to read the [theoretical bacground] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the GaussBP provides three inference approaches:
+We advise the reader to read the [theoretical background] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the GaussBP provides three inference approaches:
 - [vanilla GBP algorithm] (@ref vanillaGBP),
 - [computation-efficient GBP algorithm] (@ref efficientGBP),
 - [computation-efficient kahan–babuška GBP algorithm] (@ref kahanGBP).
 
-Each of the inference functions accepts only the composite type `GraphicalModel`, i.e., an output variable of the function `gbp = graphicalModel()`.
+Each of the inference functions accepts only the composite type `GraphicalModel`, i.e., an output variable of the function `gbp = graphicalModel()` and applies the [synchronous message passing schedule] (@ref synchronous).
 
 ---
 

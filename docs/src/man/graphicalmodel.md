@@ -1,7 +1,7 @@
 # [Graphical Model](@id graphicalModel)
 
-The GaussBP supports the composite type `GraphicalModel` with three fields:
-- `FactorGraph`;
+The GaussBP supports the composite type `GraphicalModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
+- `FactorGraphTree`;
 - `Inference`;
 - `SystemModel`.
 
@@ -39,7 +39,7 @@ gbp = graphicalModel(jacobian, observation, variances)
 
 #### Virtual factor nodes
 
-The GBP function `graphicalModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref schedule) which provides a detailed description of the virtual factor nodes.
+The GBP function `graphicalModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref synchronous) which provides a detailed description of the virtual factor nodes.
 
 ```julia-repl
 gbp = graphicalModel(DATA; mean = value, variance = value)

@@ -20,7 +20,7 @@ struct ErrorMetricWiden
 end
 
 ########## Compute the GBP error metrics ##########
-function errorMetric(gbp::GraphicalModel)
+function errorMetric(gbp::Union{GraphicalModel, GraphicalModelTree})
     observationGBP = gbp.system.jacobian * gbp.inference.mean
     NactiveRows = activeRows(gbp)
 
@@ -37,7 +37,7 @@ function errorMetric(gbp::GraphicalModel)
 end
 
 ########## Compute the GBP error metrics and error according to the WLS ##########
-@inline function errorMetric(gbp::GraphicalModel, wls::WeightedLeastSquares)
+@inline function errorMetric(gbp::Union{GraphicalModel, GraphicalModelTree}, wls::WeightedLeastSquares)
     observationGBP = gbp.system.jacobian * gbp.inference.mean
     NactiveRows = activeRows(gbp)
 
@@ -63,7 +63,7 @@ end
 
 
 ########## Compute WLS solution and error metrics ##########
-function wls(gbp::GraphicalModel)
+function wls(gbp::Union{GraphicalModel, GraphicalModelTree})
     W = spdiagm(0 =>  @. 1.0 / sqrt(gbp.system.variance))
     A = W * gbp.system.jacobian
     G = A' * A
@@ -90,7 +90,7 @@ function displayData(args...)
     gbpIdx = 0; wlsIdx = 0; errorIdx = 0; widenIdx = 0
     @inbounds for (k, i) in enumerate(args)
         T = split.(string(typeof(i)), ".")[end]
-        if T == "GraphicalModel"
+        if T == "GraphicalModel" || T == "GraphicalModelTree"
             gbpIdx = k
         end
         if T == "WeightedLeastSquares"

@@ -8,7 +8,7 @@ using Printf
 
 ### Form a factor graph and initialize messages and marginals
 include("graphicalmodel.jl")
-export graphicalModel, damping!
+export graphicalModel, graphicalModelTree, damping!, isTree
 
 ### Factor graph manipulation
 include("graphmanipulation.jl")
@@ -37,6 +37,10 @@ include("kahanGBP.jl")
 export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariableKahan,
        messageDampFactorVariableKahan, meanDampFactorVariableKahan,
        messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
+
+# Tree factor graph
+include("inferencetree.jl")
+export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable
 
 # Compute and show results
 include("utility.jl")

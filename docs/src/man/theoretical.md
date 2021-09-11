@@ -174,14 +174,12 @@ end
 
 ---
 
-## [Message Passing Schedule]  (@id schedule)
-We are employing a loopy GBP since the corresponding factor graph usually contains cycles. Loopy GBP is an iterative algorithm, and requires a message-passing schedule.
-Typically, the scheduling where messages from variable to factor nodes, and messages from factor nodes to variable nodes, are updated in parallel in respective half-iterations, is known as synchronous scheduling. Synchronous scheduling updates all messages in a given iteration using the output of the previous iteration as an input.
+## [Synchronous Message Passing Schedule]  (@id synchronous)
+The GBP is an iterative algorithm, and requires a message-passing schedule. Typically, the scheduling where messages from variable to factor nodes, and messages from factor nodes to variable nodes, are updated in parallel in respective half-iterations, is known as synchronous scheduling. Synchronous scheduling updates all messages in a given iteration using the output of the previous iteration as an input.
 
 The initialization step starts with messages from singly connected factor nodes to variable nodes. Then, variable nodes forward the incoming messages received from singly connected factor nodes along remaining edges. To ensure this, we are using virtual factor nodes. Hence, the virtual factor node is a singly connected factor node used if the variable node is not directly observed. In a typical scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity. We also improve convergence performance using virtual factor nodes.
 
 ---
-
 
 ## [The GBP with Randomized Damping]  (@id dampGBP)
 We propose a randomized damping approach, where each mean value message from factor node to a variable node is damped independently with probability ``p``, otherwise, the message is calculated as in the standard the GBP algorithm. The damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights ``\alpha`` and ``1 - \alpha``, respectively. More, precisly, the proposed randomized damping scheduling updates of selected factor to variable
@@ -228,3 +226,18 @@ Finally, the linear growth model can be observed as a compromise between logarit
       \bar {v}_i, & \tau \geq \theta.
   \end{cases}
 ```
+---
+
+## [The Forward-Backward Algorithm]  (@id treeGBP)
+The forward–backward algorithm allows exact inference in tree factor graph. We start by viewing an arbitrary variable node as the root of the factor graph and initiating messages at the leaves of the tree factor graph using. The message passing steps from variable nodes to factor nodes and from factor nodes to variable nodes are then applied recursively until messages have been propagated along every link, and the root node has received messages from all of its neighbours. Each node can send a message towards the root once it has received messages from all of its other neighbours. This step is known as the forward recursion.
+
+The backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves.
+
+By now, a message will have passed in both directions across every link in the graph, and every node will have received
+a message from all of its neighbours. Every variable node will have received messages from all of its neighbours, we can readily calculate the marginal distribution for every variable in the graph. The number of messages that have to be computed is given by twice the number of links in the graph and so involves only twice the computation involved in finding a single marginal [1].
+
+---
+
+## [References](@id refs)
+[1] C. M. Bishop, *Pattern Recognition and Machine Learning* (Information Science and Statistics). Berlin, Heidelberg: Springer-Verlag, 2006.
+
