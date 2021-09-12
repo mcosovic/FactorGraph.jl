@@ -53,7 +53,7 @@ function forwardFactorVariable(gbp::GraphicalModelTree)
             end
         end
         if length(gbp.graph.colForward[variable]) == 1 && variable != gbp.graph.root
-            push!(gbp.graph.iterateVariable, gbp.graph.rowForward[factor][1])
+            push!(gbp.graph.iterateVariable, variable)
         end
     end
     gbp.graph.iterateFactor = Int64[]
@@ -83,9 +83,9 @@ function backwardVariableFactor(gbp::GraphicalModelTree)
             gbp.inference.meanVariableFactor[gbp.graph.passVariableFactor] = Mcol / Wcol
 
             push!(gbp.graph.incomingToFactor[factor], gbp.graph.passVariableFactor)
-            for (p, variables) in enumerate(gbp.graph.rowBackward[factor])
+            for (k, variables) in enumerate(gbp.graph.rowBackward[factor])
                 if variable == variables
-                    deleteat!(gbp.graph.rowBackward[factor], p)
+                    deleteat!(gbp.graph.rowBackward[factor], k)
                 end
             end
             push!(gbp.graph.iterateFactor, factor)
@@ -97,7 +97,7 @@ end
 ########## Backward messages from factor to variable nodes ##########
 function backwardFactorVariable(gbp::GraphicalModelTree)
     @inbounds for factor in gbp.graph.iterateFactor
-        for (kk, variable) in enumerate(gbp.graph.rowBackward[factor])
+        for variable in gbp.graph.rowBackward[factor]
             gbp.graph.passFactorVariable += 1
 
             gbp.inference.fromFactor[gbp.graph.passFactorVariable] = factor

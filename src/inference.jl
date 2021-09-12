@@ -51,7 +51,8 @@ end
 ######### Ageing the GBP update ##########
 @inline function ageingVariance!(gbp::GraphicalModel; factor = 0::Int64, initial = 0, limit = 0, model = 0::Int64, a = 0, b = 0, tau = 0)
     if gbp.system.variance[factor] < limit
-        if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
+        Nvariable = gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]
+        if Nvariable == 1
             idx = gbp.system.jacobianTranspose.colptr[factor]
             variable = trunc(Int, gbp.system.jacobianTranspose.rowval[idx])
 
@@ -71,7 +72,7 @@ end
             gbp.system.variance[factor] =  limit
         end
 
-        if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
+        if Nvariable == 1
             gbp.graph.meanDirect[variable] += gbp.system.observation[factor] * gbp.system.jacobianTranspose[variable, factor] / gbp.system.variance[factor]
             gbp.graph.weightDirect[variable] += gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
         else
