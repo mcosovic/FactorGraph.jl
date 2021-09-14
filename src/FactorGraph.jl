@@ -1,4 +1,4 @@
-module GaussBP
+module FactorGraph
 
 using SparseArrays, LinearAlgebra
 using HDF5, XLSX
