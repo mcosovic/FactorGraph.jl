@@ -3,7 +3,7 @@
 [![Documentation][documentation-badge]][documentation] ![Build][build-badge]
 
 
-<a href="https://mcosovic.github.io/GaussBP.jl/stable/"><img align="left" width="320" src="/docs/src/assets/logo2.svg" /></a>
+<a href="https://mcosovic.github.io/FactorGraph.jl/stable/"><img align="left" width="320" src="/docs/src/assets/logo2.svg" /></a>
 
 GaussBP is an open-source, easy-to-use simulation tool/solver for researchers and educators provided as a Julia package, with source code released under MIT License. The GaussBP package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
 
@@ -63,7 +63,7 @@ marginal(gbp)                               # compute marginals
 
 - Synchronous message passing schedule using the GBP and Kahan-Babuska algorithm with the plotting of the marginal mean through iteration.
 ```julia-repl
-using GaussBP
+using FactorGraph
 using Plots
 
 gbp = graphicalModel("data33_14.h5")        # initialize the graphical model
@@ -79,7 +79,7 @@ plot(collect(1:50), x6)                     # show plot
 
 - Synchronous message passing schedule using the native GBP algorithm in the dynamic framework.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
@@ -105,7 +105,7 @@ displayData(gbp)                            # show results
 
 - Synchronous message passing schedule using the native GBP algorithm in the dynamic ageing framework.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
@@ -134,7 +134,7 @@ displayData(gbp)                            # show results
 
  - Forward–backward algorithm over the tree factor graph.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # jacobian matrix
      0 0 2 0 0; 0 0 3 8 2]
@@ -155,6 +155,6 @@ displayData(gbp)                            # show results
 ```
 
 
-[documentation-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Documentation/badge.svg
-[build-badge]: https://github.com/mcosovic/GaussBP.jl/workflows/Build/badge.svg
-[documentation]: https://mcosovic.github.io/GaussBP.jl/stable/
+[documentation-badge]: https://github.com/mcosovic/FactorGraph.jl/workflows/Documentation/badge.svg
+[build-badge]: https://github.com/mcosovic/FactorGraph.jl/workflows/Build/badge.svg
+[documentation]: https://mcosovic.github.io/FactorGraph.jl/stable/
