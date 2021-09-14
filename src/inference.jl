@@ -1,5 +1,5 @@
 ########## Compute the GBP marginal vector ##########
-function marginal(gbp::GraphicalModel)
+function marginal(gbp::ContinuousModel)
     @inbounds for i in gbp.graph.iterateMarginal
         Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
 
@@ -13,7 +13,7 @@ function marginal(gbp::GraphicalModel)
 end
 
 ########## Compute the GBP marginal vector for the tree factor graph ##########
-function marginal(gbp::GraphicalModelTree)
+function marginal(gbp::ContinuousTreeModel)
     @inbounds for i = 1:gbp.graph.Nvariable
         Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
 
@@ -27,7 +27,7 @@ function marginal(gbp::GraphicalModelTree)
 end
 
 ########## Dynamic the GBP update ##########
-@inline function dynamicFactor!(gbp::GraphicalModel; factor = 0::Int64, mean = 0, variance = 0)
+@inline function dynamicFactor!(gbp::ContinuousModel; factor = 0::Int64, mean = 0, variance = 0)
     if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
         idx = gbp.system.jacobianTranspose.colptr[factor]
         variable = trunc(Int, gbp.system.jacobianTranspose.rowval[idx])
@@ -49,7 +49,7 @@ end
 end
 
 ######### Ageing the GBP update ##########
-@inline function ageingVariance!(gbp::GraphicalModel; factor = 0::Int64, initial = 0, limit = 0, model = 0::Int64, a = 0, b = 0, tau = 0)
+@inline function ageingVariance!(gbp::ContinuousModel; factor = 0::Int64, initial = 0, limit = 0, model = 0::Int64, a = 0, b = 0, tau = 0)
     if gbp.system.variance[factor] < limit
         Nvariable = gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]
         if Nvariable == 1

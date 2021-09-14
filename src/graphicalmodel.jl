@@ -1,4 +1,4 @@
-mutable struct SystemModel
+mutable struct ContinuousSystem
     jacobian::SparseMatrixCSC{Float64,Int64}
     jacobianTranspose::SparseMatrixCSC{Float64,Int64}
     observation::Array{Float64,1}
@@ -6,7 +6,7 @@ mutable struct SystemModel
     data::String
 end
 
-mutable struct Graph
+mutable struct ContinuousGraph
     Nvariable::Int64
     Nfactor::Int64
     Nindirect::Int64
@@ -31,7 +31,7 @@ mutable struct Graph
     dynamic::Array{Int64,1}
 end
 
-mutable struct FactorGraphTree
+mutable struct ContinuousTreeGraph
     Nvariable::Int64
     Nfactor::Int64
     Nlink::Int64
@@ -54,7 +54,7 @@ mutable struct FactorGraphTree
     backward::Bool
 end
 
-mutable struct Inference
+mutable struct ContinuousInference
     fromFactor::Array{Int64,1}
     toVariable::Array{Int64,1}
     meanFactorVariable::Array{Float64,1}
@@ -67,20 +67,20 @@ mutable struct Inference
     variance::Array{Float64,1}
 end
 
-struct GraphicalModel
-    graph::Graph
-    inference::Inference
-    system::SystemModel
+struct ContinuousModel
+    graph::ContinuousGraph
+    inference::ContinuousInference
+    system::ContinuousSystem
 end
 
-struct GraphicalModelTree
-    graph::FactorGraphTree
-    inference::Inference
-    system::SystemModel
+struct ContinuousTreeModel
+    graph::ContinuousTreeGraph
+    inference::ContinuousInference
+    system::ContinuousSystem
 end
 
 ########## Form a graph and initialize messages ##########
-function graphicalModel(
+function continuousModel(
     args...;
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
@@ -96,7 +96,7 @@ function graphicalModel(
 
     graph, inference = makeGraph(system, mean, variance, prob, alpha)
 
-    return GraphicalModel(graph, inference, system)
+    return ContinuousModel(graph, inference, system)
 end
 
 ########## Check keyword arguments ##########
@@ -131,11 +131,11 @@ end
 ########## Load from HDF5 or XLSX files ##########
 function juliaOut(args)
     #### Check the package is installed
-    pathtoGaussBP = Base.find_package("FactorGraph")
-    if isnothing(pathtoGaussBP)
-        throw(ErrorException("GaussBP not found in install packages"))
+    pathtoFactorGraph = Base.find_package("FactorGraph")
+    if isnothing(pathtoFactorGraph)
+        throw(ErrorException("FactorGraph not found in install packages"))
     end
-    packagepath = abspath(joinpath(dirname(pathtoGaussBP), ".."))
+    packagepath = abspath(joinpath(dirname(pathtoFactorGraph), ".."))
 
     extension = ".h5"; path = ""; dataname = ""; fullpath = ""
 
@@ -198,7 +198,7 @@ function juliaOut(args)
         error("the input data is not a valid format")
     end
 
-    return SystemModel(jacobian, jacobianTranspose, observation, variance, dataname)
+    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance, dataname)
 end
 
 ########## Read in-Julia system model ##########
@@ -213,7 +213,7 @@ function juliaIn(args)
     observation = args[2]
     variance = args[3]
 
-    return SystemModel(jacobian, jacobianTranspose, observation, variance, "noname")
+    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance, "noname")
 end
 
 ########## Start row in xlsx-file ##########
@@ -332,16 +332,16 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     iterateVariable = collect(1:Nvariable)
     iterateMarginal = copy(iterateVariable)
 
-    return Graph(Nvariable, Nfactor, Nindirect, Nlink,
-                        meanVirtual, varianceVirtual, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient,
-                        sendToVariable, sendToFactor, rowptr, colptr, colptrMarginal, alphaNew, alphaOld,
-                        iterateFactor, iterateVariable, iterateMarginal, dynamic),
-           Inference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
-                     fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
+    return ContinuousGraph(Nvariable, Nfactor, Nindirect, Nlink,
+            meanVirtual, varianceVirtual, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient,
+            sendToVariable, sendToFactor, rowptr, colptr, colptrMarginal, alphaNew, alphaOld,
+            iterateFactor, iterateVariable, iterateMarginal, dynamic),
+           ContinuousInference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
+            fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
 ########## Set damping parameters ##########
-function damping!(gbp::GraphicalModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
+function damping!(gbp::ContinuousModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
     gbp.graph.alphaNew = fill(1.0, gbp.graph.Nlink)
     gbp.graph.alphaOld = fill(0.0, gbp.graph.Nlink)
     bernoulliSample = randsubseq(collect(1:gbp.graph.Nlink), prob)
@@ -352,7 +352,7 @@ function damping!(gbp::GraphicalModel; prob::Float64 = 0.6, alpha::Float64 = 0.4
 end
 
 ########## Form a tree factor graph and initialize messages ##########
-function graphicalModelTree(
+function continuousTreeModel(
     args...;
     mean::Float64 = 0.0,
     variance::Float64 = 1e10,
@@ -366,7 +366,7 @@ function graphicalModelTree(
 
     graph, inference = graphicalModelTree(system, mean, variance, root)
 
-    return GraphicalModelTree(graph, inference, system)
+    return ContinuousTreeModel(graph, inference, system)
 end
 
 ########## Produce the graphical model ##########
@@ -440,15 +440,15 @@ function graphicalModelTree(system, virtualMean, virtualVariance, root)
     passVariableFactor = 0
     iterateFactor = Int64[]
 
-    return FactorGraphTree(Nvariable, Nfactor, Nlink, root, virtualMean, virtualVariance, meanDirect, weightDirect,
+    return ContinuousTreeGraph(Nvariable, Nfactor, Nlink, root, virtualMean, virtualVariance, meanDirect, weightDirect,
             rowForward, rowBackward, colForward, colBackward, incomingToFactor, incomingToVariable,
             iterateFactor, iterateVariable, passFactorVariable, passVariableFactor, true, true),
-        Inference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
+           ContinuousInference(fromFactor, toVariable, meanFactorVariable, varianceFactorVariable,
             fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
 ########## Check that the factor graph has a tree structure ##########
-function isTree(gbp::Union{GraphicalModel, GraphicalModelTree})
+function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel})
     ## Pass through the rows
     rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
     iterateFactor = Int64[]

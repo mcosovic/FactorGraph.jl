@@ -8,7 +8,7 @@ using Printf
 
 ### Form a factor graph and initialize messages and marginals
 include("graphicalmodel.jl")
-export graphicalModel, graphicalModelTree, damping!, isTree
+export continuousModel, damping!, continuousTreeModel, isTree
 
 ### Factor graph manipulation
 include("graphmanipulation.jl")
@@ -46,4 +46,4 @@ export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, bac
 include("utility.jl")
 export wls, errorMetric, displayData
 
-end # GaussBP
+end # FactorGraph

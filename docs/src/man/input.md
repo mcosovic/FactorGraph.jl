@@ -1,6 +1,6 @@
 # [Input Data](@id inputdata)
 
-The FactorGraph package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The functions `graphicalModel()` and `graphicalModelTree()` accept `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
+The FactorGraph package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The functions `continuousModel()` and `continuousTreeModel()` accept `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
 
 
 

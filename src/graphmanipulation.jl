@@ -1,5 +1,5 @@
 ######### Freeze factor node ##########
-function freezeFactor!(gbp::GraphicalModel; factor = 0::Int64)
+function freezeFactor!(gbp::ContinuousModel; factor = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
 
     factorLocal = gbp.graph.dynamic[factor]
@@ -18,7 +18,7 @@ function freezeFactor!(gbp::GraphicalModel; factor = 0::Int64)
 end
 
 ######### Defreeze factor node ##########
-function defreezeFactor!(gbp::GraphicalModel; factor = 0::Int64)
+function defreezeFactor!(gbp::ContinuousModel; factor = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
 
     factorLocal = gbp.graph.dynamic[factor]
@@ -42,7 +42,7 @@ function defreezeFactor!(gbp::GraphicalModel; factor = 0::Int64)
 end
 
 ######### Freeze variable node ##########
-function freezeVariable!(gbp::GraphicalModel; variable = 0::Int64)
+function freezeVariable!(gbp::ContinuousModel; variable = 0::Int64)
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
 
     whereIs = 0
@@ -58,7 +58,7 @@ function freezeVariable!(gbp::GraphicalModel; variable = 0::Int64)
 end
 
 ########## Defreeze variable node ##########
-function defreezeVariable!(gbp::GraphicalModel; variable = 0::Int64)
+function defreezeVariable!(gbp::ContinuousModel; variable = 0::Int64)
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
 
     whereIs = 0
@@ -79,7 +79,7 @@ function defreezeVariable!(gbp::GraphicalModel; variable = 0::Int64)
 end
 
 ######### Freeze Egdge: From variable to factor node ##########
-function freezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor = 0::Int64)
+function freezeVariableFactor!(gbp::ContinuousModel; variable = 0::Int64, factor = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
     errorFactorLocal(gbp.graph.dynamic[factor]; state = "frozen")
@@ -98,7 +98,7 @@ function freezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor 
 end
 
 ######### Defreeze Egdge: From variable to factor node ##########
-function defreezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, factor = 0::Int64)
+function defreezeVariableFactor!(gbp::ContinuousModel; variable = 0::Int64, factor = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
     errorFactorLocal(gbp.graph.dynamic[factor]; state = "frozen")
@@ -126,7 +126,7 @@ function defreezeVariableFactor!(gbp::GraphicalModel; variable = 0::Int64, facto
 end
 
 ######### Freeze Egdge: From factor to variable node ##########
-function freezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable = 0::Int64)
+function freezeFactorVariable!(gbp::ContinuousModel; factor = 0::Int64, variable = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
 
@@ -147,7 +147,7 @@ function freezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable 
 end
 
 ######### Defreeze Egdge: From factor to variable node ##########
-function defreezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variable = 0::Int64)
+function defreezeFactorVariable!(gbp::ContinuousModel; factor = 0::Int64, variable = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
 
@@ -177,7 +177,7 @@ function defreezeFactorVariable!(gbp::GraphicalModel; factor = 0::Int64, variabl
 end
 
 ######### Hide factor node ##########
-function hideFactor!(gbp::GraphicalModel; factor = 0::Int64)
+function hideFactor!(gbp::ContinuousModel; factor = 0::Int64)
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
 
     factorLocal = gbp.graph.dynamic[factor]
@@ -235,7 +235,7 @@ function hideFactor!(gbp::GraphicalModel; factor = 0::Int64)
 end
 
 ######### Add factor nodes ##########
-function addFactors!(gbp::GraphicalModel; mean = 0.0, variance = 0.0, jacobian = [])
+function addFactors!(gbp::ContinuousModel; mean = 0.0, variance = 0.0, jacobian = [])
     ### Update system model
     append!(gbp.system.observation, mean)
     append!(gbp.system.variance, variance)

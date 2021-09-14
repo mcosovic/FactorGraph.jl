@@ -1,6 +1,6 @@
 # [Output Data](@id output)
 
-The main inference results are kept in the composite type `GraphicalModel` in the subtype `Inference` with fields:
+The main inference results are kept in the composite type `ContinuousModel` in the subtype `ContinuousInference` with fields:
 - `fromFactor`,
 - `toVariable`
 - `meanFactorVariable`,
@@ -18,7 +18,7 @@ Fields `mean` and `variance` define state variable marginal distributions.
 
 ---
 
-The `Inference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
+The `ContinuousInference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
 ```julia-repl
 using FactorGraph
 
@@ -34,9 +34,9 @@ z = [0.0; 1.7; 1.9; 0.2]
 #       f1   f2   f3    f4
 v = [1e-10; 0.1; 0.1; 1e-2]
 ```
-The factor graph construction and message initialization is accomplished using `graphicalModel()` function.
+The factor graph construction and message initialization is accomplished using `continuousModel()` function.
 ```julia-repl
-gbp = graphicalModel(H, z, v)
+gbp = continuousModel(H, z, v)
 ```
 ---
 
@@ -51,7 +51,7 @@ The first step in solving/analysing the above system/system of equations is form
 
 Additionaly, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is a singly connected factor node used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. To change defualt values of virtual factor nodes use:
 ```julia-repl
-gbp = graphicalModel(H, z, v; mean = 0.1, variance = 1e60)
+gbp = continuousModel(H, z, v; mean = 0.1, variance = 1e60)
 ```
 ---
 

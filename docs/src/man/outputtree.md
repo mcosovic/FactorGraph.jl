@@ -1,6 +1,6 @@
 # [Output Data](@id outputtree)
 
-The main inference results are kept in the composite type `GraphicalModelTree` in the subtype `Inference` with fields:
+The main inference results are kept in the composite type `ContinuousTreeModel` in the subtype `ContinuousInference` with fields:
 - `fromFactor`,
 - `toVariable`
 - `meanFactorVariable`,
@@ -18,7 +18,7 @@ Fields `mean` and `variance` define state variable marginal distributions.
 
 ---
 
-The `Inference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
+The `ContinuousInference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
 ```julia-repl
 using FactorGraph
 
@@ -35,9 +35,9 @@ z = [0.0; 1.7; 1.9; 0.8; 2.1]
 #       f1   f2   f3   f4   f5
 v = [1e-10; 0.1; 0.1; 0.1; 0.1]
 ```
-The factor graph construction and message initialization is accomplished using `graphicalModelTree()` function.
+The factor graph construction and message initialization is accomplished using `continuousTreeModel()` function.
 ```julia-repl
-gbp = graphicalModelTree(H, z, v)
+gbp = continuousTreeModel(H, z, v)
 ```
 ---
 
@@ -50,11 +50,11 @@ The first step in solving/analysing the above system/system of equations is form
 &nbsp;
 ```
 
-Additionally, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is singly connected used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. Further, the function `graphicalModelTree()` sets the first variable node ``x_1`` as the root node.
+Additionally, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is singly connected used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. Further, the function `continuousTreeModel()` sets the first variable node ``x_1`` as the root node.
 
 To change defualt values of virtual factor nodes and defualt root variable node use:
 ```julia-repl
-gbp = graphicalModelTree(H, z, v; mean = 0.1, variance = 1e60, root = 3)
+gbp = continuousTreeModel(H, z, v; mean = 0.1, variance = 1e60, root = 3)
 ```
 ---
 

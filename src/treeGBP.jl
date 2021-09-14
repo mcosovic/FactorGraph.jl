@@ -1,5 +1,5 @@
 ########## Forward messages from variable to factor nodes ##########
-function forwardVariableFactor(gbp::GraphicalModelTree)
+function forwardVariableFactor(gbp::ContinuousTreeModel)
     @inbounds for variable in gbp.graph.iterateVariable
         factor = gbp.graph.colForward[variable][1]
 
@@ -29,7 +29,7 @@ function forwardVariableFactor(gbp::GraphicalModelTree)
 end
 
 ########## Forward messages from factor to variable nodes ##########
-function forwardFactorVariable(gbp::GraphicalModelTree)
+function forwardFactorVariable(gbp::ContinuousTreeModel)
     @inbounds for factor in gbp.graph.iterateFactor
         variable = gbp.graph.rowForward[factor][1]
 
@@ -65,7 +65,7 @@ function forwardFactorVariable(gbp::GraphicalModelTree)
 end
 
 ########## Backward messages from variable to factor nodes ##########
-function backwardVariableFactor(gbp::GraphicalModelTree)
+function backwardVariableFactor(gbp::ContinuousTreeModel)
     @inbounds for variable in gbp.graph.iterateVariable
         for factor in gbp.graph.colBackward[variable]
             gbp.graph.passVariableFactor += 1
@@ -95,7 +95,7 @@ function backwardVariableFactor(gbp::GraphicalModelTree)
 end
 
 ########## Backward messages from factor to variable nodes ##########
-function backwardFactorVariable(gbp::GraphicalModelTree)
+function backwardFactorVariable(gbp::ContinuousTreeModel)
     @inbounds for factor in gbp.graph.iterateFactor
         for variable in gbp.graph.rowBackward[factor]
             gbp.graph.passFactorVariable += 1

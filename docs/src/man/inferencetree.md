@@ -2,7 +2,7 @@
 
 To exchange information over the tree factor graph, the FactorGraph provides forward–backward algorithm. We advise the reader to read the [forward–backward algorithm] (@ref treeGBP) which provides a detailed description of the inference algorithm.
 
-Each of the inference functions accepts only the composite type `GraphicalModelTree`, i.e., an output variable of the function `gbp = graphicalModelTree()`.
+Each of the inference functions accepts only the composite type `ContinuousTreeModel`, i.e., an output variable of the function `gbp = continuousTreeModel()`.
 
 ---
 
@@ -27,4 +27,4 @@ To compute marginals the FactorGraph provides the function:
 ```julia-repl
 marginal(gbp)
 ```
-Same as before, the function accepts the composite type `GraphicalModelTree`.
+Same as before, the function accepts the composite type `ContinuousTreeModel`.

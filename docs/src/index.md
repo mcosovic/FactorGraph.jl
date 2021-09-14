@@ -35,11 +35,11 @@ using FactorGraph
 #### Quick start
 Following examples are intended for a quick introduction to FactorGraph package.
 
-- Synchronous message passing schedule using the native GBP algorithm.
+- Synchronous message passing schedule using the native GBP algorithm:
 ```julia-repl
 using FactorGraph
 
-gbp = graphicalModel("data33_14.h5")        # initialize the graphical model using HDF5 input
+gbp = continuousModel("data33_14.h5")       # initialize the graphical model using HDF5 input
 for iteration = 1:200                       # the GBP inference
     messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
     messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
@@ -48,7 +48,7 @@ marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 ```
 
-- Synchronous message passing schedule using the efficient GBP algorithm.
+- Synchronous message passing schedule using the efficient GBP algorithm:
 ```julia-repl
 using FactorGraph
 
@@ -56,7 +56,7 @@ H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
-gbp = graphicalModel(H, z, v)               # initialize the graphical model via arguments
+gbp = continuousModel(H, z, v)              # initialize the graphical model via arguments
 for iteration = 1:50                        # the GBP inference
     messageFactorVariableEfficient(gbp)     # compute messages using the efficient GBP
     messageVariableFactorEfficient(gbp)     # compute messages using the efficient GBP
@@ -64,12 +64,12 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the GBP and Kahan-Babuska algorithm with the plotting of the marginal mean through iteration.
+- Synchronous message passing schedule using the GBP and Kahan-Babuska algorithm with the plotting of the marginal mean through iterations:
 ```julia-repl
 using FactorGraph
 using Plots
 
-gbp = graphicalModel("data33_14.h5")        # initialize the graphical model
+gbp = continuousModel("data33_14.h5")       # initialize the graphical model
 x6 = []                                     # save the state variable marginal
 for iteration = 1:50                        # the GBP inference
     messageFactorVariableKahan(gbp)         # compute messages using the GBP with Kahan-Babuska
@@ -80,7 +80,7 @@ end
 plot(collect(1:50), x6)                     # show plot
 ```
 
-- Synchronous message passing schedule using the native GBP algorithm in the dynamic framework.
+- Synchronous message passing schedule using the native GBP algorithm in the dynamic framework:
 ```julia-repl
 using FactorGraph
 
@@ -88,7 +88,7 @@ H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
-gbp = graphicalModel(H, z, v)               # initialize the graphical model
+gbp = continuousModel(H, z, v)              # initialize the graphical model
 for iteration = 1:200                       # the GBP inference
     messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
     messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
@@ -106,7 +106,7 @@ marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 ```
 
-- Synchronous message passing schedule using the native GBP algorithm in the dynamic ageing framework.
+- Synchronous message passing schedule using the native GBP algorithm in the dynamic ageing framework:
 ```julia-repl
 using FactorGraph
 
@@ -114,7 +114,7 @@ H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
-gbp = graphicalModel(H, z, v)               # initialize the graphical model
+gbp = continuousModel(H, z, v)              # initialize the graphical model
 for iteration = 1:200                       # the GBP inference
     messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
     messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
@@ -135,7 +135,7 @@ marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 ```
 
- - Forward–backward algorithm over the tree factor graph.
+ - Forward–backward algorithm over the tree factor graph:
 ```julia-repl
 using FactorGraph
 
@@ -144,7 +144,7 @@ H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # jacobian matrix
 z = [1; 2; 3; 4; 5]                         # observation vector
 v = [3; 4; 2; 5; 1]                         # variance vector
 
-gbp = graphicalModelTree(H, z, v; root = 1) # initialize the tree graphical model
+gbp = continuousTreeModel(H, z, v)          # initialize the tree graphical model
 while gbp.graph.forward                     # inference from leaves to the root
      forwardVariableFactor(gbp)             # compute forward messages
      forwardFactorVariable(gbp)             # compute forward messages

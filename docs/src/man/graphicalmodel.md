@@ -1,11 +1,11 @@
 # [Graphical Model](@id graphicalModel)
 
-The FactorGraph supports the composite type `GraphicalModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
-- `FactorGraph`;
-- `Inference`;
-- `SystemModel`.
+The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
+- `ContinuousGraph`;
+- `ContinuousInference`;
+- `ContinuousSystem`.
 
-The subtype `FactorGraph` describes the factor graph obtained based on the input data. The GBP inference and marginal values are kept in the subtype `Inference`. The system of the linear equations being solved is preserved in the subtype `SystemModel`. Note that the function `graphicalModel()` returns the main FactorGraph composite type `GraphicalModel` with all subtypes.
+The subtype `ContinuousGraph` describes the factor graph obtained based on the input data. The GBP inference and marginal values are kept in the subtype `ContinuousInference`. The system of the linear equations being solved is preserved in the subtype `ContinuousSystem`. Note that the function `continuousModel()` returns the main FactorGraph composite type `ContinuousModel` with all subtypes.
 
 In addition, we also provide several functions for factor graph manipulation.
 
@@ -13,36 +13,36 @@ In addition, we also provide several functions for factor graph manipulation.
 
 #### Build graphical model
 
-Input arguments DATA of the function `graphicalModel()` describe the graphical model, while the function returns `GraphicalModel` type.
+Input arguments DATA of the function `continuousModel()` describe the graphical model, while the function returns `ContinuousModel` type.
 
 Loads the system data using h5-file from the package:
 ```julia-repl
-gbp = graphicalModel("data33_14.h5")
+gbp = continuousModel("data33_14.h5")
 ```
 
 Loads the system data using xlsx-file from the package:
 ```julia-repl
-gbp = graphicalModel("data33_14.xlsx")
+gbp = continuousModel("data33_14.xlsx")
 ```
 
 Loads the system data from a custom path:
 ```julia-repl
-gbp = graphicalModel("C:/name.h5")
+gbp = continuousModel("C:/name.h5")
 ```
 
 Loads the system data passing arguments directly:
 ```julia-repl
-gbp = graphicalModel(jacobian, observation, variances)
+gbp = continuousModel(jacobian, observation, variances)
 ```
 
 ---
 
 #### Virtual factor nodes
 
-The GBP function `graphicalModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref synchronous) which provides a detailed description of the virtual factor nodes.
+The GBP function `continuousModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref synchronous) which provides a detailed description of the virtual factor nodes.
 
 ```julia-repl
-gbp = graphicalModel(DATA; mean = value, variance = value)
+gbp = continuousModel(DATA; mean = value, variance = value)
 ```
 Default setting of the mean value is `mean = 0.0`, while the default variance is equal to `variance = 1e10`.
 
@@ -50,13 +50,13 @@ Default setting of the mean value is `mean = 0.0`, while the default variance is
 
 #### Randomized damping parametars
 
-The GBP function `graphicalModel()` receives arguments by keyword to set damping parametars. We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
+The GBP function `continuousModel()` receives arguments by keyword to set damping parametars. We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
 ```julia-repl
-gbp = graphicalModel(DATA; prob = value, alpha = value)
+gbp = continuousModel(DATA; prob = value, alpha = value)
 ```
 The keyword `prob` represents the probability of the Bernoulli random variable, independently sampled for each mean value message from a factor node to a variable node, applied for randomised damping iteration scheme with `value` between 0 and 1. Default setting is set to `prob = 0.6`. The damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights `alpha = value` and `1 - alpha`, applied for randomised damping iteration scheme where `alpha` is between 0 and 1. Default setting is set to `alpha = 0.4`.
 
-Using the function `graphicalModel()`, the set of damp messages are fixed through GBP iterations. However, we provide the function that changes damp parameters `prob` and `alpha` on the fly:
+Using the function `continuousModel()`, the set of damp messages are fixed through GBP iterations. However, we provide the function that changes damp parameters `prob` and `alpha` on the fly:
 ```julia-repl
 damping!(gbp; prob = value, alpha = value)
 ```
@@ -79,7 +79,7 @@ freezeVariableFactor!(gbp; variable = index, factor = index)
 ```julia-repl
 freezeFactorVariable!(gbp; factor = index, variable = index)
 ```
-The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
+The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
 
 ---
 
@@ -100,7 +100,7 @@ defreezeVariableFactor!(gbp; variable = index, factor = index)
 defreezeFactorVariable!(gbp; factor = index, variable = index)
 ```
 
-The functions accept following parameters: composite type `GraphicalModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
+The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
 
 ---
 
@@ -109,7 +109,7 @@ Utilising a hiding mechanism, the function softly deletes factor node. Hence, th
 ```julia-repl
 hideFactor!(gbp; factor = index)
 ```
-If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function also affects `SystemModel.observation`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` fields by setting non-zero elements to zero.
+If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function also affects `ContinuousSystem.observation`, `ContinuousSystem.jacobian` and `ContinuousSystem.jacobianTranspose` fields by setting non-zero elements to zero.
 
 ---
 
@@ -118,5 +118,5 @@ The function adds new factor nodes to the existing factor graph.
 ```julia-repl
 addFactors!(gbp; mean = vector, variance = vector, jacobian = matrix)
 ```
-The function supports addition of the multiple factor nodes to initial (existing) formation of the factor graph using the same input data format. The function accepts the following parameters: composite type `GraphicalModel`; the `mean` and `variance` vectors representing new measurement values and variances, respectively. The keyword `jacobian` with corresponding coefficients defines the set of equations describing new factor nodes. Also, function initializes messages from variable nodes to a new factor node using results from the last GBP iteration. Note that the function also affects `SystemModel.observation`, `SystemModel.variance`, `SystemModel.jacobian` and `SystemModel.jacobianTranspose` fields.
+The function supports addition of the multiple factor nodes to initial (existing) formation of the factor graph using the same input data format. The function accepts the following parameters: composite type `ContinuousModel`; the `mean` and `variance` vectors representing new measurement values and variances, respectively. The keyword `jacobian` with corresponding coefficients defines the set of equations describing new factor nodes. Also, function initializes messages from variable nodes to a new factor node using results from the last GBP iteration. Note that the function also affects `ContinuousSystem.observation`, `ContinuousSystem.variance`, `ContinuousSystem.jacobian` and `ContinuousSystem.jacobianTranspose` fields.
 
