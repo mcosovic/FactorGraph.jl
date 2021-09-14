@@ -131,7 +131,7 @@ end
 ########## Load from HDF5 or XLSX files ##########
 function juliaOut(args)
     #### Check the package is installed
-    pathtoGaussBP = Base.find_package("GaussBP")
+    pathtoGaussBP = Base.find_package("FactorGraph")
     if isnothing(pathtoGaussBP)
         throw(ErrorException("GaussBP not found in install packages"))
     end
