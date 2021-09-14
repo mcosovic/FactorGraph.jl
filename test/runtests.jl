@@ -272,7 +272,7 @@ end
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 
     ### Freeze and defreeze message variable node to factor node
-    gbp = graphicalModel("data33_14.h5")
+    gbp = continuousModel("data33_14.h5")
     for iteration = 1:5
         messageFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
