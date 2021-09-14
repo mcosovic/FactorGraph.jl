@@ -1,4 +1,4 @@
-using GaussBP
+using FactorGraph
 using SparseArrays
 using Test
 
