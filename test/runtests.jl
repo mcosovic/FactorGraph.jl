@@ -131,7 +131,7 @@ end
         messageVariableFactorVanilla(gbp)
     end
     dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
-    for iteration = 100:1000
+    for iteration = 100:2000
         messageDampFactorVariableVanilla(gbp)
         messageVariableFactorVanilla(gbp)
     end
