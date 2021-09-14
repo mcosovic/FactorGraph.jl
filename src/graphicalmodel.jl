@@ -68,7 +68,7 @@ mutable struct Inference
 end
 
 struct GraphicalModel
-    graph::FactorGraph
+    graph::Graph
     inference::Inference
     system::SystemModel
 end
