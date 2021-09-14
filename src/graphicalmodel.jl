@@ -6,7 +6,7 @@ mutable struct SystemModel
     data::String
 end
 
-mutable struct FactorGraph
+mutable struct Graph
     Nvariable::Int64
     Nfactor::Int64
     Nindirect::Int64
@@ -332,7 +332,7 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
     iterateVariable = collect(1:Nvariable)
     iterateMarginal = copy(iterateVariable)
 
-    return FactorGraph(Nvariable, Nfactor, Nindirect, Nlink,
+    return Graph(Nvariable, Nfactor, Nindirect, Nlink,
                         meanVirtual, varianceVirtual, meanDirect, weightDirect, meanIndirect, varianceIndirect, coefficient,
                         sendToVariable, sendToFactor, rowptr, colptr, colptrMarginal, alphaNew, alphaOld,
                         iterateFactor, iterateVariable, iterateMarginal, dynamic),
