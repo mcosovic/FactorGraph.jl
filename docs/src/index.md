@@ -1,7 +1,7 @@
-GaussBP
+FactorGraph
 =============
 
-The GaussBP package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
+The FactorGraph package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
 
 The software package includes algorithms based on the [synchronous message passing schedule] (@ref synchronous):
  - [vanilla GBP algorithm] (@ref vanillaGBP);
@@ -16,28 +16,28 @@ The software package also includes a message passing algorithm that allows exact
 ---
 
 #### Requirement
-GaussBP requires Julia 1.6 and higher.
+FactorGraph requires Julia 1.6 and higher.
 
 ---
 
 #### Installation
-To install the GaussBP package, run the following command:
+To install the FactorGraph package, run the following command:
 ```julia-repl
-pkg> add GaussBP
+pkg> add FactorGraph
 ```
 
-To use GaussBP package, add the following code to your script, or alternatively run the same command in Julia REPL:
+To use FactorGraph package, add the following code to your script, or alternatively run the same command in Julia REPL:
 ```julia-repl
-using GaussBP
+using FactorGraph
 ```
 ---
 
 #### Quick start
-Following examples are intended for a quick introduction to GaussBP package.
+Following examples are intended for a quick introduction to FactorGraph package.
 
 - Synchronous message passing schedule using the native GBP algorithm.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 gbp = graphicalModel("data33_14.h5")        # initialize the graphical model using HDF5 input
 for iteration = 1:200                       # the GBP inference
@@ -50,7 +50,7 @@ displayData(gbp)                            # show results
 
 - Synchronous message passing schedule using the efficient GBP algorithm.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
@@ -66,7 +66,7 @@ marginal(gbp)                               # compute marginals
 
 - Synchronous message passing schedule using the GBP and Kahan-Babuska algorithm with the plotting of the marginal mean through iteration.
 ```julia-repl
-using GaussBP
+using FactorGraph
 using Plots
 
 gbp = graphicalModel("data33_14.h5")        # initialize the graphical model
@@ -82,7 +82,7 @@ plot(collect(1:50), x6)                     # show plot
 
 - Synchronous message passing schedule using the native GBP algorithm in the dynamic framework.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
@@ -108,7 +108,7 @@ displayData(gbp)                            # show results
 
 - Synchronous message passing schedule using the native GBP algorithm in the dynamic ageing framework.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
@@ -137,7 +137,7 @@ displayData(gbp)                            # show results
 
  - Forward–backward algorithm over the tree factor graph.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # jacobian matrix
      0 0 2 0 0; 0 0 3 8 2]

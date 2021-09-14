@@ -1,11 +1,11 @@
 # [Graphical Model](@id graphicalModel)
 
-The GaussBP supports the composite type `GraphicalModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
+The FactorGraph supports the composite type `GraphicalModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
 - `FactorGraph`;
 - `Inference`;
 - `SystemModel`.
 
-The subtype `FactorGraph` describes the factor graph obtained based on the input data. The GBP inference and marginal values are kept in the subtype `Inference`. The system of the linear equations being solved is preserved in the subtype `SystemModel`. Note that the function `graphicalModel()` returns the main GaussBP composite type `GraphicalModel` with all subtypes.
+The subtype `FactorGraph` describes the factor graph obtained based on the input data. The GBP inference and marginal values are kept in the subtype `Inference`. The system of the linear equations being solved is preserved in the subtype `SystemModel`. Note that the function `graphicalModel()` returns the main FactorGraph composite type `GraphicalModel` with all subtypes.
 
 In addition, we also provide several functions for factor graph manipulation.
 

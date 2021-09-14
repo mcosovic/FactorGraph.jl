@@ -1,40 +1,40 @@
-# GaussBP
+# FactorGraph
 
 [![Documentation][documentation-badge]][documentation] ![Build][build-badge]
 
 
 <a href="https://mcosovic.github.io/FactorGraph.jl/stable/"><img align="left" width="320" src="/docs/src/assets/logo2.svg" /></a>
 
-GaussBP is an open-source, easy-to-use simulation tool/solver for researchers and educators provided as a Julia package, with source code released under MIT License. The GaussBP package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
+FactorGraph is an open-source, easy-to-use simulation tool/solver for researchers and educators provided as a Julia package, with source code released under MIT License. The FactorGraph package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
 
 We have tested and verified simulation tool using different scenarios to the best of our ability. As a user of this simulation tool, you can help us to improve future versions, we highly appreciate your feedback about any errors, inaccuracies, and bugs. For more information, please visit [documentation][documentation] site.
 
 ---
 
 #### Requirement
-GaussBP requires Julia 1.6 and higher.
+FactorGraph requires Julia 1.6 and higher.
 
 ---
 
 #### Installation
-To install the GaussBP package, run the following command:
+To install the FactorGraph package, run the following command:
 ```julia-repl
-pkg> add GaussBP
+pkg> add FactorGraph
 ```
 
-To use GaussBP package, add the following code to your script, or alternatively run the same command in Julia REPL:
+To use FactorGraph package, add the following code to your script, or alternatively run the same command in Julia REPL:
 ```julia-repl
-using GaussBP
+using FactorGraph
 ```
 ---
 
 
 #### Quick start
-Following examples are intended for a quick introduction to GaussBP package.
+Following examples are intended for a quick introduction to FactorGraph package.
 
 - Synchronous message passing schedule using the native GBP algorithm.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 gbp = graphicalModel("data33_14.h5")        # initialize the graphical model using HDF5 input
 for iteration = 1:200                       # the GBP inference
@@ -47,7 +47,7 @@ displayData(gbp)                            # show results
 
 - Synchronous message passing schedule using the efficient GBP algorithm.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector

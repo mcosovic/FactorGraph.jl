@@ -1,6 +1,6 @@
 # [Input Data](@id inputdata)
 
-The GaussBP package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The functions `graphicalModel()` and `graphicalModelTree()` accept `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
+The FactorGraph package supports HDF5 and XLSX input files or passing data directly via command-line arguments. The basic input data structure describing a linear system of equations includes the `jacobian` matrix containing coefficients of the equations, while vectors `observation` and `variance` represent measurement values and measurement variances, respectively. The functions `graphicalModel()` and `graphicalModelTree()` accept `jacobian`, `observation` and `variance` variables to form appropriate probabilistic graphical model. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
 
 
 
@@ -41,13 +41,13 @@ The type and structure of the arguments must be:
 ---
 
 #### Data structure
-The GaussBP package uses `jacobian` input data format for all analyses. Jacobian input data contains coefficients of the linear system of the equations. The structure of the `jacobian` variable being loaded from HDF5 or XLSX input files is given below:
+The FactorGraph package uses `jacobian` input data format for all analyses. Jacobian input data contains coefficients of the linear system of the equations. The structure of the `jacobian` variable being loaded from HDF5 or XLSX input files is given below:
 - column 1: row indices of the corresponding jacobian matrix;
 - column 2: column indices of the corresponding jacobian matrix;
 - column 3: coefficient values of the corresponding jacobian matrix.
 Passing data directly via command-line arguments allows the use of a sparse or full matrix to describe the `jacobian` variable.
 
-The `observation` and `variance` input data are used for all analyses available in the GaussBP package and contains measurement mean and variance values.
+The `observation` and `variance` input data are used for all analyses available in the FactorGraph package and contains measurement mean and variance values.
 
 ---
 

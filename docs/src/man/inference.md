@@ -1,6 +1,6 @@
 # [Inference](@id vanilla)
 
-We advise the reader to read the [theoretical background] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the GaussBP provides three inference approaches:
+We advise the reader to read the [theoretical background] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the FactorGraph provides three inference approaches:
 - [vanilla GBP algorithm] (@ref vanillaGBP),
 - [computation-efficient GBP algorithm] (@ref efficientGBP),
 - [computation-efficient kahan–babuška GBP algorithm] (@ref kahanGBP).
@@ -47,7 +47,7 @@ messageDampFactorVariableKahan(gbp); meanDampFactorVariableKahan(gbp)
 ---
 
 #### Marginal inference
-To compute marginals the GaussBP provides the function:
+To compute marginals the FactorGraph provides the function:
 ```julia-repl
 marginal(gbp)
 ```

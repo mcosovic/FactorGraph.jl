@@ -1,7 +1,7 @@
 name = "FactorGraph"
 uuid = "528f6532-2a0d-4856-bb42-8bcefd89a10f"
 authors = ["Mirsad Cosovic <mirsad.cosovic@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"

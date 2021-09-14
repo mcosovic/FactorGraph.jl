@@ -20,7 +20,7 @@ Fields `mean` and `variance` define state variable marginal distributions.
 
 The `Inference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 #     x1   x2   x3   x4
 H = [1.0  0.0  0.0  0.0;  # f1
@@ -95,7 +95,7 @@ julia> [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
 ```
 The first row defines the message from factor node ``f_3`` to variable node ``x_1``. Zero rows are initialized for messages to be calculated in the next forward and backward steps.
 
-The message passing steps from variable nodes to factor nodes and from factor nodes to variable nodes are then applied recursively until messages have been propagated along every link, and the root node has received messages from all of its neighbours. The GaussBP keeps flag `gbp.graph.forward` to signal that moment. Therefore, a complete forward step can be done using:
+The message passing steps from variable nodes to factor nodes and from factor nodes to variable nodes are then applied recursively until messages have been propagated along every link, and the root node has received messages from all of its neighbours. The FactorGraph keeps flag `gbp.graph.forward` to signal that moment. Therefore, a complete forward step can be done using:
 ```julia-repl
 while gbp.graph.forward
     forwardVariableFactor(gbp)
@@ -135,7 +135,7 @@ julia> [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
 ```
 The first two rows are obtained using forward steps. The third row defines the message from factor node ``f_2`` to variable node ``x_1``, the fourth row keeps the message from factor node ``f_2`` to variable node ``x_2``.
 
-Thus, the backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves. The GaussBP keeps flag `gbp.graph.backward` to signal that moment. Therefore, a complete backward step can be done using:
+Thus, the backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves. The FactorGraph keeps flag `gbp.graph.backward` to signal that moment. Therefore, a complete backward step can be done using:
 ```julia-repl
 while gbp.graph.backward
     backwardVariableFactor(gbp)

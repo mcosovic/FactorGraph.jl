@@ -1,6 +1,6 @@
 # [Utility Functions](@id utilityfunction)
 
-The GaussBP provides several utility functions to evaluate and compare obtained results.
+The FactorGraph provides several utility functions to evaluate and compare obtained results.
 
 ---
 #### The WLS results

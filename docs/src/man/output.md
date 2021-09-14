@@ -20,7 +20,7 @@ Fields `mean` and `variance` define state variable marginal distributions.
 
 The `Inference` field contains the GBP algorithm results. To describe the outputs, we will use the example shown below.
 ```julia-repl
-using GaussBP
+using FactorGraph
 
 #     x1   x2   x3
 H = [1.0  0.0  0.0;  # f1
