@@ -1,8 +1,8 @@
-using Documenter, GaussBP
+using Documenter, FactorGraph
 
 makedocs(
-    sitename = "GaussBP",
-    modules = [GaussBP],
+    sitename = "FactorGraph",
+    modules = [FactorGraph],
     clean = false,
     doctest = false,
     format = Documenter.HTML(
@@ -29,6 +29,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/mcosovic/GaussBP.jl.git",
+    repo = "github.com/mcosovic/FactorGraph.jl.git",
     target = "build",
 )
