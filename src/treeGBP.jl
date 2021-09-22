@@ -165,7 +165,7 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel, DiscreteTreeMod
 
     ## Pilling the factor graph
     hasSingleVariable = true; hasSingleFactor = true;
-    @inbounds while hasSingleFactor || hasSingleVariable
+    while hasSingleFactor || hasSingleVariable
         for variable in iterateVariable
             factor = colptr[variable][1]
             for (k, variables) in enumerate(rowptr[factor])
@@ -182,6 +182,14 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel, DiscreteTreeMod
             hasSingleFactor = false
         end
         iterateVariable = Int64[]
+
+        flag = true
+        for i in rowptr[iterateFactor]
+            if !isempty(i)
+                flag = false
+            end
+        end
+        if flag break end
 
         for factor in iterateFactor
             variable = rowptr[factor][1]
