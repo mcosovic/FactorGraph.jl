@@ -8,7 +8,7 @@ makedocs(
     format = Documenter.HTML(
         assets = ["assets/style.css"],
         prettyurls = prettyurls = get(ENV, "CI", nothing) == "true",
-        collapselevel = 1,
+        collapselevel = 2,
     ),
     pages = [
         "Home" => "index.md",
