@@ -12,18 +12,28 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Input Data" => "man/input.md",
+        "Continuous Framework" => [
+        "Input Data" => "man/continuousInput.md",
         "General Factor Graph" => [
-            "Graphical Model" => "man/graphicalmodel.md",
-            "Inference" => "man/inference.md",
-            "Output Data" => "man/output.md",
+            "Graphical Model" => "man/continuousModel.md",
+            "Inference" => "man/continuousInference.md",
+            "Output Data" => "man/continuousOutput.md",
         ],
         "Tree Factor Graph" => [
-            "Graphical Model" => "man/graphicalmodeltree.md",
-            "Inference" => "man/inferencetree.md",
-            "Output Data" => "man/outputtree.md",
+            "Graphical Model" => "man/continuousTreeModel.md",
+            "Inference" => "man/continuousTreeInference.md",
+            "Output Data" => "man/continuousTreeOutput.md",
         ],
-        "Utility Functions" => "man/utility.md",
+        "Utility Functions" => "man/utility.md"
+        ],
+        "Discrete Framework" => [
+        "Input Data" => "man/discreteInput.md",
+        "Tree Factor Graph" => [
+            "Graphical Model" => "man/discreteTreeModel.md",
+            "Inference" => "man/discreteTreeInference.md",
+            "Output Data" => "man/discreteTreeOutput.md",
+        ],
+        ],
         "Theoretical Background" => "man/theoretical.md",
     ],
 )

@@ -1,4 +1,4 @@
-# [Graphical Model](@id graphicalModel)
+# [Graphical Model](@id graphicalModelContinuous)
 
 The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
 - `ContinuousGraph`;

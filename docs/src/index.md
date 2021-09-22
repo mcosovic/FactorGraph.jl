@@ -1,17 +1,25 @@
 FactorGraph
 =============
 
-The FactorGraph package provides the set of different functions to perform inference over the factor graph in a static or dynamic framework using the linear Gaussian belief propagation (GBP) algorithm. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables.
+The FactorGraph package provides the set of different functions to perform inference over the factor graph with continuous or discrete random variables using the belief propagation (BP) algorithm, also known as the sum-product algorithm.
 
-The software package includes algorithms based on the [synchronous message passing schedule] (@ref synchronous):
+----
+
+#### Continuous framework
+In the case of continuous random variables described by Gaussian distributions, we are using the linear Gaussian belief propagation (GBP) algorithm to solve the inference problem. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables. To perform inference the FactorGraph package uses several algorithms based on the [synchronous message passing schedule] (@ref synchronous):
  - [vanilla GBP algorithm] (@ref vanillaGBP);
- - [computation-efficient GBP algorithm] (@ref efficientGBP);
- - [computation-efficient GBP algorithm with Kahan–Babuška algorithm] (@ref kahanGBP);
+ - [broadcast GBP algorithm] (@ref broadcastGBP);
+ - [broadcast GBP with Kahan–Babuška algorithm] (@ref kahanGBP).
+Within these algorithms, the packege provides several routines to allow dynamic GBP framework:
  - [dynamic GBP algorithm] (@ref dynamicGBP);
  - [ageing GBP algorithm] (@ref ageingGBP).
-
-The software package also includes a message passing algorithm that allows exact inference in tree factor graph:
+Finally, the package also includes a message passing algorithm that allows inference in tree factor graph:
 - [forward–backward algorithm] (@ref treeGBP).
+
+---
+
+#### Discrete framework
+In the case of discrete random variables the package currently provides only the BP algorithm that allows exact inference in the tree factor graph.
 
 ---
 
@@ -32,23 +40,23 @@ using FactorGraph
 ```
 ---
 
-#### Quick start
-Following examples are intended for a quick introduction to FactorGraph package.
+#### Quick start whitin continuous framework
+The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.
 
-- Synchronous message passing schedule using the native GBP algorithm:
+- Synchronous message passing schedule using the vanilla GBP algorithm:
 ```julia-repl
 using FactorGraph
 
 gbp = continuousModel("data33_14.h5")       # initialize the graphical model using HDF5 input
 for iteration = 1:200                       # the GBP inference
-    messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
-    messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 ```
 
-- Synchronous message passing schedule using the efficient GBP algorithm:
+- Synchronous message passing schedule using the broadcast GBP algorithm:
 ```julia-repl
 using FactorGraph
 
@@ -58,13 +66,13 @@ v = [0.1; 1.0; 1.0]                         # variance vector
 
 gbp = continuousModel(H, z, v)              # initialize the graphical model via arguments
 for iteration = 1:50                        # the GBP inference
-    messageFactorVariableEfficient(gbp)     # compute messages using the efficient GBP
-    messageVariableFactorEfficient(gbp)     # compute messages using the efficient GBP
+    messageFactorVariableBroadcast(gbp)     # compute messages using the broadcast GBP
+    messageVariableFactorBroadcast(gbp)     # compute messages using the broadcast GBP
 end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the GBP and Kahan-Babuska algorithm with the plotting of the marginal mean through iterations:
+- Synchronous message passing schedule using broadcast GBP with Kahan–Babuška algorithm with the plotting of the marginal mean through iterations:
 ```julia-repl
 using FactorGraph
 using Plots
@@ -80,7 +88,7 @@ end
 plot(collect(1:50), x6)                     # show plot
 ```
 
-- Synchronous message passing schedule using the native GBP algorithm in the dynamic framework:
+- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:
 ```julia-repl
 using FactorGraph
 
@@ -90,8 +98,8 @@ v = [0.1; 1.0; 1.0]                         # variance vector
 
 gbp = continuousModel(H, z, v)              # initialize the graphical model
 for iteration = 1:200                       # the GBP inference
-    messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
-    messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 
 dynamicFactor!(gbp;                         # integrate changes in the running GBP
@@ -99,14 +107,14 @@ dynamicFactor!(gbp;                         # integrate changes in the running G
     mean = 0.85,
     variance = 1e-10)
 for iteration = 201:400                     # continues the GBP inference
-    messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
-    messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
 ```
 
-- Synchronous message passing schedule using the native GBP algorithm in the dynamic ageing framework:
+- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic ageing framework:
 ```julia-repl
 using FactorGraph
 
@@ -116,8 +124,8 @@ v = [0.1; 1.0; 1.0]                         # variance vector
 
 gbp = continuousModel(H, z, v)              # initialize the graphical model
 for iteration = 1:200                       # the GBP inference
-    messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
-    messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 
 for iteration = 1:400                       # continues the GBP inference
@@ -128,8 +136,8 @@ for iteration = 1:400                       # continues the GBP inference
         model = 1,
         a = 0.05,
         tau = iteration)
-    messageFactorVariableVanilla(gbp)       # compute messages using the native GBP
-    messageVariableFactorVanilla(gbp)       # compute messages using the native GBP
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
@@ -155,7 +163,27 @@ while gbp.graph.backward                    # inference from the root to leaves
 end
 marginal(gbp)                               # compute marginals
 displayData(gbp)                            # show results
+```
 
+---
+
+#### Quick start whitin discrete framework
+Following examples are intended for a quick introduction to FactorGraph package within the discrete framework.
+
+ - Forward–backward algorithm over the tree factor graph:
+```julia-repl
+using FactorGraph
+
+bp = discreteTreeModel("discrete6_4.xlsx")  # initialize the tree graphical model
+while bp.graph.forward                      # inference from leaves to the root
+    forwardVariableFactor(bp)               # compute forward messages
+    forwardFactorVariable(bp)               # compute forward messages
+end
+while bp.graph.backward                     # inference from the root to leaves
+    backwardVariableFactor(bp)              # compute backward messages
+    backwardFactorVariable(bp)              # compute backward messages
+end
+marginal(bp)                                # compute normalized marginals
 ```
 
 ---
@@ -163,4 +191,3 @@ displayData(gbp)                            # show results
 #### More information
 - M. Cosovic and D. Vukobratovic, "Distributed Gauss-Newton Method for State Estimation Using Belief Propagation," in IEEE Transactions on  Power Systems, vol. 34, no. 1, pp. 648-658, Jan. 2019. [arxiv.org](https://arxiv.org/pdf/1702.05781.pdf)
 - M. Cosovic, "Design and Analysis of Distributed State Estimation Algorithms Based on Belief Propagation and Applications in Smart Grids." arXiv preprint arXiv:1811.08355 (2018). [arxiv.org](https://arxiv.org/pdf/1811.08355.pdf)
-

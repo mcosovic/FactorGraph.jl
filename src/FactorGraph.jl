@@ -3,12 +3,15 @@ module FactorGraph
 using SparseArrays, LinearAlgebra
 using HDF5, XLSX
 using Random
-using PrettyTables
-using Printf
+using PrettyTables, Printf
 
-### Form a factor graph and initialize messages and marginals
-include("graphicalmodel.jl")
-export continuousModel, damping!, continuousTreeModel, isTree
+### Form a continuous factor graph and initialize messages and marginals
+include("continuousgraph.jl")
+export continuousModel, continuousTreeModel
+
+### Form a discrete factor graph and initialize messages and marginals
+include("discretegraph.jl")
+export discreteTreeModel
 
 ### Factor graph manipulation
 include("graphmanipulation.jl")
@@ -18,21 +21,21 @@ export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
 
 ### Inference
 include("inference.jl")
-export marginal, dynamicFactor!, ageingVariance!
+export marginal, marginalUnnormalized, dynamicFactor!, ageingVariance!, damping!
 
 ### Vanilla GBP algorithm
 include("vanillaGBP.jl")
-export messageFactorVariableVanilla, meanFactorVariableVanilla, varianceFactorVariableVanilla,
-       messageDampFactorVariableVanilla, meanDampFactorVariableVanilla,
-       messageVariableFactorVanilla, meanVariableFactorVanilla, varianceVariableFactorVanilla
+export messageFactorVariable, meanFactorVariable, varianceFactorVariable,
+       messageDampFactorVariable, meanDampFactorVariable,
+       messageVariableFactor, meanVariableFactor, varianceVariableFactor
 
-### Computation-efficient GBP algorithm
-include("efficientGBP.jl")
-export messageFactorVariableEfficient, meanFactorVariableEfficient, varianceFactorVariableEfficient,
-       messageDampFactorVariableEfficient, meanDampFactorVariableEfficient,
-       messageVariableFactorEfficient, meanVariableFactorEfficient, varianceVariableFactorEfficient
+### Broadcast GBP algorithm
+include("broadcastGBP.jl")
+export messageFactorVariableBroadcast, meanFactorVariableBroadcast, varianceFactorVariableBroadcast,
+       messageDampFactorVariableBroadcast, meanDampFactorVariableBroadcast,
+       messageVariableFactorBroadcast, meanVariableFactorBroadcast, varianceVariableFactorBroadcast
 
-### Computation-efficient GBP algorithm with Kahan-Babuska algorithm
+### Broadcast GBP with Kahan-Babuska algorithm
 include("kahanGBP.jl")
 export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariableKahan,
        messageDampFactorVariableKahan, meanDampFactorVariableKahan,
@@ -40,7 +43,7 @@ export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariab
 
 # Tree factor graph
 include("treeGBP.jl")
-export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable
+export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable, isTree
 
 # Compute and show results
 include("utility.jl")

@@ -6,12 +6,12 @@ using Test
     ### Vanilla GBP with Damping and XLSX input
     gbp = continuousModel("data33_14.xlsx"; variance = 1e60)
     for iteration = 1:50
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 51:1000
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -33,15 +33,15 @@ using Test
     displayData(gbp)
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
 
-    ### Efficient GBP with Damping and HDF5 input
+    ### Broadcast GBP with Damping and HDF5 input
     gbp = continuousModel("data33_14.h5"; variance = 1e10)
     for iteration = 1:50
-        messageFactorVariableEfficient(gbp)
-        messageVariableFactorEfficient(gbp)
+        messageFactorVariableBroadcast(gbp)
+        messageVariableFactorBroadcast(gbp)
     end
     for iteration = 51:1000
-        messageDampFactorVariableEfficient(gbp)
-        messageVariableFactorEfficient(gbp)
+        messageDampFactorVariableBroadcast(gbp)
+        messageVariableFactorBroadcast(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -50,13 +50,13 @@ using Test
     ### Vanilla GBP with Damping with marginal computation in each iteration
     gbp = continuousModel("data33_14.h5"; variance = 1e60)
     for iteration = 1:50
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
         marginal(gbp)
     end
     for iteration = 51:1000
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
         marginal(gbp)
     end
     exact = wls(gbp)
@@ -66,12 +66,12 @@ using Test
     ### Vanilla GBP with Damping with error metrics
     gbp = continuousModel("data33_14.h5"; variance = 1e60)
     for iteration = 1:50
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 51:500
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -89,12 +89,12 @@ using Test
     v = [1.0; 1.0; 1.0]
     gbp = continuousModel(H, z, v)
     for iteration = 1:5
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 6:1000
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 1.0]
@@ -121,19 +121,19 @@ end
     ### Vanilla GBP with Damping and two dynamic updates
     gbp = continuousModel(H, z, v)
     for iteration = 1:9
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
     dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
     for iteration = 10:99
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 100:2000
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 1.0]
@@ -141,16 +141,16 @@ end
     ### Vanilla GBP with Damping and one dynamic updates
     gbp = continuousModel(H, z, v)
     for iteration = 1:9
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
         marginal(gbp)
     end
     dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
     dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
     dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
     for iteration = 10:1000
-        messageDampFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageDampFactorVariable(gbp)
+        messageVariableFactor(gbp)
         marginal(gbp)
     end
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 1.0]
@@ -164,13 +164,13 @@ end
     ### Vanilla GBP with linear ageing
     gbp = continuousModel(H, z, v)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 1:900
         ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 1, a = 1e57, tau = iteration)
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 3.0]
@@ -178,13 +178,13 @@ end
     ### Vanilla GBP with logarithmic ageing
     gbp = continuousModel(H, z, v)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 1:1000
         ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 2, a = 1e57, b = 0.00002, tau = iteration)
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 3.0]
@@ -192,13 +192,13 @@ end
     ### Vanilla GBP with exponential ageing
     gbp = continuousModel(H, z, v)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     for iteration = 1:900
         ageingVariance!(gbp; factor = 4, initial = 1, limit = 1e60, model = 3, a = 0.08, b = 2, tau = iteration)
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 3.0]
@@ -208,8 +208,8 @@ end
     ### Freeze factor node
     gbp = continuousModel("data33_14.h5")
     for i = 1:2
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     beforeFreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
@@ -217,8 +217,8 @@ end
     beforeFreeze = beforeFreeze[idx, :]
     freezeFactor!(gbp; factor = 10)
     for i = 1:20
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     afterFreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
@@ -229,8 +229,8 @@ end
     ### Defreeze factor node
     defreezeFactor!(gbp; factor = 10)
     for i = 1:20
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     afterDefreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
@@ -241,8 +241,8 @@ end
     ### Freeze variable node
     gbp = continuousModel("data33_14.h5")
     for i = 1:2
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     beforeFreeze = [T.fromVariable T.toFactor T.meanVariableFactor T.varianceVariableFactor]
@@ -250,8 +250,8 @@ end
     beforeFreeze = beforeFreeze[idx, :]
     freezeVariable!(gbp; variable = 9)
     for i = 1:20
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     afterFreeze = [T.fromVariable T.toFactor T.meanVariableFactor T.varianceVariableFactor]
@@ -262,8 +262,8 @@ end
     ### Defreeze variable node
     defreezeVariable!(gbp; variable = 9)
     for i = 1:20
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     T = gbp.inference
     afterDefreeze = [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
@@ -274,16 +274,16 @@ end
     ### Freeze and defreeze message variable node to factor node
     gbp = continuousModel("data33_14.h5")
     for iteration = 1:5
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     beforeFreeze6 = copy(gbp.inference.meanVariableFactor[6])
     beforeFreeze57 = copy(gbp.inference.meanVariableFactor[57])
     freezeVariableFactor!(gbp; variable = 9, factor = 29)
     freezeVariableFactor!(gbp; variable = 2, factor = 10)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     afterFreeze6 = copy(gbp.inference.meanVariableFactor[6])
     afterFreeze57 = copy(gbp.inference.meanVariableFactor[57])
@@ -292,8 +292,8 @@ end
     defreezeVariableFactor!(gbp; variable = 9, factor = 29)
     defreezeVariableFactor!(gbp; variable = 2, factor = 10)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     @test afterFreeze6 != gbp.inference.meanVariableFactor[6]
     @test afterFreeze57 != gbp.inference.meanVariableFactor[57]
@@ -301,16 +301,16 @@ end
     ### Freeze and defreeze message factor node to variable node
     gbp = continuousModel("data33_14.h5")
     for iteration = 1:5
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     beforeFreeze6 = copy(gbp.inference.meanFactorVariable[6])
     beforeFreeze57 = copy(gbp.inference.meanFactorVariable[57])
     freezeFactorVariable!(gbp; variable = 2, factor = 11)
     freezeFactorVariable!(gbp; variable = 14, factor = 25)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     afterFreeze6 = copy(gbp.inference.meanFactorVariable[6])
     afterFreeze57 = copy(gbp.inference.meanFactorVariable[57])
@@ -319,8 +319,8 @@ end
     defreezeFactorVariable!(gbp; variable = 2, factor = 11)
     defreezeFactorVariable!(gbp; variable = 14, factor = 25)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     @test afterFreeze6 != gbp.inference.meanFactorVariable[6]
     @test afterFreeze57 != gbp.inference.meanFactorVariable[57]
@@ -336,8 +336,8 @@ end
     gbp = continuousModel(H,z,v)
     hideFactor!(gbp; factor = 2)
     for iteration = 1:200
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -353,8 +353,8 @@ end
     gbp = continuousModel(H,z,v)
     hideFactor!(gbp; factor = 4)
     for iteration = 1:200
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -363,8 +363,8 @@ end
     ### Add factor node
     gbp = continuousModel("data33_14.h5")
     for iteration = 1:15
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     mean = [2.2; 3.1; 0.5]
     variance = [0.001; 0.001; 0.001]
@@ -374,8 +374,8 @@ end
     jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
     addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
     for iteration = 1:200
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -384,8 +384,8 @@ end
     ### Hide and add factor node
     gbp = continuousModel("data33_14.h5")
     for iteration = 1:15
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     hideFactor!(gbp; factor = 2)
     mean = [2.2; 3.1; 0.5]
@@ -396,8 +396,8 @@ end
     jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
     addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
     for iteration = 1:200
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     exact = wls(gbp)
@@ -433,8 +433,8 @@ end
     # Forward-backward algorithm
     gbp = continuousModel(H, z, v)
     for iteration = 1:100
-        messageFactorVariableVanilla(gbp)
-        messageVariableFactorVanilla(gbp)
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
     end
     marginal(gbp)
     mean = copy(gbp.inference.mean)
@@ -476,4 +476,27 @@ end
     end
     marginal(gbp)
     @test sum(round.(mean - gbp.inference.mean, digits = 4)) == 0
+end
+
+@testset "DicreteModelTree" begin
+    ### isTree
+    bp = discreteTreeModel("discrete6_4.xlsx")
+    tree = isTree(bp)
+    @test tree == true
+
+    bp = discreteTreeModel("discrete6_4.h5")
+    tree = isTree(bp)
+    @test tree == true
+
+    # Forward-backward algorithm
+    bp = discreteTreeModel("discrete6_4.h5")
+    while bp.graph.forward
+        forwardVariableFactor(bp)
+        forwardFactorVariable(bp)
+    end
+    while bp.graph.backward
+        backwardVariableFactor(bp)
+        backwardFactorVariable(bp)
+    end
+    marginal(bp)
 end

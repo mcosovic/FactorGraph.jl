@@ -1,3 +1,7 @@
+.math-container {
+  overflow-y: hidden;
+}
+
 .center {
   display: block;
   margin-left: auto;

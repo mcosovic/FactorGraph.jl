@@ -79,7 +79,7 @@ struct ContinuousTreeModel
     system::ContinuousSystem
 end
 
-########## Form a graph and initialize messages ##########
+########## Form a graph with continuous variables and initialize messages ##########
 function continuousModel(
     args...;
     prob::Float64 = 0.6,
@@ -88,85 +88,38 @@ function continuousModel(
     variance::Float64 = 1e10)
 
     checkKeywords(prob, alpha, variance)
-    if checkSystemInputs(args)
-        system = juliaOut(args)
+    if checkFileOrArguments(args)
+        system = readContinuousFile(args)
     else
-        system = juliaIn(args)
+        system = readContinuousArguments(args)
     end
 
-    graph, inference = makeGraph(system, mean, variance, prob, alpha)
+    graph, inference = makeContinuousGraph(system, mean, variance, prob, alpha)
 
     return ContinuousModel(graph, inference, system)
 end
 
-########## Check keyword arguments ##########
-function checkKeywords(prob, alpha, variance)
-    #### Check convergence parameters
-    if prob <= 0.0 || prob >= 1.0
-        error("Invalid prob value.")
-    end
-    if alpha <= 0.0 || alpha >= 1.0
-        error("Invalid alpha value.")
+########## Form a tree factor graph and initialize messages ##########
+function continuousTreeModel(
+    args...;
+    mean::Float64 = 0.0,
+    variance::Float64 = 1e10,
+    root::Int64 = 1)
+
+    if checkFileOrArguments(args)
+        system = readContinuousFile(args)
+    else
+        system = readContinuousArguments(args)
     end
 
-    #### Check initial variance
-    if variance < 0.0
-        error("Invalid variance value.")
-    end
-end
+    graph, inference = makeContinuousTreeGraph(system, mean, variance, root)
 
-########## Type of the system data ##########
-function checkSystemInputs(args)
-    fromfile = false
-    @inbounds for i in args
-        if typeof(i) == String
-            fromfile = true
-            break
-        end
-    end
-
-    return fromfile
+    return ContinuousTreeModel(graph, inference, system)
 end
 
 ########## Load from HDF5 or XLSX files ##########
-function juliaOut(args)
-    #### Check the package is installed
-    pathtoFactorGraph = Base.find_package("FactorGraph")
-    if isnothing(pathtoFactorGraph)
-        throw(ErrorException("FactorGraph not found in install packages"))
-    end
-    packagepath = abspath(joinpath(dirname(pathtoFactorGraph), ".."))
-
-    extension = ".h5"; path = ""; dataname = ""; fullpath = ""
-
-    @inbounds for i = 1:length(args)
-        try
-            extension = string(match(r"\.[A-Za-z0-9]+$", args[i]).match)
-        catch
-            extension = ""
-        end
-        if extension == ".h5" || extension == ".xlsx"
-            fullpath = args[i]
-            path = dirname(args[i])
-            dataname = basename(args[i])
-            break
-        end
-    end
-
-    if isempty(extension)
-        throw(ErrorException("the input DATA extension is not found"))
-    elseif extension != ".h5" && extension != ".xlsx"
-        throw(DomainError(extension, "the input DATA extension is not supported"))
-    end
-
-    if path == ""
-        path = joinpath(packagepath, "src/example/")
-        fullpath = joinpath(packagepath, "src/example/", dataname)
-    end
-
-    if !(dataname in cd(readdir, path))
-        throw(DomainError(dataname, "the input DATA is not found"))
-    end
+function readContinuousFile(args)
+    fullpath, extension, dataname = checkImportFile(args)
 
     #### Read from HDF5 or XLSX file
     if extension == ".h5"
@@ -186,13 +139,17 @@ function juliaOut(args)
         else
             throw(ErrorException("error opening sheet jacobian"))
         end
-        if "measurement" in XLSX.sheetnames(xf)
-            start = startxlsx(xf["measurement"])
-            list = xf["measurement"][:][start:end, :]
-            observation = list[:, 1]
-            variance = list[:, 2]
+        if "observation" in XLSX.sheetnames(xf)
+            start = startxlsx(xf["observation"])
+            observation = xf["observation"][:][start:end]
         else
-            throw(ErrorException("error opening sheet measurement"))
+            throw(ErrorException("error opening sheet observation"))
+        end
+        if "variance" in XLSX.sheetnames(xf)
+            start = startxlsx(xf["variance"])
+            variance = xf["variance"][:][start:end]
+        else
+            throw(ErrorException("error opening sheet variance"))
         end
     else
         error("the input data is not a valid format")
@@ -202,7 +159,7 @@ function juliaOut(args)
 end
 
 ########## Read in-Julia system model ##########
-function juliaIn(args)
+function readContinuousArguments(args)
     if typeof(args[1]) == Array{Float64, 2}
         jacobian = sparse(args[1])
     else
@@ -216,20 +173,8 @@ function juliaIn(args)
     return ContinuousSystem(jacobian, jacobianTranspose, observation, variance, "noname")
 end
 
-########## Start row in xlsx-file ##########
-function startxlsx(xf)
-    start = 1
-    @inbounds for r in XLSX.eachrow(xf)
-        if !isa(r[1], String)
-            start = XLSX.row_number(r)
-            break
-        end
-    end
-    return start
-end
-
 ########## Produce the graphical model ##########
-function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAlpha)
+function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAlpha)
     ### Number of factor and variable nodes
     Nfactor, Nvariable = size(system.jacobian)
 
@@ -340,37 +285,8 @@ function makeGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAl
             fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
-########## Set damping parameters ##########
-function damping!(gbp::ContinuousModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
-    gbp.graph.alphaNew = fill(1.0, gbp.graph.Nlink)
-    gbp.graph.alphaOld = fill(0.0, gbp.graph.Nlink)
-    bernoulliSample = randsubseq(collect(1:gbp.graph.Nlink), prob)
-    @inbounds for i in bernoulliSample
-        gbp.graph.alphaNew[i] = 1.0 - alpha
-        gbp.graph.alphaOld[i] = alpha
-    end
-end
-
-########## Form a tree factor graph and initialize messages ##########
-function continuousTreeModel(
-    args...;
-    mean::Float64 = 0.0,
-    variance::Float64 = 1e10,
-    root::Int64 = 1)
-
-    if checkSystemInputs(args)
-        system = juliaOut(args)
-    else
-        system = juliaIn(args)
-    end
-
-    graph, inference = graphicalModelTree(system, mean, variance, root)
-
-    return ContinuousTreeModel(graph, inference, system)
-end
-
 ########## Produce the graphical model ##########
-function graphicalModelTree(system, virtualMean, virtualVariance, root)
+function makeContinuousTreeGraph(system, virtualMean, virtualVariance, root)
     ### Number of factor and variable nodes
     Nfactor, Nvariable = size(system.jacobian)
 
@@ -447,92 +363,3 @@ function graphicalModelTree(system, virtualMean, virtualVariance, root)
             fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
-########## Check that the factor graph has a tree structure ##########
-function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel})
-    ## Pass through the rows
-    rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
-    iterateFactor = Int64[]
-    @inbounds for i = 1:gbp.graph.Nfactor
-        if gbp.system.jacobianTranspose.colptr[i + 1] - gbp.system.jacobianTranspose.colptr[i] != 1
-            for j = gbp.system.jacobianTranspose.colptr[i]:(gbp.system.jacobianTranspose.colptr[i + 1] - 1)
-                row = gbp.system.jacobianTranspose.rowval[j]
-                push!(rowptr[i], row)
-            end
-        end
-    end
-
-    ## Pass through the columns
-    iterateVariable = fill(0, gbp.graph.Nvariable)
-    colptr = [Int[] for col = 1:gbp.graph.Nvariable]
-    counter = 0
-    @inbounds for col = 1:gbp.graph.Nvariable
-        for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
-            row = gbp.system.jacobian.rowval[i]
-            if gbp.system.jacobianTranspose.colptr[row + 1] - gbp.system.jacobianTranspose.colptr[row] != 1
-                push!(colptr[col], row)
-            end
-        end
-        if length(colptr[col]) == 1
-            counter += 1
-            iterateVariable[counter] = col
-        end
-    end
-    resize!(iterateVariable, counter)
-
-    ## Pilling the factor graph
-    hasSingleVariable = true; hasSingleFactor = true;
-    @inbounds while hasSingleFactor || hasSingleVariable
-        for variable in iterateVariable
-            factor = colptr[variable][1]
-            for (k, variables) in enumerate(rowptr[factor])
-                if variable == variables
-                    deleteat!(rowptr[factor], k)
-                    deleteat!(colptr[variable], 1)
-                end
-            end
-            if length(rowptr[factor]) == 1
-                push!(iterateFactor, factor)
-            end
-        end
-        if isempty(iterateFactor)
-            hasSingleFactor = false
-        end
-        iterateVariable = Int64[]
-
-        for factor in iterateFactor
-            variable = rowptr[factor][1]
-            for (k, factors) in enumerate(colptr[variable])
-                if factor == factors
-                    deleteat!(colptr[variable], k)
-                    deleteat!(rowptr[factor], 1)
-                end
-            end
-            if length(colptr[variable]) == 1
-                push!(iterateVariable, variable)
-            end
-        end
-
-        flag = true
-        for i in colptr[iterateVariable]
-            if !isempty(i)
-                flag = false
-            end
-        end
-        if flag break end
-
-        if isempty(iterateVariable)
-            hasSingleVariable = false
-        end
-        iterateFactor = Int64[]
-    end
-
-    isTree = true
-    @inbounds for i in colptr
-        if length(i) != 0
-            isTree = false
-            break
-        end
-    end
-
-    return isTree
-end

@@ -1,5 +1,5 @@
-########## Efficient GBP messages: Factor to variable ##########
-function messageFactorVariableEfficient(gbp::ContinuousModel)
+########## Broadcast GBP messages: Factor to variable ##########
+function messageFactorVariableBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0
         for j in gbp.graph.rowptr[i]
@@ -14,8 +14,8 @@ function messageFactorVariableEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP means: Factor to variable ##########
-function meanFactorVariableEfficient(gbp::ContinuousModel)
+########## Broadcast GBP means: Factor to variable ##########
+function meanFactorVariableBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Mrow = 0.0
         for j in gbp.graph.rowptr[i]
@@ -27,8 +27,8 @@ function meanFactorVariableEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP variances: Factor to variable ##########
-function varianceFactorVariableEfficient(gbp::ContinuousModel)
+########## Broadcast GBP variances: Factor to variable ##########
+function varianceFactorVariableBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Vrow = 0.0
         for j in gbp.graph.rowptr[i]
@@ -40,8 +40,8 @@ function varianceFactorVariableEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP damp messages: Factor to variable ##########
-function messageDampFactorVariableEfficient(gbp::ContinuousModel)
+########## Broadcast GBP damp messages: Factor to variable ##########
+function messageDampFactorVariableBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Mrow = 0.0; Vrow = 0.0
         for j in gbp.graph.rowptr[i]
@@ -56,8 +56,8 @@ function messageDampFactorVariableEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP damp means: Factor to variable ##########
-function meanDampFactorVariableEfficient(gbp::ContinuousModel)
+########## Broadcast GBP damp means: Factor to variable ##########
+function meanDampFactorVariableBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Mrow = 0.0
         for j in gbp.graph.rowptr[i]
@@ -70,8 +70,8 @@ function meanDampFactorVariableEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP messages: Variable to factor ##########
-function messageVariableFactorEfficient(gbp::ContinuousModel)
+########## Broadcast GBP messages: Variable to factor ##########
+function messageVariableFactorBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]
         for j in gbp.graph.colptr[i]
@@ -86,8 +86,8 @@ function messageVariableFactorEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP means: Variable to factor ##########
-function meanVariableFactorEfficient(gbp::ContinuousModel)
+########## Broadcast GBP means: Variable to factor ##########
+function meanVariableFactorBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         Mcol = gbp.graph.meanDirect[i]
         for j in gbp.graph.colptr[i]
@@ -100,8 +100,8 @@ function meanVariableFactorEfficient(gbp::ContinuousModel)
     end
 end
 
-########## Efficient GBP variances: Variable to factor ##########
-function varianceVariableFactorEfficient(gbp::ContinuousModel)
+########## Broadcast GBP variances: Variable to factor ##########
+function varianceVariableFactorBroadcast(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         Wcol = gbp.graph.weightDirect[i]
         for j in gbp.graph.colptr[i]

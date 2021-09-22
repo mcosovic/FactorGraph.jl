@@ -1,9 +1,9 @@
-# [Inference](@id vanilla)
+# [Inference](@id inferenceContinuous)
 
 We advise the reader to read the [theoretical background] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the FactorGraph provides three inference approaches:
-- [vanilla GBP algorithm] (@ref vanillaGBP),
-- [computation-efficient GBP algorithm] (@ref efficientGBP),
-- [computation-efficient kahan–babuška GBP algorithm] (@ref kahanGBP).
+ - [vanilla GBP algorithm] (@ref vanillaGBP);
+ - [broadcast GBP algorithm] (@ref broadcastGBP);
+ - [broadcast GBP with Kahan–Babuška algorithm] (@ref kahanGBP).
 
 Each of the inference functions accepts only the composite type `ContinuousModel`, i.e., an output variable of the function `gbp = continuousModel()` and applies the [synchronous message passing schedule] (@ref synchronous).
 
@@ -12,8 +12,8 @@ Each of the inference functions accepts only the composite type `ContinuousModel
 #### Message inference
 The set of functions that can be used to preform message inference:
 ```julia-repl
-messageFactorVariableVanilla(gbp); messageVariableFactorVanilla(gbp)
-messageFactorVariableEfficient(gbp); messageVariableFactorEfficient(gbp)
+messageFactorVariable(gbp); messageVariableFactor(gbp)
+messageFactorVariableBroadcast(gbp); messageVariableFactorBroadcast(gbp)
 messageFactorVariableKahan(gbp); messageVariableFactorKahan(gbp)
 ```
 ---
@@ -21,8 +21,8 @@ messageFactorVariableKahan(gbp); messageVariableFactorKahan(gbp)
 #### Mean inference
 The set of functions that can be used to preform only mean inference:
 ```julia-repl
-meanFactorVariableVanilla(gbp); meanVariableFactorVanilla(gbp)
-meanFactorVariableEfficient(gbp); meanVariableFactorEfficient(gbp)
+meanFactorVariable(gbp); meanVariableFactor(gbp)
+meanFactorVariableBroadcast(gbp); meanVariableFactorBroadcast(gbp)
 meanFactorVariableKahan(gbp); meanVariableFactorKahan(gbp)
 ```
 ---
@@ -30,8 +30,8 @@ meanFactorVariableKahan(gbp); meanVariableFactorKahan(gbp)
 #### Variance inference
 The set of functions that can be used to preform only variance inference:
 ```julia-repl
-varianceFactorVariableVanilla(gbp); varianceVariableFactorVanilla(gbp)
-varianceFactorVariableEfficient(gbp); varianceVariableFactorEfficient(gbp)
+varianceFactorVariable(gbp); varianceVariableFactor(gbp)
+varianceFactorVariableBroadcast(gbp); varianceVariableFactorBroadcast(gbp)
 varianceFactorVariableKahan(gbp); varianceVariableFactorKahan(gbp)
 ```
 ---
@@ -40,8 +40,8 @@ varianceFactorVariableKahan(gbp); varianceVariableFactorKahan(gbp)
 #### Randomised damping inference
 Additionaly, we provide the set of functions to preform damping inference:
 ```julia-repl
-messageDampFactorVariableVanilla(gbp); meanDampFactorVariableVanilla(gbp)
-messageDampFactorVariableEfficient(gbp); meanDampFactorVariableEfficient(gbp)
+messageDampFactorVariable(gbp); meanDampFactorVariable(gbp)
+messageDampFactorVariableBroadcast(gbp); meanDampFactorVariableBroadcast(gbp)
 messageDampFactorVariableKahan(gbp); meanDampFactorVariableKahan(gbp)
 ```
 ---

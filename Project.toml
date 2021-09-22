@@ -1,7 +1,7 @@
 name = "FactorGraph"
 uuid = "528f6532-2a0d-4856-bb42-8bcefd89a10f"
 authors = ["Mirsad Cosovic <mirsad.cosovic@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -15,7 +15,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
-HDF5 = "0.15.5"
+HDF5 = "0.15.6"
 PrettyTables = "1.1.0"
 XLSX = "0.7.6"
 julia = "1.6"

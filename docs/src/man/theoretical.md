@@ -132,7 +132,7 @@ Finally, the mean-value ``\hat x_s`` is adopted as the estimated value of the st
 
 ---
 
-## [Computation-efficient GBP Algorithm]  (@id efficientGBP)
+## [Broadcast GBP Algorithm]  (@id broadcastGBP)
 We can make a substantial improvement to the vanilla GBP algorithm's complexity by reducing the number of calculations per outgoing messages. We achieve this reduction by summarisation of all incoming messages for each variable and factor node instead of summarising all incoming messages per each outgoing message. This simple trick, allow a single variable or factor node to share these summations across all outgoing messages, hence calculating these summations only once. As a result, each outgoing message involves a constant number of operations improving the worst-case running complexity to ``\mathcal{O}(nm)``. In this framework, we calculate the message from the variable node to the factor node as:
 ```math
         z_{x_s \to f_i} = \Bigg(\alpha_{x_s} - \cfrac{z_{f_i \to x_s}}{v_{f_i \to x_s}}\Bigg) v_{x_s \to f_i} \\
@@ -156,7 +156,7 @@ where:
 
 ---
 
-## [The GBP and Kahan–Babuška Algorithm]  (@id kahanGBP)
+## [The Broadcast GBP and Kahan–Babuška Algorithm]  (@id kahanGBP)
 The major drawback of the computation-efficient GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in the values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisely, we do summation that exists in the messages as:
 ```julia-repl
 function kahan(summands, total, epsilon)

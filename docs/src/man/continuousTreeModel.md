@@ -1,4 +1,4 @@
-# [Graphical Model Tree](@id graphicalModelTree)
+# [Tree Graphical Model](@id graphicalTreeModelContinuous)
 
 The FactorGraph supports the composite type `ContinuousTreeModel` related with the [forward–backward message passing] (@ref treeGBP), with three fields:
 - `ContinuousTreeGraph`;

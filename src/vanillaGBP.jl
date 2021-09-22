@@ -1,4 +1,5 @@
-function messageFactorVariableVanilla(gbp::ContinuousModel)
+########## Vanilla GBP messages: Factor to variable ##########
+function messageFactorVariable(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         for j in gbp.graph.rowptr[i]
             Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]; q = gbp.graph.toVariable.nzval[j]
@@ -15,7 +16,7 @@ function messageFactorVariableVanilla(gbp::ContinuousModel)
 end
 
 ########## Vanilla GBP means: Factor to variable ##########
-function meanFactorVariableVanilla(gbp::ContinuousModel)
+function meanFactorVariable(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         for j in gbp.graph.rowptr[i]
             Mrow = gbp.graph.meanIndirect[j]
@@ -30,7 +31,7 @@ function meanFactorVariableVanilla(gbp::ContinuousModel)
 end
 
 ########## Vanilla GBP variances: Factor to variable ##########
-function varianceFactorVariableVanilla(gbp::ContinuousModel)
+function varianceFactorVariable(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         for j in gbp.graph.rowptr[i]
             Vrow = gbp.graph.varianceIndirect[j]
@@ -45,7 +46,7 @@ function varianceFactorVariableVanilla(gbp::ContinuousModel)
 end
 
 ########## Vanilla GBP damp messages: Factor to variable ##########
-function messageDampFactorVariableVanilla(gbp::ContinuousModel)
+function messageDampFactorVariable(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         for j in gbp.graph.rowptr[i]
             Mrow = gbp.graph.meanIndirect[j]; Vrow = gbp.graph.varianceIndirect[j]; q = gbp.graph.toVariable.nzval[j]
@@ -62,7 +63,7 @@ function messageDampFactorVariableVanilla(gbp::ContinuousModel)
 end
 
 ########## Vanilla GBP damp means: Factor to variable ##########
-function meanDampFactorVariableVanilla(gbp::ContinuousModel)
+function meanDampFactorVariable(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         for j in gbp.graph.rowptr[i]
             Mrow = gbp.graph.meanIndirect[j]; q = gbp.graph.toVariable.nzval[j]
@@ -77,7 +78,7 @@ function meanDampFactorVariableVanilla(gbp::ContinuousModel)
 end
 
 ############# Vanilla GBP messages: Variable to factor ##########
-function messageVariableFactorVanilla(gbp::ContinuousModel)
+function messageVariableFactor(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         for j in gbp.graph.colptr[i]
             Mcol = gbp.graph.meanDirect[i]; Wcol = gbp.graph.weightDirect[i]; q = gbp.graph.toFactor.nzval[j]
@@ -94,7 +95,7 @@ function messageVariableFactorVanilla(gbp::ContinuousModel)
 end
 
 ############# Vanilla GBP means: Variable to factor ##########
-function meanVariableFactorVanilla(gbp::ContinuousModel)
+function meanVariableFactor(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         for j in gbp.graph.colptr[i]
             Mcol = gbp.graph.meanDirect[i]; q = gbp.graph.toFactor.nzval[j]
@@ -109,7 +110,7 @@ function meanVariableFactorVanilla(gbp::ContinuousModel)
 end
 
 ############# Vanilla GBP variances: Variable to factor ##########
-function varianceVariableFactorVanilla(gbp::ContinuousModel)
+function varianceVariableFactor(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateVariable
         for j in gbp.graph.colptr[i]
             Wcol = gbp.graph.weightDirect[i]

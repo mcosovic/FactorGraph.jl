@@ -26,6 +26,28 @@ function marginal(gbp::ContinuousTreeModel)
     end
 end
 
+########## Compute the BP marginal vector for the tree factor graph ##########
+function marginal(bp::DiscreteTreeModel)
+    @inbounds for i = 1:bp.graph.Nvariable
+        bp.inference.marginal[i] = copy(bp.graph.messageDirect[i])
+        for k in bp.graph.incomingToVariable[i]
+            bp.inference.marginal[i] .*= bp.inference.messageFactorVariable[k]
+        end
+        normalizeConstant = sum(bp.inference.marginal[i])
+        bp.inference.marginal[i] = bp.inference.marginal[i] ./ normalizeConstant
+    end
+end
+
+########## Compute the BP unnormalized marginal vector for the tree factor graph ##########
+function marginalUnnormalized(bp::DiscreteTreeModel)
+    @inbounds for i = 1:bp.graph.Nvariable
+        bp.inference.marginal[i] = copy(bp.graph.messageDirect[i])
+        for k in bp.graph.incomingToVariable[i]
+            bp.inference.marginal[i] .*= bp.inference.messageFactorVariable[k]
+        end
+    end
+end
+
 ########## Dynamic the GBP update ##########
 @inline function dynamicFactor!(gbp::ContinuousModel; factor = 0::Int64, mean = 0, variance = 0)
     if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
@@ -81,5 +103,16 @@ end
                 gbp.graph.varianceIndirect[i] = gbp.system.variance[factor]
             end
         end
+    end
+end
+
+########## Set damping parameters ##########
+function damping!(gbp::ContinuousModel; prob::Float64 = 0.6, alpha::Float64 = 0.4)
+    gbp.graph.alphaNew = fill(1.0, gbp.graph.Nlink)
+    gbp.graph.alphaOld = fill(0.0, gbp.graph.Nlink)
+    bernoulliSample = randsubseq(collect(1:gbp.graph.Nlink), prob)
+    @inbounds for i in bernoulliSample
+        gbp.graph.alphaNew[i] = 1.0 - alpha
+        gbp.graph.alphaOld[i] = alpha
     end
 end

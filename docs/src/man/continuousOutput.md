@@ -1,4 +1,4 @@
-# [Output Data](@id output)
+# [Output Data](@id outputContinuous)
 
 The main inference results are kept in the composite type `ContinuousModel` in the subtype `ContinuousInference` with fields:
 - `fromFactor`,
@@ -64,7 +64,7 @@ The initialization step starts with messages from local factor nodes ``\{f_1, f_
 #### Messages from factor nodes to variable nodes
 The GBP iterations computing messages from indirect factor nodes ``\{f_2, f_3\}`` to variable nodes ``\mathcal{X}``, using incoming messages from variable nodes ``\mathcal{X}`` to indirect factor nodes ``\{f_2, f_3\}`` obtained in the previus step.
 ```julia-repl
-messageFactorVariableVanilla(gbp)
+messageFactorVariable(gbp)
 
 julia> T = gbp.inference
 julia> [T.fromFactor T.toVariable T.meanFactorVariable T.varianceFactorVariable]
@@ -83,7 +83,7 @@ The first row defines the message from factor node ``f_2`` to variable node ``x_
 Next, the algorithm proceeds with computing messages from variable nodes ``\mathcal{X}`` to indirect factor nodes ``\{f_1, f_2\}``, using incoming messages from
 factor nodes ``\mathcal{F}`` to variable nodes ``\mathcal{X}``.
 ```julia-repl
-messageVariableFactorVanilla(gbp)
+messageVariableFactor(gbp)
 
 julia> T = gbp.inference
 julia> [T.fromVariable T.toFactor T.meanVariableFactor T.varianceVariableFactor]

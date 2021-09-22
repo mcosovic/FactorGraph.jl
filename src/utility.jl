@@ -61,7 +61,6 @@ end
     return ErrorMetricWiden(rmse, mae, wrss, rmseGBPWLS, maeGBPWLS)
 end
 
-
 ########## Compute WLS solution and error metrics ##########
 function wls(gbp::Union{ContinuousModel, ContinuousTreeModel})
     W = spdiagm(0 =>  @. 1.0 / sqrt(gbp.system.variance))
@@ -167,4 +166,88 @@ end
     end
 
     return NactiveRows
+end
+
+########## Start row in xlsx-file ##########
+function startxlsx(xf)
+    start = 1
+    @inbounds for r in XLSX.eachrow(xf)
+        if !isa(r[1], String)
+            start = XLSX.row_number(r)
+            break
+        end
+    end
+    return start
+end
+
+########## Check data for import ##########
+function checkImportFile(args)
+    #### Check the package is installed
+    pathtoFactorGraph = Base.find_package("FactorGraph")
+    if isnothing(pathtoFactorGraph)
+        throw(ErrorException("FactorGraph not found in install packages"))
+    end
+    packagepath = abspath(joinpath(dirname(pathtoFactorGraph), ".."))
+
+    extension = ".h5"; path = ""; dataname = ""; fullpath = ""
+
+    @inbounds for i = 1:length(args)
+        try
+            extension = string(match(r"\.[A-Za-z0-9]+$", args[i]).match)
+        catch
+            extension = ""
+        end
+        if extension == ".h5" || extension == ".xlsx"
+            fullpath = args[i]
+            path = dirname(args[i])
+            dataname = basename(args[i])
+            break
+        end
+    end
+
+    if isempty(extension)
+        throw(ErrorException("the input DATA extension is not found"))
+    elseif extension != ".h5" && extension != ".xlsx"
+        throw(DomainError(extension, "the input DATA extension is not supported"))
+    end
+
+    if path == ""
+        path = joinpath(packagepath, "src/example/")
+        fullpath = joinpath(packagepath, "src/example/", dataname)
+    end
+
+    if !(dataname in cd(readdir, path))
+        throw(DomainError(dataname, "the input DATA is not found"))
+    end
+
+    return fullpath, extension, dataname
+end
+
+########## Check keyword arguments ##########
+function checkKeywords(prob, alpha, variance)
+    #### Check convergence parameters
+    if prob <= 0.0 || prob >= 1.0
+        error("Invalid prob value.")
+    end
+    if alpha <= 0.0 || alpha >= 1.0
+        error("Invalid alpha value.")
+    end
+
+    #### Check initial variance
+    if variance < 0.0
+        error("Invalid variance value.")
+    end
+end
+
+########## Type of the system data ##########
+function checkFileOrArguments(args)
+    fromfile = false
+    @inbounds for i in args
+        if typeof(i) == String
+            fromfile = true
+            break
+        end
+    end
+
+    return fromfile
 end

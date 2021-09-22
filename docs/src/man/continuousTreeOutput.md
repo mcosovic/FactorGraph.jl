@@ -1,4 +1,4 @@
-# [Output Data](@id outputtree)
+# [Output Data](@id outputTreeContinuous)
 
 The main inference results are kept in the composite type `ContinuousTreeModel` in the subtype `ContinuousInference` with fields:
 - `fromFactor`,
@@ -104,7 +104,7 @@ end
 ```
 ---
 
-#### Backward messages the root node to the leaf nodes
+#### Backward messages from the root node to the leaf nodes
 The GBP first backward recursion step starts by computing message from the root variable node ``x_3`` to the factor node ``f_2``, using incoming message from factor node ``f_4``.
 ```julia-repl
 backwardVariableFactor(gbp)

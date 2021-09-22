@@ -1,4 +1,4 @@
-# [Inference](@id inferenceTree)
+# [Inference](@id inferenceTreeContinuous)
 
 To exchange information over the tree factor graph, the FactorGraph provides forward–backward algorithm. We advise the reader to read the [forward–backward algorithm] (@ref treeGBP) which provides a detailed description of the inference algorithm.
 
