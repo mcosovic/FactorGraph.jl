@@ -21,7 +21,7 @@ Thus, the parameters that describe the factor graph structure are represented by
 #### Build the graphical model by passing arguments
 Let us observe the following joint probability density function:
 ```math
-    g(\mathcal{X})  =  p_1(x_1)p_2(x_1|x_2)p_3(x_1|x_2,x_3),
+    g(\mathcal{X})  \propto  p_1(x_1)p_2(x_1|x_2)p_3(x_1|x_2,x_3),
 ```
 where all variables have two states ``1`` and ``2``. The conditional probability tables can be written in the compact form:
 

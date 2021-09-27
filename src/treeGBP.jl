@@ -1,4 +1,4 @@
-########## Forward messages from variable to factor nodes ##########
+########## Continuous model: Forward messages from variable to factor nodes ##########
 function forwardVariableFactor(gbp::ContinuousTreeModel)
     @inbounds for variable in gbp.graph.iterateVariable
         factor = gbp.graph.colForward[variable][1]
@@ -28,7 +28,7 @@ function forwardVariableFactor(gbp::ContinuousTreeModel)
     gbp.graph.iterateVariable = Int64[]
 end
 
-########## Forward messages from factor to variable nodes ##########
+########## Continuous model: Forward messages from factor to variable nodes ##########
 function forwardFactorVariable(gbp::ContinuousTreeModel)
     @inbounds for factor in gbp.graph.iterateFactor
         variable = gbp.graph.rowForward[factor][1]
@@ -64,7 +64,7 @@ function forwardFactorVariable(gbp::ContinuousTreeModel)
     end
 end
 
-########## Backward messages from variable to factor nodes ##########
+########## Continuous model: Backward messages from variable to factor nodes ##########
 function backwardVariableFactor(gbp::ContinuousTreeModel)
     @inbounds for variable in gbp.graph.iterateVariable
         for factor in gbp.graph.colBackward[variable]
@@ -94,7 +94,7 @@ function backwardVariableFactor(gbp::ContinuousTreeModel)
     gbp.graph.iterateVariable = Int64[]
 end
 
-########## Backward messages from factor to variable nodes ##########
+########## Continuous model: Backward messages from factor to variable nodes ##########
 function backwardFactorVariable(gbp::ContinuousTreeModel)
     @inbounds for factor in gbp.graph.iterateFactor
         for variable in gbp.graph.rowBackward[factor]
@@ -131,9 +131,159 @@ function backwardFactorVariable(gbp::ContinuousTreeModel)
     end
 end
 
-########## Check that the factor graph has a tree structure ##########
-function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel, DiscreteTreeModel})
+########## Discrete model: Forward messages from variable to factor nodes ##########
+function forwardVariableFactor(bp::DiscreteTreeModel)
+    @inbounds for variable in bp.graph.iterateVariable
+        factor = bp.graph.colForward[variable][1]
+
+        bp.graph.passVariableFactor += 1
+        bp.inference.fromVariable[bp.graph.passVariableFactor] = variable
+        bp.inference.toFactor[bp.graph.passVariableFactor] = factor
+
+        bp.inference.messageVariableFactor[bp.graph.passVariableFactor] = copy(bp.graph.messageDirect[variable])
+        for j in bp.graph.incomingToVariable[variable]
+            bp.inference.messageVariableFactor[bp.graph.passVariableFactor] .*= bp.inference.messageFactorVariable[j]
+        end
+
+        for (k, variables) in enumerate(bp.system.probability[factor])
+            if variables == variable
+                bp.graph.incomingToFactor[factor][k] = bp.graph.passVariableFactor
+            end
+        end
+
+        for (k, variables) in enumerate(bp.graph.rowForward[factor])
+            if variable == variables
+                deleteat!(bp.graph.rowForward[factor], k)
+            end
+        end
+
+        if length(bp.graph.rowForward[factor]) == 1
+            push!(bp.graph.iterateFactor, factor)
+        end
+    end
+    bp.graph.iterateVariable = Int64[]
+end
+
+########## Discrete model: Forward messages from factor to variable nodes ##########
+function forwardFactorVariable(bp::DiscreteTreeModel)
+    @inbounds for factor in bp.graph.iterateFactor
+        variable = bp.graph.rowForward[factor][1]
+
+        bp.graph.passFactorVariable += 1
+        bp.inference.fromFactor[bp.graph.passFactorVariable] = factor
+        bp.inference.toVariable[bp.graph.passFactorVariable] = variable
+
+        table = deepcopy(bp.system.table[factor])
+        bp.inference.messageFactorVariable[bp.graph.passFactorVariable] = fill(0.0, bp.graph.state[variable])
+        position = 0
+        for idx in CartesianIndices(bp.system.table[factor])
+            for (k, variables) in enumerate(bp.system.probability[factor])
+                if variables != variable
+                    whereIs = bp.graph.incomingToFactor[factor][k]
+                    table[idx] *= bp.inference.messageVariableFactor[whereIs][idx[k]]
+                else
+                    position = k
+                end
+            end
+            bp.inference.messageFactorVariable[bp.graph.passFactorVariable][idx[position]] += table[idx]
+        end
+
+        push!(bp.graph.incomingToVariable[variable], bp.graph.passFactorVariable)
+        for (k, factors) in enumerate(bp.graph.colForward[variable])
+            if factor == factors
+                deleteat!(bp.graph.colForward[variable], k)
+            end
+        end
+        if length(bp.graph.colForward[variable]) == 1 && variable != bp.graph.root
+            push!(bp.graph.iterateVariable, variable)
+        end
+    end
+    bp.graph.iterateFactor = Int64[]
+
+    if bp.graph.passFactorVariable + bp.graph.passVariableFactor == bp.graph.Nlink
+        bp.graph.iterateVariable = [bp.graph.root]
+        bp.graph.forward = false
+    end
+end
+
+########## Discrete model: Backward messages from variable to factor nodes ##########
+function backwardVariableFactor(bp::DiscreteTreeModel)
+    @inbounds for variable in bp.graph.iterateVariable
+        for factor in bp.graph.colBackward[variable]
+            bp.graph.passVariableFactor += 1
+            bp.inference.fromVariable[bp.graph.passVariableFactor] = variable
+            bp.inference.toFactor[bp.graph.passVariableFactor] = factor
+
+            bp.inference.messageVariableFactor[bp.graph.passVariableFactor] = copy(bp.graph.messageDirect[variable])
+            for k in bp.graph.incomingToVariable[variable]
+                if factor != bp.inference.fromFactor[k]
+                    bp.inference.messageVariableFactor[bp.graph.passVariableFactor] .*= bp.inference.messageFactorVariable[k]
+                end
+            end
+
+            for (k, variables) in enumerate(bp.system.probability[factor])
+                if variables == variable
+                    bp.graph.incomingToFactor[factor][k] = bp.graph.passVariableFactor
+                end
+            end
+
+            for (k, variables) in enumerate(bp.graph.rowBackward[factor])
+                if variable == variables
+                    deleteat!(bp.graph.rowBackward[factor], k)
+                end
+            end
+            push!(bp.graph.iterateFactor, factor)
+        end
+    end
+    bp.graph.iterateVariable = Int64[]
+end
+
+########## Discrete model: Backward messages from factor to variable nodes ##########
+function backwardFactorVariable(bp::DiscreteTreeModel)
+    @inbounds for factor in bp.graph.iterateFactor
+        for variable in bp.graph.rowBackward[factor]
+            bp.graph.passFactorVariable += 1
+
+            bp.inference.fromFactor[bp.graph.passFactorVariable] = factor
+            bp.inference.toVariable[bp.graph.passFactorVariable] = variable
+
+            table = deepcopy(bp.system.table[factor])
+            bp.inference.messageFactorVariable[bp.graph.passFactorVariable] = fill(0.0, bp.graph.state[variable])
+            position = 0
+            for idx in CartesianIndices(bp.system.table[factor])
+                for (k, variables) in enumerate(bp.system.probability[factor])
+                    if variables != variable
+                        whereIs = bp.graph.incomingToFactor[factor][k]
+                        table[idx] *= bp.inference.messageVariableFactor[whereIs][idx[k]]
+                    else
+                        position = k
+                    end
+                end
+               bp.inference.messageFactorVariable[bp.graph.passFactorVariable][idx[position]] += table[idx]
+            end
+
+            push!(bp.graph.incomingToVariable[variable], bp.graph.passFactorVariable)
+            for (k, factors) in enumerate(bp.graph.colBackward[variable])
+                if factor == factors
+                    deleteat!(bp.graph.colBackward[variable], k)
+                end
+            end
+            if length(bp.graph.colBackward[variable]) != 0
+                push!(bp.graph.iterateVariable, variable)
+            end
+        end
+    end
+    bp.graph.iterateFactor = Int64[]
+
+    if bp.graph.passFactorVariable + bp.graph.passVariableFactor == 2 * bp.graph.Nlink
+        bp.graph.backward = false
+    end
+end
+
+########## Continuous model: Check that the factor graph has a tree structure ##########
+function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel})
     ## Pass through the rows
+    Nlink = copy(gbp.graph.Nlink)
     rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
     iterateFactor = Int64[]
     @inbounds for i = 1:gbp.graph.Nfactor
@@ -166,56 +316,43 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel, DiscreteTreeMod
     ## Pilling the factor graph
     hasSingleVariable = true; hasSingleFactor = true;
     while hasSingleFactor || hasSingleVariable
+        iterateFactor = Int64[]
         for variable in iterateVariable
             factor = colptr[variable][1]
             for (k, variables) in enumerate(rowptr[factor])
                 if variable == variables
                     deleteat!(rowptr[factor], k)
-                    deleteat!(colptr[variable], 1)
+                    Nlink -= 1
                 end
             end
+            colptr[variable] = []
             if length(rowptr[factor]) == 1
                 push!(iterateFactor, factor)
             end
         end
+        if Nlink == 0 break end
         if isempty(iterateFactor)
             hasSingleFactor = false
         end
+
         iterateVariable = Int64[]
-
-        flag = true
-        for i in rowptr[iterateFactor]
-            if !isempty(i)
-                flag = false
-            end
-        end
-        if flag break end
-
         for factor in iterateFactor
             variable = rowptr[factor][1]
             for (k, factors) in enumerate(colptr[variable])
                 if factor == factors
                     deleteat!(colptr[variable], k)
-                    deleteat!(rowptr[factor], 1)
+                    Nlink -= 1
                 end
             end
+            rowptr[factor] = []
             if length(colptr[variable]) == 1
                 push!(iterateVariable, variable)
             end
         end
-
-        flag = true
-        for i in colptr[iterateVariable]
-            if !isempty(i)
-                flag = false
-            end
-        end
-        if flag break end
-
+        if Nlink == 0 break end
         if isempty(iterateVariable)
             hasSingleVariable = false
         end
-        iterateFactor = Int64[]
     end
 
     isTree = true
@@ -229,156 +366,89 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel, DiscreteTreeMod
     return isTree
 end
 
-########## Forward messages from variable to factor nodes ##########
-function forwardVariableFactor(bp::DiscreteTreeModel)
-    @inbounds for variable in bp.graph.iterateVariable
-        factor = bp.graph.colForward[variable][1]
-
-        bp.graph.passVariableFactor += 1
-        bp.inference.fromVariable[bp.graph.passVariableFactor] = variable
-        bp.inference.toFactor[bp.graph.passVariableFactor] = factor
-
-        bp.inference.messageVariableFactor[bp.graph.passVariableFactor] = copy(bp.graph.messageDirect[variable])
-        for j in bp.graph.incomingToVariable[variable]
-            bp.inference.messageVariableFactor[bp.graph.passVariableFactor] .*= bp.inference.messageFactorVariable[j]
-        end
-
-        for (k, i) in enumerate(bp.system.probability[factor])
-            if i == variable
-                bp.graph.incomingToFactor[factor][k] = bp.graph.passVariableFactor
+########## Discrete model: Check that the factor graph has a tree structure ##########
+function isTree(gbp::DiscreteTreeModel)
+    ## Pass through the rows
+    Nlink = copy(gbp.graph.Nlink)
+    rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
+    iterateFactor = Int64[]
+    @inbounds for i = 1:gbp.graph.Nfactor
+        if gbp.system.incidenceTranspose.colptr[i + 1] - gbp.system.incidenceTranspose.colptr[i] != 1
+            for j = gbp.system.incidenceTranspose.colptr[i]:(gbp.system.incidenceTranspose.colptr[i + 1] - 1)
+                row = gbp.system.incidenceTranspose.rowval[j]
+                push!(rowptr[i], row)
             end
-        end
-
-        for (k, variables) in enumerate(bp.graph.rowForward[factor])
-            if variable == variables
-                deleteat!(bp.graph.rowForward[factor], k)
-            end
-        end
-        if length(bp.graph.rowForward[factor]) == 1
-            push!(bp.graph.iterateFactor, factor)
         end
     end
-    bp.graph.iterateVariable = Int64[]
-end
 
-########## Forward messages from factor to variable nodes ##########
-function forwardFactorVariable(bp::DiscreteTreeModel)
-    @inbounds for factor in bp.graph.iterateFactor
-        variable = bp.graph.rowForward[factor][1]
-
-        bp.graph.passFactorVariable += 1
-        bp.inference.fromFactor[bp.graph.passFactorVariable] = factor
-        bp.inference.toVariable[bp.graph.passFactorVariable] = variable
-
-        cartesianTable = CartesianIndices(bp.system.table[factor])
-        table = deepcopy(bp.system.table[factor])
-        bp.inference.messageFactorVariable[bp.graph.passFactorVariable] = fill(0.0, bp.graph.state[variable])
-        position = 0
-        for i = 1:length(cartesianTable)
-            idx = cartesianTable[i]
-            for (k, variables) in enumerate(bp.system.probability[factor])
-                if variables != variable
-                    whereIs = bp.graph.incomingToFactor[factor][k]
-                    table[idx] *=  bp.inference.messageVariableFactor[whereIs][idx[k]]
-
-                else
-                    position = k
-                end
-            end
-            bp.inference.messageFactorVariable[bp.graph.passFactorVariable][idx[position]] += table[idx]
-        end
-
-        push!(bp.graph.incomingToVariable[variable], bp.graph.passFactorVariable)
-        for (k, factors) in enumerate(bp.graph.colForward[variable])
-            if factor == factors
-                deleteat!(bp.graph.colForward[variable], k)
+    ## Pass through the columns
+    iterateVariable = fill(0, gbp.graph.Nvariable)
+    colptr = [Int[] for col = 1:gbp.graph.Nvariable]
+    counter = 0
+    @inbounds for col = 1:gbp.graph.Nvariable
+        for i = gbp.system.incidence.colptr[col]:(gbp.system.incidence.colptr[col + 1] - 1)
+            row = gbp.system.incidence.rowval[i]
+            if gbp.system.incidenceTranspose.colptr[row + 1] - gbp.system.incidenceTranspose.colptr[row] != 1
+                push!(colptr[col], row)
             end
         end
-        if length(bp.graph.colForward[variable]) == 1 && variable != bp.graph.root
-            push!(bp.graph.iterateVariable, variable)
+        if length(colptr[col]) == 1
+            counter += 1
+            iterateVariable[counter] = col
         end
     end
-    bp.graph.iterateFactor = Int64[]
+    resize!(iterateVariable, counter)
 
-    if bp.graph.passFactorVariable + bp.graph.passVariableFactor == bp.graph.Nlink
-        bp.graph.iterateVariable = [bp.graph.root]
-        bp.graph.forward = false
-    end
-end
-
-########## Backward messages from variable to factor nodes ##########
-function backwardVariableFactor(bp::DiscreteTreeModel)
-    @inbounds for variable in bp.graph.iterateVariable
-        for factor in bp.graph.colBackward[variable]
-            bp.graph.passVariableFactor += 1
-            bp.inference.fromVariable[bp.graph.passVariableFactor] = variable
-            bp.inference.toFactor[bp.graph.passVariableFactor] = factor
-
-            bp.inference.messageVariableFactor[bp.graph.passVariableFactor] = copy(bp.graph.messageDirect[variable])
-            for k in bp.graph.incomingToVariable[variable]
-                if factor != bp.inference.fromFactor[k]
-                    bp.inference.messageVariableFactor[bp.graph.passVariableFactor] .*= bp.inference.messageFactorVariable[k]
-                end
-            end
-
-            for (k, i) in enumerate(bp.system.probability[factor])
-                if i == variable
-                    bp.graph.incomingToFactor[factor][k] = bp.graph.passVariableFactor
-                end
-            end
-
-            for (k, variables) in enumerate(bp.graph.rowBackward[factor])
+    ## Pilling the factor graph
+    hasSingleVariable = true; hasSingleFactor = true;
+    while hasSingleFactor || hasSingleVariable
+        iterateFactor = Int64[]
+        for variable in iterateVariable
+            factor = colptr[variable][1]
+            for (k, variables) in enumerate(rowptr[factor])
                 if variable == variables
-                    deleteat!(bp.graph.rowBackward[factor], k)
+                    deleteat!(rowptr[factor], k)
+                    Nlink -= 1
                 end
             end
-            push!(bp.graph.iterateFactor, factor)
+            colptr[variable] = []
+            if length(rowptr[factor]) == 1
+                push!(iterateFactor, factor)
+            end
         end
-    end
-    bp.graph.iterateVariable = Int64[]
-end
+        if Nlink == 0 break end
+        if isempty(iterateFactor)
+            hasSingleFactor = false
+        end
 
-########## Backward messages from factor to variable nodes ##########
-function backwardFactorVariable(bp::DiscreteTreeModel)
-    @inbounds for factor in bp.graph.iterateFactor
-        for variable in bp.graph.rowBackward[factor]
-            bp.graph.passFactorVariable += 1
-
-            bp.inference.fromFactor[bp.graph.passFactorVariable] = factor
-            bp.inference.toVariable[bp.graph.passFactorVariable] = variable
-
-            cartesianTable = CartesianIndices(bp.system.table[factor])
-            table = deepcopy(bp.system.table[factor])
-            bp.inference.messageFactorVariable[bp.graph.passFactorVariable] = fill(0.0, bp.graph.state[variable])
-            position = 0
-            for i = 1:length(cartesianTable)
-                idx = cartesianTable[i]
-                for (k, variables) in enumerate(bp.system.probability[factor])
-                    if variables != variable
-                        whereIs = bp.graph.incomingToFactor[factor][k]
-                        table[idx] *=  bp.inference.messageVariableFactor[whereIs][idx[k]]
-
-                    else
-                        position = k
-                    end
-                end
-               bp.inference.messageFactorVariable[bp.graph.passFactorVariable][idx[position]] += table[idx]
-            end
-
-            push!(bp.graph.incomingToVariable[variable], bp.graph.passFactorVariable)
-            for (k, factors) in enumerate(bp.graph.colBackward[variable])
+        iterateVariable = Int64[]
+        for factor in iterateFactor
+            variable = rowptr[factor][1]
+            for (k, factors) in enumerate(colptr[variable])
                 if factor == factors
-                    deleteat!(bp.graph.colBackward[variable], k)
+                    deleteat!(colptr[variable], k)
+                    Nlink -= 1
                 end
             end
-            if length(bp.graph.colBackward[variable]) != 0
-                push!(bp.graph.iterateVariable, variable)
+            rowptr[factor] = []
+            if length(colptr[variable]) == 1
+                push!(iterateVariable, variable)
             end
         end
+        if Nlink == 0 break end
+        if isempty(iterateVariable)
+            hasSingleVariable = false
+        end
     end
-    bp.graph.iterateFactor = Int64[]
 
-    if bp.graph.passFactorVariable + bp.graph.passVariableFactor == 2 * bp.graph.Nlink
-        bp.graph.backward = false
+    isTree = true
+    @inbounds for i in colptr
+        if length(i) != 0
+            isTree = false
+            break
+        end
     end
+
+    return isTree
 end
+

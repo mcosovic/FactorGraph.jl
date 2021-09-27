@@ -1,8 +1,8 @@
 mutable struct DiscreteSystem
     probability::Vector{Vector{Int64}}
     table::Vector{Array{Float64, N} where N}
-    jacobian::SparseMatrixCSC{Float64,Int64}
-    jacobianTranspose::SparseMatrixCSC{Float64,Int64}
+    incidence::SparseMatrixCSC{Float64,Int64}
+    incidenceTranspose::SparseMatrixCSC{Float64,Int64}
     data::String
 end
 
@@ -82,9 +82,9 @@ function readDiscreteArguments(args)
         table = args[2]
     end
 
-    jacobian, jacobianTranspose = incidenceMatrix(probability)
+    incidence, incidenceTranspose = incidenceMatrix(probability)
 
-    return DiscreteSystem(probability, table, jacobian, jacobianTranspose, "noname")
+    return DiscreteSystem(probability, table, incidence, incidenceTranspose, "noname")
 end
 
 ########## Load from HDF5 or XLSX files ##########
@@ -152,12 +152,12 @@ function readDiscreteFile(args)
         error("The input data is not a valid format.")
     end
 
-    jacobian, jacobianTranspose = incidenceMatrix(probability)
+    incidence, incidenceTranspose = incidenceMatrix(probability)
 
-    return DiscreteSystem(probability, table, jacobian, jacobianTranspose, dataname)
+    return DiscreteSystem(probability, table, incidence, incidenceTranspose, dataname)
 end
 
-########## Form incidence matrix ##########
+########## Incidence matrix ##########
 function incidenceMatrix(probabilities)
     row = Int64[]; col = Int64[]
 
@@ -167,16 +167,16 @@ function incidenceMatrix(probabilities)
             push!(col, variable)
         end
     end
-    jacobian = sparse(row, col, 1)
-    jacobianTranspose = sparse(col, row, 1)
+    incidence = sparse(row, col, 1)
+    incidenceTranspose = sparse(col, row, 1)
 
-    return jacobian, jacobianTranspose
+    return incidence, incidenceTranspose
 end
 
 ########## Produce the graphical model ##########
 function makeDiscreteTreeGraph(system, virtualMessage, root)
     ### Number of factor and variable nodes
-    Nfactor, Nvariable = size(system.jacobian)
+    Nfactor, Nvariable = size(system.incidence)
 
     ### Pass through probabilities
     Nlink = 0
