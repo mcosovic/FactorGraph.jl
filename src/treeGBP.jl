@@ -451,4 +451,3 @@ function isTree(gbp::DiscreteTreeModel)
 
     return isTree
 end
-

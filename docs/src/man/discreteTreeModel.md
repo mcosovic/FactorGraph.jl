@@ -1,6 +1,6 @@
 # [Tree Graphical Model](@id graphicalTreeModelDiscrete)
 
-The FactorGraph supports the composite type `DiscreteTreeModel` related with the [forward–backward message passing] (@ref treeGBP), with three fields:
+The FactorGraph supports the composite type `DiscreteTreeModel` related with the [forward–backward message passing] (@ref treeSchedule), with three fields:
 - `DiscreteTreeGraph`;
 - `DiscreteInference`;
 - `DiscreteSystem`.

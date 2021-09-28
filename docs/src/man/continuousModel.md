@@ -1,6 +1,6 @@
 # [Graphical Model](@id graphicalModelContinuous)
 
-The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing schedule] (@ref synchronous), with three fields:
+The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing schedule] (@ref synchronousSchedule), with three fields:
 - `ContinuousGraph`;
 - `ContinuousInference`;
 - `ContinuousSystem`.
@@ -39,7 +39,7 @@ gbp = continuousModel(jacobian, observation, variances)
 
 #### Virtual factor nodes
 
-The GBP function `continuousModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the section [message passing schedule] (@ref synchronous) which provides a detailed description of the virtual factor nodes.
+The GBP function `continuousModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the Section [initialisation procedure] (@ref initialisationProcedure) which provides a detailed description of the virtual factor nodes.
 
 ```julia-repl
 gbp = continuousModel(DATA; mean = value, variance = value)

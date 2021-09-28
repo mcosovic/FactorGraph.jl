@@ -34,7 +34,10 @@ makedocs(
             "Output Data" => "man/discreteTreeOutput.md",
         ],
         ],
-        "Theoretical Background" => "man/theoretical.md",
+        "Theoretical Background" => [
+            "Inference in Factor Graphs" => "man/theoreticalInference.md",
+            "Continuous Variables" => "man/theoreticalBelief.md"
+        ],
     ],
 )
 

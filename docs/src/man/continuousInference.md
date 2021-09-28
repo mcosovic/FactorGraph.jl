@@ -1,11 +1,11 @@
 # [Inference](@id inferenceContinuous)
 
-We advise the reader to read the [theoretical background] (@ref theoretical) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the FactorGraph provides three inference approaches:
+We advise the reader to read the Section [continuous Gaussian random variables] (@ref continuousVariables) which provides a detailed description of the inference algorithms. To exchange information over the factor graph, the FactorGraph provides three inference approaches:
  - [vanilla GBP algorithm] (@ref vanillaGBP);
  - [broadcast GBP algorithm] (@ref broadcastGBP);
  - [broadcast GBP with Kahan–Babuška algorithm] (@ref kahanGBP).
 
-Each of the inference functions accepts only the composite type `ContinuousModel`, i.e., an output variable of the function `gbp = continuousModel()` and applies the [synchronous message passing schedule] (@ref synchronous).
+Each of the inference functions accepts only the composite type `ContinuousModel`, i.e., an output variable of the function `gbp = continuousModel()` and applies the [synchronous message passing schedule] (@ref synchronousSchedule).
 
 ---
 

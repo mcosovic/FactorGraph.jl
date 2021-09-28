@@ -1,6 +1,11 @@
-# [Theoretical Background](@id theoretical)
+# [Continuous Gaussian random variables] (@id continuousVariables)
+The Gaussian belief propagation (GBP) represents a class of the BP, where local function ``\psi(\mathcal{X}_i)`` is defined as a continuous Gaussian distribution:
+```math
+    \mathcal{N}(z_i|\mathcal{X}_i,v_i) \propto \exp\Bigg\{-\cfrac{[z_i-h(\mathcal{X}_i)]^2}{2v_i}\Bigg\},
+```
+where ``v_i`` is the variance, and the function ``h(\mathcal{X}_i)`` connects the set of state variables ``\mathcal{X}_i`` to the known ``z_i`` value. The linear-GBP model implies the linear function ``h(\mathcal{X}_i)``. If the linear-GBP algorithm converges, it will converge to a fixed point representing a true means [1], regardless of the structure of the factor graph. Unlike means, the variances of the linear-GBP algorithm may not converge to correct values for graphical models with loops, while for models without loops (i.e., tree factor graph) variances will have exact values.
 
-As an input, we observe a noisy linear system of equations with real coefficients and variables:
+Thus, as an input, we observe a noisy linear system of equations with real coefficients and variables:
 ```math
         \mathbf{z}=\mathbf{h}(\mathbf{x})+\mathbf{u},
 ```
@@ -36,34 +41,10 @@ The state estimate ``\hat{\mathbf x}`` representing the solution of the optimiza
 
 ---
 
-## [Linear GBP Algorithm] (@id vanillaGBP)
+### [Vanilla GBP algorithm] (@id vanillaGBP)
+Under the vanilla GBP algorithm, we imply the algorithm in which messages are calculated as described below.
 
-In the standard setup, the goal of the belief propagation (BP) algorithm is to efficiently evaluate the marginals of a set of random variables ``\mathcal{X} = \{x_1,\dots,x_n\}`` described via the joint probability density function ``g(\mathcal{X})``. Assuming the function ``g(\mathcal{X})`` can be factorised proportionally (``\propto``) to a product of local functions:
-```math
-    g(\mathcal{X}) \propto \prod_{i=1}^m \psi(\mathcal{X}_i),
-```
-where ``\mathcal{X}_i \subseteq \mathcal{X}``. The first step is forming a factor graph, which is a bipartite graph that describes the structure of the factorisation. Factor graph allows a graph-based representation of probability density functions using variable and factor nodes connected by edges. In contrast to directed and undirected graphical models, factor graphs provide the details of the factorisation more explicitly. The factor graph structure comprises the set of factor nodes ``\mathcal{F}=\{f_1,\dots,f_m\}``, where each factor node  ``f_i`` represents local function ``\psi(\mathcal{X}_i)``, and the set of variable nodes ``\mathcal{X}``. The factor node ``f_i`` connects to the variable node ``x_s`` if and only if ``x_s \in \mathcal{X}_i``.
-
-The BP algorithm on factor graphs proceeds by passing two types of messages along the edges of the factor graph:
-- a variable node ``x_s \in \mathcal{X}`` to a factor node ``f_i \in \mathcal{F}`` message ``\mu_{x_s \to f_i}(x_s)``, and
-- a factor node ``f_i \in \mathcal{F}`` to a variable node ``x_s \in \mathcal{X}`` message ``\mu_{f_i \to x_s}(x_s)``.
-Both variable and factor nodes in a factor graph process the incoming messages and calculate outgoing messages, where an output message on any edge depends on incoming messages from all other edges. The BP messages represent ``beliefs" about variable nodes, thus a message that arrives or departs a certain variable node is a function (distribution) of the random variable corresponding to the variable node.
-
-The Gaussian belief propagation (GBP) represents a class of the BP, where local function ``\psi(\mathcal{X}_i)`` is defined as a continuous Gaussian distribution:
-```math
-    \mathcal{N}(z_i|\mathcal{X}_i,v_i) \propto \exp\Bigg\{-\cfrac{[z_i-h(\mathcal{X}_i)]^2}{2v_i}\Bigg\},
-```
-where ``v_i`` is the variance, and the function ``h(\mathcal{X}_i)`` connects the set of state variables ``\mathcal{X}_i`` to the known ``z_i`` value. The \emph{linear}-GBP model implies the linear function ``h(\mathcal{X}_i)``. If the linear-GBP algorithm converges, it will converge to a fixed point representing a true means \cite{bickson}, regardless of the structure of the factor graph. Unlike means, the variances of the linear-GBP algorithm may not converge to correct values for graphical models with loops, while for models without loops (i.e., tree factor graph) variances will have exact values.
-
-Under the **native GBP algorithm** , we imply the algorithm in which messages are calculated as described below.
-
-#### Message from a variable node to a factor node
-Consider a part of a factor graph with a group of factor nodes ``\mathcal{F}_s=\{f_i,f_w,...,f_W\}`` ``\subseteq`` ``\mathcal{F}`` that are neighbours of the variable node ``x_s \in \mathcal{X}``. The message ``\mu_{x_s \to f_i}(x_s)`` from the variable node ``x_s`` to the factor node ``f_i`` is equal to the product of all incoming factor node to variable node messages arriving at all the other incident edges:
-```math
-    \mu_{x_s \to f_i}(x_s) =\prod_{f_a \in \mathcal{F}_s \setminus f_i} \mu_{f_a \to x_s}(x_s),
-```
-where ``\mathcal{F}_s \setminus f_i`` represents the set of factor nodes incident to the variable node ``x_s``, excluding the factor node ``f_i``. Note that each message is a function of the variable ``x_s``.
-
+#### Message from a factor node to a variable node
 Let us assume that the incoming messages ``\mu_{f_w \to x_s}(x_s)``, ``\dots``, ``\mu_{f_W \to x_s}(x_s)`` into the variable node ``x_s`` are Gaussian and represented by their mean-variance pairs ``(z_{f_w \to x_s},v_{f_w \to x_s})``, ``\dots``, ``(z_{f_W \to x_s},v_{f_W \to x_s})``. Note that these messages carry beliefs about the variable node ``x_s`` provided by its neighbouring factor nodes ``\mathcal{F}_s\setminus f_i``. It can be shown that the message ``\mu_{x_s \to f_i}(x_s)`` from the variable node ``x_s`` to the factor node ``f_i`` is proportional to:
 ```math
     \mu_{x_s \to f_i}(x_s) \propto \mathcal{N}(x_s|z_{x_s \to f_i}, v_{x_s \to f_i}),
@@ -77,13 +58,6 @@ with mean ``z_{x_s \to f_i}`` and variance ``v_{x_s \to f_i}`` obtained as:
 After the variable node ``x_s`` receives the messages from all of the neighbouring factor nodes from the set ``\mathcal{F}_s\setminus f_i``, it evaluates the message ``\mu_{x_s \to f_i}(x_s)``, and sends it to the factor node ``f_i``.
 
 #### Message from a factor node to a variable node
-Consider a part of a factor graph that consists of a group of variable nodes ``\mathcal{X}_i = \{x_s, x_l,...,x_L\}`` ``\subseteq`` ``\mathcal X`` that are neighbours of the factor node ``f_i`` ``\in`` ``\mathcal{F}``. The message ``\mu_{f_i \to x_s}(x_s)`` from the factor node ``f_i`` to the variable node ``x_s`` is defined as a product of all incoming variable node to factor node messages arriving at other incident edges, multiplied by the function ``\psi_i(\mathcal{X}_i)`` associated to the factor node ``f_i``, and marginalised over all of the variables associated with the incoming messages:
-```math
-    \mu_{f_i \to x_s}(x_s)= \int\limits_{x_l}\dots\int\limits_{x_L} \psi_i(\mathcal{X}_i)
-    \prod_{x_b \in \mathcal{X}_i\setminus x_s} \big[\mu_{x_b \to f_i}(x_b) \cdot \mathrm{d}x_b\big],
-```
-where ``\mathcal{X}_i\setminus x_s`` is the set of variable nodes incident to the factor node ``f_i``, excluding the variable node ``x_s``.
-
 Due to linearity of measurement functions ``h_i(\mathcal{X}_i)``, closed form expressions for these messages is easy to obtain and follow a Gaussian form:
 ```math
     \mu_{f_i \to x_s}(x_s) \propto \mathcal{N}(x_s|z_{f_i \to x_s},v_{f_i \to x_s}).
@@ -114,11 +88,7 @@ It can be shown that the message ``\mu_{f_i \to x_s}(x_s)`` from the factor node
 To summarise, after the factor node ``f_i`` receives the messages from all of the neighbouring variable nodes from the set ``\mathcal{X}_i\setminus x_s``, it evaluates the message ``\mu_{f_i \to x_s}(x_s)``, and sends it to the variable node ``x_s``.
 
 #### Marginal inference
-The marginal of the variable node ``x_s`` is obtained as the product of all incoming messages into the variable node ``x_s``:
-```math
-    p(x_s) =\prod_{f_c \in \mathcal{F}_s} \mu_{f_c \to x_s}(x_s),
-```
-where ``\mathcal{F}_s`` is the set of factor nodes incident to the variable node ``x_s``. It can be shown that the marginal of the state variable ``x_s`` is represented by:
+It can be shown that the marginal of the state variable ``x_s`` is represented by:
 ```math
     p(x_s) \propto \mathcal{N}(x_s|\hat x_s,v_{x_s}),
 ```
@@ -132,7 +102,7 @@ Finally, the mean-value ``\hat x_s`` is adopted as the estimated value of the st
 
 ---
 
-## [Broadcast GBP Algorithm]  (@id broadcastGBP)
+### [Broadcast GBP algorithm]  (@id broadcastGBP)
 We can make a substantial improvement to the vanilla GBP algorithm's complexity by reducing the number of calculations per outgoing messages. We achieve this reduction by summarisation of all incoming messages for each variable and factor node instead of summarising all incoming messages per each outgoing message. This simple trick, allow a single variable or factor node to share these summations across all outgoing messages, hence calculating these summations only once. As a result, each outgoing message involves a constant number of operations improving the worst-case running complexity to ``\mathcal{O}(nm)``. In this framework, we calculate the message from the variable node to the factor node as:
 ```math
         z_{x_s \to f_i} = \Bigg(\alpha_{x_s} - \cfrac{z_{f_i \to x_s}}{v_{f_i \to x_s}}\Bigg) v_{x_s \to f_i} \\
@@ -153,10 +123,9 @@ where:
     \alpha_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b} z_{x_b \to f_i};  \quad
     \beta_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b}^2 v_{x_b \to f_i}.
 ```
-
 ---
 
-## [The Broadcast GBP and Kahan–Babuška Algorithm]  (@id kahanGBP)
+### [Broadcast GBP and Kahan–Babuška algorithm]  (@id kahanGBP)
 The major drawback of the computation-efficient GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in the values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisely, we do summation that exists in the messages as:
 ```julia-repl
 function kahan(summands, total, epsilon)
@@ -174,14 +143,7 @@ end
 
 ---
 
-## [Synchronous Message Passing Schedule]  (@id synchronous)
-The GBP is an iterative algorithm, and requires a message-passing schedule. Typically, the scheduling where messages from variable to factor nodes, and messages from factor nodes to variable nodes, are updated in parallel in respective half-iterations, is known as synchronous scheduling. Synchronous scheduling updates all messages in a given iteration using the output of the previous iteration as an input.
-
-The initialization step starts with messages from singly connected factor nodes to variable nodes. Then, variable nodes forward the incoming messages received from singly connected factor nodes along remaining edges. To ensure this, we are using virtual factor nodes. Hence, the virtual factor node is a singly connected factor node used if the variable node is not directly observed. In a typical scenario, without prior knowledge, the variance of virtual factor nodes tend to infinity. We also improve convergence performance using virtual factor nodes.
-
----
-
-## [The GBP with Randomized Damping]  (@id dampGBP)
+### [The GBP with randomized damping]  (@id dampGBP)
 We propose a randomized damping approach, where each mean value message from factor node to a variable node is damped independently with probability ``p``, otherwise, the message is calculated as in the standard the GBP algorithm. The damped message is evaluated as a linear combination of the message from the previous and the current iteration, with weights ``\alpha`` and ``1 - \alpha``, respectively. More, precisly, the proposed randomized damping scheduling updates of selected factor to variable
 node means in every iteration by combining them with their values from the previous iteration using convergence parameters ``p`` and ``\alpha``:
 ```math
@@ -193,14 +155,14 @@ The randomised damping parameter pairs lead to a trade-off between the number of
 
 ---
 
-## [The Dynamic GBP Algorithm]  (@id dynamicGBP)
+### [Dynamic GBP algorithm]  (@id dynamicGBP)
 To recall, each factor node is associated with the measurement value ``z_i`` and the measurement variance  ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurements from different measurement subsystems. Such measurements are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
 
 Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the Jacobian matrix, should include all possible measurements. Measurements that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to measurement variances whose values are much smaller than ``10^{60}``.
 
 ---
 
-## [The Ageing GBP Algorithm]  (@id ageingGBP)
+### [Ageing GBP algorithm]  (@id ageingGBP)
 The ageing framework represents an extension of the dynamic model and establishes a model for measurement arrival processes and for the process of measurement deterioration or ageing over time (or GBP iterations). We integrate these measurements regularly into the running instances of the GBP algorithm.
 
 Let us assume that factor node ``f_i`` receives the new variance ``v_{i}``. After that moment, the ageing model increases variance value over iterations ``v_i(\tau)``. More precisely, we associate the Gaussian distribution ``\mathcal{N}(z_i|\mathcal{X}_i, v_i(\tau))`` to the corresponding factor node ``f_i``, where the variance ``v_i(\tau)`` increases its value starting from the predefined variance ``v_i(\tau) = v_i``. Finally, in practice ageing model requires defining a limit from above ``\bar {v}_i`` of a function ``v_i(\tau)``, instead of allowing variance to take on extremely large values.
@@ -226,18 +188,10 @@ Finally, the linear growth model can be observed as a compromise between logarit
       \bar {v}_i, & \tau \geq \theta.
   \end{cases}
 ```
----
-
-## [The Forward-Backward Algorithm]  (@id treeGBP)
-The forward–backward algorithm allows exact inference in tree factor graph. We start by viewing an arbitrary variable node as the root of the factor graph and initiating messages at the leaves of the tree factor graph using. The message passing steps from variable nodes to factor nodes and from factor nodes to variable nodes are then applied recursively until messages have been propagated along every link, and the root node has received messages from all of its neighbours. Each node can send a message towards the root once it has received messages from all of its other neighbours. This step is known as the forward recursion.
-
-The backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves.
-
-By now, a message will have passed in both directions across every link in the graph, and every node will have received
-a message from all of its neighbours. Every variable node will have received messages from all of its neighbours, we can readily calculate the marginal distribution for every variable in the graph. The number of messages that have to be computed is given by twice the number of links in the graph and so involves only twice the computation involved in finding a single marginal [1].
 
 ---
 
-## [References](@id refs)
-[1] C. M. Bishop, *Pattern Recognition and Machine Learning* (Information Science and Statistics). Berlin, Heidelberg: Springer-Verlag, 2006.
+### [References](@id refsBelief)
+[1] D. Bickson, *Gaussian Belief Propagation: Theory and Aplication,* ArXiv e-prints, Nov. 2008.
+
 

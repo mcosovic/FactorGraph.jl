@@ -1,6 +1,6 @@
 # [Inference](@id inferenceTreeDiscrete)
 
-To exchange information over the tree factor graph, the FactorGraph provides forward–backward algorithm. We advise the reader to read the [forward–backward algorithm] (@ref treeGBP) which provides a detailed description of the inference algorithm.
+To exchange information over the tree factor graph, the FactorGraph provides forward–backward algorithm. We advise the reader to read the Section [forward–backward schedule] (@ref treeSchedule) which provides a detailed description of the inference algorithm.
 
 Each of the inference functions accepts only the composite type `DiscreteTreeModel`, i.e., an output variable of the function `bp = discreteTreeModel()`.
 

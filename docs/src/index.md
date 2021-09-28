@@ -6,7 +6,7 @@ The FactorGraph package provides the set of different functions to perform infer
 ----
 
 #### Continuous framework
-In the case of continuous random variables described by Gaussian distributions, we are using the linear Gaussian belief propagation (GBP) algorithm to solve the inference problem. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables. To perform inference the FactorGraph package uses several algorithms based on the [synchronous message passing schedule] (@ref synchronous):
+In the case of continuous random variables described by Gaussian distributions, we are using the linear Gaussian belief propagation (GBP) algorithm to solve the inference problem. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables. To perform inference the FactorGraph package uses several algorithms based on the [synchronous message passing schedule] (@ref synchronousSchedule):
  - [vanilla GBP algorithm] (@ref vanillaGBP);
  - [broadcast GBP algorithm] (@ref broadcastGBP);
  - [broadcast GBP with Kahan–Babuška algorithm] (@ref kahanGBP).
@@ -14,12 +14,13 @@ Within these algorithms, the packege provides several routines to allow dynamic 
  - [dynamic GBP algorithm] (@ref dynamicGBP);
  - [ageing GBP algorithm] (@ref ageingGBP).
 Finally, the package also includes a message passing algorithm that allows inference in tree factor graph:
-- [forward–backward algorithm] (@ref treeGBP).
+- [forward–backward algorithm] (@ref treeSchedule).
 
 ---
 
 #### Discrete framework
-In the case of discrete random variables the package currently provides only the BP algorithm that allows exact inference in the tree factor graph.
+In the case of discrete random variables the package currently provides only the BP algorithm that allows exact inference in the tree factor graph:
+- [forward–backward algorithm] (@ref treeSchedule).
 
 ---
 
