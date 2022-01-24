@@ -28,7 +28,7 @@ function errorMetric(gbp::Union{ContinuousModel, ContinuousTreeModel})
     @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
-        wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
+        wrss += (gbp.system.observation[i] - observationGBP[i])^2 / gbp.system.variance[i]
     end
     rmse = (rmse / NactiveRows)^(1/2)
     mae = mae / NactiveRows
@@ -45,7 +45,7 @@ end
     @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationGBP[i])^2
         mae += abs(gbp.system.observation[i] - observationGBP[i])
-        wrss += (gbp.system.observation[i] - observationGBP[i]) / gbp.system.variance[i]
+        wrss += (gbp.system.observation[i] - observationGBP[i])^2 / gbp.system.variance[i]
     end
     rmse = (rmse / NactiveRows)^(1/2)
     mae = mae / NactiveRows
@@ -76,7 +76,7 @@ function wls(gbp::Union{ContinuousModel, ContinuousTreeModel})
     @inbounds for i = 1:length(gbp.system.observation)
         rmse += (gbp.system.observation[i] - observationWLS[i])^2
         mae += abs(gbp.system.observation[i] - observationWLS[i])
-        wrss += (gbp.system.observation[i] - observationWLS[i]) / gbp.system.variance[i]
+        wrss += (gbp.system.observation[i] - observationWLS[i])^2 / gbp.system.variance[i]
     end
     rmse = (rmse / NactiveRows)^(1/2)
     mae = mae / NactiveRows
