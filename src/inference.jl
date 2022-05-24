@@ -58,7 +58,7 @@ end
         gbp.graph.weightDirect[variable] -= gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
 
         gbp.graph.meanDirect[variable] += mean * gbp.system.jacobianTranspose[variable, factor] / variance
-        gbp.graph.weightDirect[variable] += gbp.system.jacobianTranspose[variable, factor]^2 / dvariance
+        gbp.graph.weightDirect[variable] += gbp.system.jacobianTranspose[variable, factor]^2 / variance
     else
         k = gbp.graph.dynamic[factor]
         @inbounds for i in gbp.graph.rowptr[k]
