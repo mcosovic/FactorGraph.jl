@@ -15,22 +15,7 @@ In addition, we also provide several functions for factor graph manipulation.
 
 Input arguments DATA of the function `continuousModel()` describe the graphical model, while the function returns `ContinuousModel` type.
 
-Loads the system data using h5-file from the package:
-```julia-repl
-gbp = continuousModel("data33_14.h5")
-```
-
-Loads the system data using xlsx-file from the package:
-```julia-repl
-gbp = continuousModel("data33_14.xlsx")
-```
-
-Loads the system data from a custom path:
-```julia-repl
-gbp = continuousModel("C:/name.h5")
-```
-
-Loads the system data passing arguments directly:
+Loads the system data passing arguments:
 ```julia-repl
 gbp = continuousModel(jacobian, observation, variances)
 ```

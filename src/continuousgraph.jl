@@ -3,7 +3,6 @@ mutable struct ContinuousSystem
     jacobianTranspose::SparseMatrixCSC{Float64,Int64}
     observation::Array{Float64,1}
     variance::Array{Float64,1}
-    data::String
 end
 
 mutable struct ContinuousGraph
@@ -88,12 +87,7 @@ function continuousModel(
     variance::Float64 = 1e10)
 
     checkKeywords(prob, alpha, variance)
-    if checkFileOrArguments(args)
-        system = readContinuousFile(args)
-    else
-        system = readContinuousArguments(args)
-    end
-
+    system = readContinuousArguments(args)
     graph, inference = makeContinuousGraph(system, mean, variance, prob, alpha)
 
     return ContinuousModel(graph, inference, system)
@@ -106,57 +100,12 @@ function continuousTreeModel(
     variance::Float64 = 1e10,
     root::Int64 = 1)
 
-    if checkFileOrArguments(args)
-        system = readContinuousFile(args)
-    else
-        system = readContinuousArguments(args)
-    end
-
+    system = readContinuousArguments(args)
     graph, inference = makeContinuousTreeGraph(system, mean, variance, root)
 
     return ContinuousTreeModel(graph, inference, system)
 end
 
-########## Load from HDF5 or XLSX files ##########
-function readContinuousFile(args)
-    fullpath, extension, dataname = checkImportFile(args)
-
-    #### Read from HDF5 or XLSX file
-    if extension == ".h5"
-        list = h5read(fullpath, "/jacobian")::Array{Float64,2}
-        jacobian = sparse(list[:,1], list[:,2], list[:,3])::SparseMatrixCSC{Float64,Int64}
-        jacobianTranspose = sparse(list[:,2], list[:,1], list[:,3])::SparseMatrixCSC{Float64,Int64}
-
-        observation = h5read(fullpath, "/observation")::Array{Float64,1}
-        variance = h5read(fullpath, "/variance")::Array{Float64,1}
-    elseif extension == ".xlsx"
-        xf = XLSX.openxlsx(fullpath, mode = "r")
-        if "jacobian" in XLSX.sheetnames(xf)
-            start = startxlsx(xf["jacobian"])
-            list = xf["jacobian"][:][start:end, :]
-            jacobian = sparse(list[:, 1], list[:, 2], list[:, 3])
-            jacobianTranspose = sparse(list[:, 2], list[:, 1], list[:, 3])
-        else
-            throw(ErrorException("error opening sheet jacobian"))
-        end
-        if "observation" in XLSX.sheetnames(xf)
-            start = startxlsx(xf["observation"])
-            observation = xf["observation"][:][start:end]
-        else
-            throw(ErrorException("error opening sheet observation"))
-        end
-        if "variance" in XLSX.sheetnames(xf)
-            start = startxlsx(xf["variance"])
-            variance = xf["variance"][:][start:end]
-        else
-            throw(ErrorException("error opening sheet variance"))
-        end
-    else
-        error("the input data is not a valid format")
-    end
-
-    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance, dataname)
-end
 
 ########## Read in-Julia system model ##########
 function readContinuousArguments(args)
@@ -170,7 +119,7 @@ function readContinuousArguments(args)
     observation = args[2]
     variance = args[3]
 
-    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance, "noname")
+    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance)
 end
 
 ########## Produce the graphical model ##########

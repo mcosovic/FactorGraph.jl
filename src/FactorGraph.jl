@@ -1,9 +1,9 @@
 module FactorGraph
 
 using SparseArrays, LinearAlgebra
-using HDF5, XLSX
 using Random
 using PrettyTables, Printf
+using Test
 
 ### Form a continuous factor graph and initialize messages and marginals
 include("continuousgraph.jl")

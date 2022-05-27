@@ -13,22 +13,7 @@ The subtype `DiscreteTreeGraph` describes the tree factor graph obtained based o
 
 Input arguments DATA of the function `discreteTreeModel()` describe the tree graphical model, while the function returns `DiscreteTreeModel` type.
 
-Loads the system data using h5-file from the package:
-```julia-repl
-bp = discreteTreeModel("discrete6_4.h5")
-```
-
-Loads the system data using xlsx-file from the package:
-```julia-repl
-bp = discreteTreeModel("discrete6_4.xlsx")
-```
-
-Loads the system data from a custom path:
-```julia-repl
-bp = discreteTreeModel("C:/name.h5")
-```
-
-Loads the system data passing arguments directly:
+Loads the system data passing arguments:
 ```julia-repl
 bp = discreteTreeModel(probability, table)
 ```

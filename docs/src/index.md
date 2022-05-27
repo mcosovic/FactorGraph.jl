@@ -44,19 +44,6 @@ using FactorGraph
 #### Quick start whitin continuous framework
 The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.
 
-- Synchronous message passing schedule using the vanilla GBP algorithm:
-```julia-repl
-using FactorGraph
-
-gbp = continuousModel("data33_14.h5")       # initialize the graphical model using HDF5 input
-for iteration = 1:200                       # the GBP inference
-    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
-    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
-end
-marginal(gbp)                               # compute marginals
-displayData(gbp)                            # show results
-```
-
 - Synchronous message passing schedule using the broadcast GBP algorithm:
 ```julia-repl
 using FactorGraph
@@ -71,22 +58,7 @@ for iteration = 1:50                        # the GBP inference
     messageVariableFactorBroadcast(gbp)     # compute messages using the broadcast GBP
 end
 marginal(gbp)                               # compute marginals
-```
-
-- Synchronous message passing schedule using broadcast GBP with Kahan–Babuška algorithm with the plotting of the marginal mean through iterations:
-```julia-repl
-using FactorGraph
-using Plots
-
-gbp = continuousModel("data33_14.h5")       # initialize the graphical model
-x6 = []                                     # save the state variable marginal
-for iteration = 1:50                        # the GBP inference
-    messageFactorVariableKahan(gbp)         # compute messages using the GBP with Kahan-Babuska
-    messageVariableFactorKahan(gbp)         # compute messages using the GBP with Kahan-Babuska
-    marginal(gbp)                           # compute marginals
-    push!(x6, gbp.inference.mean[6])        # save state variable marginal
-end
-plot(collect(1:50), x6)                     # show plot
+displayData(gbp)                            # show results
 ```
 
 - Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:
@@ -175,7 +147,28 @@ Following examples are intended for a quick introduction to FactorGraph package 
 ```julia-repl
 using FactorGraph
 
-bp = discreteTreeModel("discrete6_4.xlsx")  # initialize the tree graphical model
+probability1 = [1]
+table1 = [0.2; 0.3; 0.4; 0.1]
+
+probability2 = [1; 2; 3]
+table2 = zeros(4, 3, 1)
+table2[1, 1, 1] = 0.2; table2[2, 1, 1] = 0.5; table2[3, 1, 1] = 0.3; table2[4, 1, 1] = 0.0
+table2[1, 2, 1] = 0.1; table2[2, 2, 1] = 0.1; table2[3, 2, 1] = 0.7; table2[4, 2, 1] = 0.1
+table2[1, 3, 1] = 0.5; table2[2, 3, 1] = 0.2; table2[3, 3, 1] = 0.1; table2[4, 3, 1] = 0.1
+
+probability3 = [4; 2]
+table3 = zeros(2, 3)
+table3[1, 1] = 0.2; table3[2, 1] = 0.8
+table3[1, 2] = 0.5; table3[2, 2] = 0.5
+table3[1, 3] = 0.5; table3[2, 3] = 0.5
+
+probability4 = [4]
+table4 = [0.4; 0.6]
+
+probability = [probability1, probability2, probability3, probability4]
+table = [table1, table2, table3, table4]
+
+bp = discreteTreeModel(probability, table)  # initialize the tree graphical model
 while bp.graph.forward                      # inference from leaves to the root
     forwardVariableFactor(bp)               # compute forward messages
     forwardFactorVariable(bp)               # compute forward messages

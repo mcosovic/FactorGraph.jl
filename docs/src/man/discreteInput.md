@@ -10,15 +10,12 @@ The FactorGraph package supports disrecte random variables, where each random va
 ```
 Hence, the local function is associated with the conditional distribution ``p_i(x_i|\mathcal{X}_i \setminus x_i)`` and the set of random variables ``\mathcal{X}_i``. The conditional distribution takes probability values over all possible state combinations of the random variables from the set ``\mathcal{X}_i`` forming the conditional probability table. To describe the joint probability density function ``g(\mathcal{X})``, it is enough to define the container that saves indices of discrete variables and conditional probability tables.
 
-
-The input data used to describe the joint probability density function can be given using HDF5 and XLSX input files or by passing data directly via command-line arguments. The examples of the input files are located in the `src/example`. Note that, with large-scale systems, we strongly recommend using the HDF5 file data format.
-
-Thus, the parameters that describe the factor graph structure are represented by variable `probability` containing indices of random variables, while variable `table` saves conditional probability tables. The function `discreteTreeModel()` accepts HDF5 and XLSX input files with variables `probability` and `table`. Also, this function accepts variables `probability` and `table` directly via function arguments.
+Thus, the parameters that describe the factor graph structure are represented by variable `probability` containing indices of random variables, while variable `table` saves conditional probability tables. The function `discreteTreeModel()` accepts variables `probability` and `table`.
 
 ---
 
 
-#### Build the graphical model by passing arguments
+#### Build the graphical model
 Let us observe the following joint probability density function:
 ```math
     g(\mathcal{X})  \propto  p_1(x_1)p_2(x_1|x_2)p_3(x_1|x_2,x_3),
@@ -67,13 +64,3 @@ inputData = Dict("probability" => (probability1, probability2, probability3),
 
 bp = discreteTreeModel(inputData)
 ```
-
-----
-
-#### Build the graphical model using HDF5 file
-The HDF5 input data stored above format in the fields `probability` and `table`. Inside these fields, each subfield holds data about specific conditional probability distribution with a unique subfield name. Subfield names through fields `probability` and `table` must match.
-
----
-
-#### Build the graphical model using XLSX file
-The input data stored in the XLSX file requires conditional probability tables in the native form with discrete variable indices. Further, the number of possible states should be given for each random variable.

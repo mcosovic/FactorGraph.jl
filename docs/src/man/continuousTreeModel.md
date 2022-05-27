@@ -13,22 +13,7 @@ The subtype `ContinuousTreeGraph` describes the tree factor graph obtained based
 
 Input arguments DATA of the function `continuousTreeModel()` describe the tree graphical model, while the function returns `ContinuousTreeModel` type.
 
-Loads the system data using h5-file from the package:
-```julia-repl
-gbp = continuousTreeModel("data12_11.h5")
-```
-
-Loads the system data using xlsx-file from the package:
-```julia-repl
-gbp = continuousTreeModel("data13_11.xlsx")
-```
-
-Loads the system data from a custom path:
-```julia-repl
-gbp = continuousTreeModel("C:/name.h5")
-```
-
-Loads the system data passing arguments directly:
+Loads the system data passing arguments:
 ```julia-repl
 gbp = continuousTreeModel(jacobian, observation, variances)
 ```

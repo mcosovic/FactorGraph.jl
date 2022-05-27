@@ -2,24 +2,13 @@ using FactorGraph
 using SparseArrays
 using Test
 
-@testset "StaticGBP" begin
-    ### Vanilla GBP with Damping and XLSX input
-    gbp = continuousModel("data33_14.xlsx"; variance = 1e60)
-    for iteration = 1:50
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    for iteration = 51:1000
-        messageDampFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    marginal(gbp)
-    exact = wls(gbp)
-    displayData(gbp)
-    @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
+include("inputsystems.jl")
 
-    ### Kahan GBP with Damping and HDF5 input
-    gbp = continuousModel("data33_14.h5"; variance = 1e60)
+@testset "StaticGBP" begin
+    H, z, v = data33_14()
+
+    ### Kahan GBP with Damping
+    gbp = continuousModel(H, z, v; variance = 1e60)
     for iteration = 1:50
         messageFactorVariableKahan(gbp)
         messageVariableFactorKahan(gbp)
@@ -34,7 +23,7 @@ using Test
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
 
     ### Broadcast GBP with Damping and HDF5 input
-    gbp = continuousModel("data33_14.h5"; variance = 1e10)
+    gbp = continuousModel(H, z, v; variance = 1e10)
     for iteration = 1:50
         messageFactorVariableBroadcast(gbp)
         messageVariableFactorBroadcast(gbp)
@@ -48,7 +37,7 @@ using Test
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.00000000003
 
     ### Vanilla GBP with Damping with marginal computation in each iteration
-    gbp = continuousModel("data33_14.h5"; variance = 1e60)
+    gbp = continuousModel(H, z, v; variance = 1e60)
     for iteration = 1:50
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -64,7 +53,7 @@ using Test
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
 
     ### Vanilla GBP with Damping with error metrics
-    gbp = continuousModel("data33_14.h5"; variance = 1e60)
+    gbp = continuousModel(H, z, v; variance = 1e60)
     for iteration = 1:50
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -82,35 +71,6 @@ using Test
     @test abs(errors.wrss[1] - exact.wrss[1]) < 1e-10
     @test errors.rmseGBPWLS[1] < 1e-10
     @test errors.maeGBPWLS[1] < 1e-10
-
-    ### Vanilla GBP with Damping and passing arguments
-    H = [3.0 2.0 -1.0; -2.0 2.0 1.0; 1.0 1.0 1.0]
-    z = [6.0; 3.0; 4.0]
-    v = [1.0; 1.0; 1.0]
-    gbp = continuousModel(H, z, v)
-    for iteration = 1:5
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    for iteration = 6:1000
-        messageDampFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    marginal(gbp)
-    @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 1.0]
-
-    ### Kahan GBP and passing arguments
-    H = [1.0 0.0 0.0; 25 -25 0; -50 -40 90; 0 1 0]
-    z = [0; 1.795; 1.966; -0.066]
-    v = [1e-2; 1e-2; 1e-2; 1e-6]
-
-    gbp = continuousModel(H, z, v, variance = 1e60)
-    for iteration = 1:30
-        messageFactorVariableKahan(gbp)
-        messageVariableFactorKahan(gbp)
-    end
-    marginal(gbp)
-    @test round.(gbp.inference.mean, digits = 5) ≈ [0.00579; -0.066; -0.00427]
 end
 
 @testset "DynamicGBP" begin
@@ -155,6 +115,7 @@ end
     end
     @test round.(gbp.inference.mean, digits = 3) ≈ [1.0; 2.0; 1.0]
 end
+
 
 @testset "AgeingGBP" begin
     H = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 3.0 2.0 -1.0]
@@ -205,8 +166,10 @@ end
 end
 
 @testset "GraphicalModel" begin
+    H, z, v = data33_14()
+
     ### Freeze factor node
-    gbp = continuousModel("data33_14.h5")
+    gbp = continuousModel(H, z, v)
     for i = 1:2
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -239,7 +202,7 @@ end
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 
     ### Freeze variable node
-    gbp = continuousModel("data33_14.h5")
+    gbp = continuousModel(H, z, v)
     for i = 1:2
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -272,7 +235,7 @@ end
     @test sum(afterDefreeze[:, 4] - afterFreeze[:, 4]) != 0
 
     ### Freeze and defreeze message variable node to factor node
-    gbp = continuousModel("data33_14.h5")
+    gbp = continuousModel(H, z, v)
     for iteration = 1:5
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -299,7 +262,7 @@ end
     @test afterFreeze57 != gbp.inference.meanVariableFactor[57]
 
     ### Freeze and defreeze message factor node to variable node
-    gbp = continuousModel("data33_14.h5")
+    gbp = continuousModel(H, z, v)
     for iteration = 1:5
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -324,6 +287,50 @@ end
     end
     @test afterFreeze6 != gbp.inference.meanFactorVariable[6]
     @test afterFreeze57 != gbp.inference.meanFactorVariable[57]
+
+    ### Hide and add factor node
+    gbp = continuousModel(H, z, v)
+    for iteration = 1:15
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
+    end
+    hideFactor!(gbp; factor = 2)
+    mean = [2.2; 3.1; 0.5]
+    variance = [0.001; 0.001; 0.001]
+    jacobian = zeros(3, 14)
+    jacobian[1, 5] = 2.0
+    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
+    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
+    for iteration = 1:200
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
+
+    ### Add factor node
+    H, z, v = data33_14()
+    gbp = continuousModel(H, z, v)
+    for iteration = 1:15
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
+    end
+    mean = [2.2; 3.1; 0.5]
+    variance = [0.001; 0.001; 0.001]
+    jacobian = zeros(3, 14)
+    jacobian[1, 5] = 2.0
+    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
+    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
+    for iteration = 1:200
+        messageFactorVariable(gbp)
+        messageVariableFactor(gbp)
+    end
+    marginal(gbp)
+    exact = wls(gbp)
+    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
 
     ### Hide factor node
     H = [1.5 0.0 1.0;
@@ -359,51 +366,7 @@ end
     marginal(gbp)
     exact = wls(gbp)
     @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
-
-    ### Add factor node
-    gbp = continuousModel("data33_14.h5")
-    for iteration = 1:15
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    mean = [2.2; 3.1; 0.5]
-    variance = [0.001; 0.001; 0.001]
-    jacobian = zeros(3, 14)
-    jacobian[1, 5] = 2.0
-    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
-    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
-    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
-    for iteration = 1:200
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    marginal(gbp)
-    exact = wls(gbp)
-    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
-
-    ### Hide and add factor node
-    gbp = continuousModel("data33_14.h5")
-    for iteration = 1:15
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    hideFactor!(gbp; factor = 2)
-    mean = [2.2; 3.1; 0.5]
-    variance = [0.001; 0.001; 0.001]
-    jacobian = zeros(3, 14)
-    jacobian[1, 5] = 2.0
-    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
-    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
-    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
-    for iteration = 1:200
-        messageFactorVariable(gbp)
-        messageVariableFactor(gbp)
-    end
-    marginal(gbp)
-    exact = wls(gbp)
-    @test round.(gbp.inference.mean, digits = 4) ≈ round.(exact.estimate, digits = 4)
 end
-
 
 @testset "GraphicalModelTree" begin
     H = [2 3 0 0 0 0 0 0 0 0 0;
@@ -426,7 +389,8 @@ end
     tree = isTree(gbp)
     @test tree == true
 
-    gbp = continuousModel("data33_14.h5")
+    Hc, zc, vc = data33_14()
+    gbp = continuousModel(Hc, zc, vc)
     tree = isTree(gbp)
     @test tree == false
 
@@ -479,17 +443,15 @@ end
 end
 
 @testset "DicreteModelTree" begin
-    ### isTree
-    bp = discreteTreeModel("discrete6_4.xlsx")
-    tree = isTree(bp)
-    @test tree == true
+    probability, table = discrete6_4()
 
-    bp = discreteTreeModel("discrete6_4.h5")
+    ### isTree
+    bp = discreteTreeModel(probability, table)
     tree = isTree(bp)
     @test tree == true
 
     # Forward-backward algorithm
-    bp = discreteTreeModel("discrete6_4.h5")
+    bp = discreteTreeModel(probability, table)
     while bp.graph.forward
         forwardVariableFactor(bp)
         forwardFactorVariable(bp)

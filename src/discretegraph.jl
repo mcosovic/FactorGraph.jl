@@ -3,7 +3,6 @@ mutable struct DiscreteSystem
     table::Vector{Array{Float64, N} where N}
     incidence::SparseMatrixCSC{Float64,Int64}
     incidenceTranspose::SparseMatrixCSC{Float64,Int64}
-    data::String
 end
 
 mutable struct DiscreteTreeGraph
@@ -50,12 +49,8 @@ function discreteTreeModel(
     virtual::Float64 = 1.0,
     root::Int64 = 1)
 
-    if checkFileOrArguments(args)
-        system = readDiscreteFile(args)
-    else
-        system = readDiscreteArguments(args)
-    end
 
+    system = readDiscreteArguments(args)
     graph, inference = makeDiscreteTreeGraph(system, virtual, root)
 
     return DiscreteTreeModel(graph, inference, system)
@@ -84,77 +79,7 @@ function readDiscreteArguments(args)
 
     incidence, incidenceTranspose = incidenceMatrix(probability)
 
-    return DiscreteSystem(probability, table, incidence, incidenceTranspose, "noname")
-end
-
-########## Load from HDF5 or XLSX files ##########
-function readDiscreteFile(args)
-    fullpath, extension, dataname = checkImportFile(args)
-
-    #### Read from HDF5 or XLSX file
-    if extension == ".h5"
-        list = h5open(fullpath, "r")
-        probability = []; table = Any[]
-        probabilityH5 = h5read(fullpath, "/probability")
-        tableH5 = h5read(fullpath, "/table")
-        for key in sort(collect(keys(probabilityH5)))
-            push!(probability, vec(probabilityH5[key]))
-            if size(tableH5[key], 2) == 1
-                push!(table, vec(tableH5[key]))
-            else
-                push!(table, tableH5[key])
-            end
-        end
-    elseif extension == ".xlsx"
-        xf = XLSX.openxlsx(fullpath, mode = "r")
-        if "graphical model" in XLSX.sheetnames(xf)
-            list = xf["graphical model"][:][1:end, :]
-
-            probability = Any[]; table = Any[]; cpt = []
-            Nlist = size(list, 1);  flag = false; last = 0
-            @inbounds for i = 1:Nlist - 1
-                if !ismissing(list[i, 1])
-                    if list[i, 1] == "conditional independence"
-                        for (q, k) in enumerate(list[i, 2:end])
-                            if ismissing(k)
-                                last = q
-                                break
-                            end
-                        end
-                        push!(probability, list[i, 2:last])
-                    end
-
-                    if list[i, 1] == "discrete variable states"
-                        cpt = zeros(tuple(list[i, 2:last]...))
-                    end
-                    if list[i, 1] == "conditional probability table"
-                        flag = true
-                    end
-                end
-                if flag && !ismissing(list[i, 2])
-                    idx = CartesianIndex(tuple(list[i, 2:last]...))
-                    cpt[idx] = list[i, last + 1]
-                end
-                if !ismissing(list[i + 1, 1]) && list[i + 1, 1] == "conditional independence"
-                    push!(table, cpt)
-                    flag = false
-                end
-                if i + 1 == Nlist && !ismissing(list[i + 1, 2])
-                    idx = CartesianIndex(tuple(list[i + 1, 2:last]...))
-                    cpt[idx] = list[i + 1, last + 1]
-                    push!(table, cpt)
-                end
-            end
-        else
-            throw(ErrorException("Error opening sheet: graphical model."))
-        end
-    else
-        error("The input data is not a valid format.")
-    end
-
-    incidence, incidenceTranspose = incidenceMatrix(probability)
-
-    return DiscreteSystem(probability, table, incidence, incidenceTranspose, dataname)
+    return DiscreteSystem(probability, table, incidence, incidenceTranspose)
 end
 
 ########## Incidence matrix ##########
