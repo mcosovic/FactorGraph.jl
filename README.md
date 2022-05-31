@@ -89,7 +89,7 @@ end
 
 for iteration = 1:400                       # continues the GBP inference
     ageingVariance!(gbp;                    # integrate changes in the running GBP
-        factor = 4,
+        factor = 3,
         initial = 1,
         limit = 50,
         model = 1,
@@ -140,17 +140,8 @@ table2[1, 1, 1] = 0.2; table2[2, 1, 1] = 0.5; table2[3, 1, 1] = 0.3; table2[4, 1
 table2[1, 2, 1] = 0.1; table2[2, 2, 1] = 0.1; table2[3, 2, 1] = 0.7; table2[4, 2, 1] = 0.1
 table2[1, 3, 1] = 0.5; table2[2, 3, 1] = 0.2; table2[3, 3, 1] = 0.1; table2[4, 3, 1] = 0.1
 
-probability3 = [4; 2]
-table3 = zeros(2, 3)
-table3[1, 1] = 0.2; table3[2, 1] = 0.8
-table3[1, 2] = 0.5; table3[2, 2] = 0.5
-table3[1, 3] = 0.5; table3[2, 3] = 0.5
-
-probability4 = [4]
-table4 = [0.4; 0.6]
-
-probability = [probability1, probability2, probability3, probability4]
-table = [table1, table2, table3, table4]
+probability = [probability1, probability2]
+table = [table1, table2]
 
 bp = discreteTreeModel(probability, table)  # initialize the tree graphical model
 while bp.graph.forward                      # inference from leaves to the root

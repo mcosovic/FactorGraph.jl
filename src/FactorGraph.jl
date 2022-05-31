@@ -45,6 +45,6 @@ export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, bac
 
 # Compute and show results
 include("utility.jl")
-export wls, errorMetric, displayData
+export wls, errorMetric
 
 end # FactorGraph
