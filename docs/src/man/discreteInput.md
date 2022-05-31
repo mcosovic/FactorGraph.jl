@@ -4,7 +4,7 @@ The FactorGraph package requires knowledge about the joint probability density f
 ```math
     g(\mathcal{X}) \propto \prod_{i=1}^m \psi_i(\mathcal{X}_i).
 ```
-The FactorGraph package supports disrecte random variables, where each random variable having ``K`` possible states, while local function ``\psi_i(\mathcal{X}_i)`` is defined as the conditional probability distribution:
+The FactorGraph package supports disrecte random variables, where each random variable ``x_i`` having ``k_i`` possible states, while local function ``\psi_i(\mathcal{X}_i)`` is defined as the conditional probability distribution:
 ```math
   p_i(x_i|\mathcal{X}_i \setminus x_i),
 ```
@@ -20,7 +20,7 @@ Let us observe the following joint probability density function:
 ```math
     g(\mathcal{X})  \propto  p_1(x_1)p_2(x_1|x_2)p_3(x_1|x_2,x_3),
 ```
-where all variables have two states ``1`` and ``2``. The conditional probability tables can be written in the compact form:
+where all variables have two states, state ``1`` and state ``2``. The conditional probability tables can be written in the compact form:
 
 |             |     |     |     |     |     |     |     |     |     |     |     |     |     |     |
 | :---------: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |

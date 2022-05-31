@@ -19,10 +19,9 @@ include("inputsystems.jl")
     end
     marginal(gbp)
     exact = wls(gbp)
-    displayData(gbp)
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
 
-    ### Broadcast GBP with Damping and HDF5 input
+    ### Broadcast GBP with Damping
     gbp = continuousModel(H, z, v; variance = 1e10)
     for iteration = 1:50
         messageFactorVariableBroadcast(gbp)
@@ -49,7 +48,6 @@ include("inputsystems.jl")
         marginal(gbp)
     end
     exact = wls(gbp)
-    displayData(gbp, exact)
     @test maximum(gbp.inference.mean ./ exact.estimate) < 1.0000000009
 
     ### Vanilla GBP with Damping with error metrics
@@ -65,7 +63,6 @@ include("inputsystems.jl")
     marginal(gbp)
     exact = wls(gbp)
     errors = errorMetric(gbp, exact)
-    displayData(gbp, exact, errors)
     @test abs(errors.rmse[1] - exact.rmse[1]) < 1e-10
     @test abs(errors.mae[1] - exact.mae[1]) < 1e-10
     @test abs(errors.wrss[1] - exact.wrss[1]) < 1e-10

@@ -17,7 +17,7 @@ function messageFactorVariableKahan(gbp::ContinuousModel)
     end
 end
 
-# ########## Efficient Kahan-Babuska GBP means: Factor to variable ##########
+########## Efficient Kahan-Babuska GBP means: Factor to variable ##########
 function meanFactorVariableKahan(gbp::ContinuousModel)
     @inbounds Threads.@threads for i in gbp.graph.iterateFactor
         Mrow = 0.0; errorM = 0.0

@@ -1,6 +1,6 @@
 # [Graphical Model](@id graphicalModelContinuous)
 
-The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing schedule] (@ref synchronousSchedule), with three fields:
+The FactorGraph supports the composite type `ContinuousModel` related with the [synchronous message passing] (@ref synchronousSchedule), with three fields:
 - `ContinuousGraph`;
 - `ContinuousInference`;
 - `ContinuousSystem`.
@@ -13,7 +13,7 @@ In addition, we also provide several functions for factor graph manipulation.
 
 #### Build graphical model
 
-Input arguments DATA of the function `continuousModel()` describe the graphical model, while the function returns `ContinuousModel` type.
+Input arguments of the function `continuousModel()` describe the graphical model, while the function returns `ContinuousModel` type.
 
 Loads the system data passing arguments:
 ```julia-repl
@@ -24,7 +24,7 @@ gbp = continuousModel(jacobian, observation, variances)
 
 #### Virtual factor nodes
 
-The GBP function `continuousModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the Section [initialisation procedure] (@ref initialisationProcedure) which provides a detailed description of the virtual factor nodes.
+The function `continuousModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes. We advise the reader to read the Section [initialisation procedure] (@ref initialisationProcedure) which provides a detailed description of the virtual factor nodes.
 
 ```julia-repl
 gbp = continuousModel(DATA; mean = value, variance = value)
@@ -35,7 +35,7 @@ Default setting of the mean value is `mean = 0.0`, while the default variance is
 
 #### Randomized damping parametars
 
-The GBP function `continuousModel()` receives arguments by keyword to set damping parametars. We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
+The function `continuousModel()` receives arguments by keyword to set damping parametars. We advise the reader to read the section [the GBP with randomized damping] (@ref dampGBP) which provides a detailed description of the input parameters.
 ```julia-repl
 gbp = continuousModel(DATA; prob = value, alpha = value)
 ```

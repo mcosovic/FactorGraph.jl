@@ -9,13 +9,13 @@ Thus, as an input, we observe a noisy linear system of equations with real coeff
 ```math
         \mathbf{z}=\mathbf{h}(\mathbf{x})+\mathbf{u},
 ```
-where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation or measurement functions,  ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of measurement values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated measurement errors. The linear system of equations is an overdetermined ``m>n`` arising in many technical fields, such as statistics, signal processing, and control theory.
+where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation or measurement functions,  ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of observation values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated observation errors. The linear system of equations is an overdetermined ``m>n`` arising in many technical fields, such as statistics, signal processing, and control theory.
 
-Each observation is associated with measured value ``z_i``, measurement error  ``u_i``, and measurement function ``h_i(\mathbf{x})``. Under the assumption that measurement errors ``u_i`` follow a zero-mean Gaussian distribution, the probability density function associated with the ``i``-th measurement is proportional to:
+Each observation is associated with observed value ``z_i``, error  ``u_i``, and function ``h_i(\mathbf{x})``. Under the assumption that observation errors ``u_i`` follow a zero-mean Gaussian distribution, the probability density function associated with the ``i``-th observation is proportional to:
 ```math
     \mathcal{N}(z_i|\mathbf{x},v_i) \propto \exp\Bigg\{-\cfrac{[z_i-h_i(\mathbf{x})]^2}{2v_i}\Bigg\},
 ```
-where ``v_i`` is the measurement variance defined by the measurement error ``u_i``, and the measurement function ``h_i(\mathbf{x})`` connects the vector of state variables ``\mathbf{x}`` to the value of the ``i``-th measurement.
+where ``v_i`` is the observation variance defined by the error ``u_i``, and the function ``h_i(\mathbf{x})`` connects the vector of state variables ``\mathbf{x}`` to the value of the ``i``-th observation.
 
 The goal is to determine state variables ``\mathbf{x}`` according to the noisy observed data ``\mathbf{z}`` and a prior knowledge:
 ```math
@@ -27,7 +27,7 @@ Assuming that the prior probability distribution ``p(\mathbf{x})`` is uniform, a
     \mathrm{arg}\max_{\mathbf{x}}\mathcal{L}(\mathbf{z}|\mathbf{x}).
 ```
 
-One can find the solution via maximization of the likelihood function ``\mathcal{L}(\mathbf{z}|\mathbf{x})``, which is defined via likelihoods of ``m`` independent measurements:
+One can find the solution via maximization of the likelihood function ``\mathcal{L}(\mathbf{z}|\mathbf{x})``, which is defined via likelihoods:
 ```math
     \hat{\mathbf x}= \mathrm{arg} \max_{\mathbf{x}}\mathcal{L}(\mathbf{z}|\mathbf{x})=
     \mathrm{arg} \max_{\mathbf{x}} \prod_{i=1}^m \mathcal{N}(z_i|\mathbf{x},v_i).
@@ -58,7 +58,7 @@ with mean ``z_{x_s \to f_i}`` and variance ``v_{x_s \to f_i}`` obtained as:
 After the variable node ``x_s`` receives the messages from all of the neighbouring factor nodes from the set ``\mathcal{F}_s\setminus f_i``, it evaluates the message ``\mu_{x_s \to f_i}(x_s)``, and sends it to the factor node ``f_i``.
 
 #### Message from a factor node to a variable node
-Due to linearity of measurement functions ``h_i(\mathcal{X}_i)``, closed form expressions for these messages is easy to obtain and follow a Gaussian form:
+Due to linearity of the functions ``h_i(\mathcal{X}_i)``, closed form expressions for these messages is easy to obtain and follow a Gaussian form:
 ```math
     \mu_{f_i \to x_s}(x_s) \propto \mathcal{N}(x_s|z_{f_i \to x_s},v_{f_i \to x_s}).
 ```
@@ -105,23 +105,23 @@ Finally, the mean-value ``\hat x_s`` is adopted as the estimated value of the st
 ### [Broadcast GBP algorithm]  (@id broadcastGBP)
 We can make a substantial improvement to the vanilla GBP algorithm's complexity by reducing the number of calculations per outgoing messages. We achieve this reduction by summarisation of all incoming messages for each variable and factor node instead of summarising all incoming messages per each outgoing message. This simple trick, allow a single variable or factor node to share these summations across all outgoing messages, hence calculating these summations only once. As a result, each outgoing message involves a constant number of operations improving the worst-case running complexity to ``\mathcal{O}(nm)``. In this framework, we calculate the message from the variable node to the factor node as:
 ```math
-        z_{x_s \to f_i} = \Bigg(\alpha_{x_s} - \cfrac{z_{f_i \to x_s}}{v_{f_i \to x_s}}\Bigg) v_{x_s \to f_i} \\
-        \cfrac{1}{v_{x_s \to f_i}} = \beta_{x_s} - \cfrac{1}{v_{f_i \to x_s}},
+        z_{x_s \to f_i} = \Bigg(z_{x_s} - \cfrac{z_{f_i \to x_s}}{v_{f_i \to x_s}}\Bigg) v_{x_s \to f_i} \\
+        \cfrac{1}{v_{x_s \to f_i}} = w_{x_s} - \cfrac{1}{v_{f_i \to x_s}},
 ```
 where:
 ```math
-    \alpha_{x_s} = \sum_{f_a \in \mathcal{F}_s} \cfrac{z_{f_a \to x_s}}{v_{f_a \to x_s}};  \quad
-    \beta_{x_s} = \sum_{f_a \in \mathcal{F}_s} \cfrac{1}{v_{f_a \to x_s}}.
+    z_{x_s} = \sum_{f_a \in \mathcal{F}_s} \cfrac{z_{f_a \to x_s}}{v_{f_a \to x_s}};  \quad
+    w_{x_s} = \sum_{f_a \in \mathcal{F}_s} \cfrac{1}{v_{f_a \to x_s}}.
 ```
 Likewise, the message from the factor node to the variable node is:
 ```math
-    z_{f_i \to x_s} = \cfrac{1}{C_{x_s}} \left(z_i - \alpha_{f_i} \right) + z_{x_s \to f_i} \\
-    v_{f_i \to x_s} = \cfrac{1}{C_{x_s}^2} \left( v_i +  \beta_{f_i}  \right) - v_{x_s \to f_i},
+    z_{f_i \to x_s} = \cfrac{1}{C_{x_s}} \left(z_i - z_{f_i} \right) + z_{x_s \to f_i} \\
+    v_{f_i \to x_s} = \cfrac{1}{C_{x_s}^2} \left( v_i +  v_{f_i}  \right) - v_{x_s \to f_i},
 ```
 where:
 ```math
-    \alpha_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b} z_{x_b \to f_i};  \quad
-    \beta_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b}^2 v_{x_b \to f_i}.
+    z_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b} z_{x_b \to f_i};  \quad
+    v_{f_i} = \sum_{x_b \in \mathcal{X}_i} C_{x_b}^2 v_{x_b \to f_i}.
 ```
 ---
 
@@ -156,25 +156,25 @@ The randomised damping parameter pairs lead to a trade-off between the number of
 ---
 
 ### [Dynamic GBP algorithm]  (@id dynamicGBP)
-To recall, each factor node is associated with the measurement value ``z_i`` and the measurement variance  ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurements from different measurement subsystems. Such measurements are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
+To recall, each factor node is associated with the mean ``z_i`` and variance value ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous data. Such data are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
 
-Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the Jacobian matrix, should include all possible measurements. Measurements that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to measurement variances whose values are much smaller than ``10^{60}``.
+Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the Jacobian matrix, should include all possible factor nodes. Factor nodes that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to variances whose values are much smaller than ``10^{60}``.
 
 ---
 
 ### [Ageing GBP algorithm]  (@id ageingGBP)
-The ageing framework represents an extension of the dynamic model and establishes a model for measurement arrival processes and for the process of measurement deterioration or ageing over time (or GBP iterations). We integrate these measurements regularly into the running instances of the GBP algorithm.
+The ageing framework represents an extension of the dynamic model and establishes a model for data arrival processes and for the process of data deterioration or ageing over time (or GBP iterations). We integrate these data regularly into the running instances of the GBP algorithm.
 
 Let us assume that factor node ``f_i`` receives the new variance ``v_{i}``. After that moment, the ageing model increases variance value over iterations ``v_i(\tau)``. More precisely, we associate the Gaussian distribution ``\mathcal{N}(z_i|\mathcal{X}_i, v_i(\tau))`` to the corresponding factor node ``f_i``, where the variance ``v_i(\tau)`` increases its value starting from the predefined variance ``v_i(\tau) = v_i``. Finally, in practice ageing model requires defining a limit from above ``\bar {v}_i`` of a function ``v_i(\tau)``, instead of allowing variance to take on extremely large values.
 
-Depending on the measurements arriving dynamic, an adaptive mechanism for increasing the variance over iterations ``v_i(\tau)`` can be derived. The logarithmic growth model represents a promising solution for systems with a high sampling rate of the measurements, where a rapid increase in variance is required:
+Depending on the data arriving dynamic, an adaptive mechanism for increasing the variance over iterations ``v_i(\tau)`` can be derived. The logarithmic growth model represents a promising solution for systems with a high sampling rate of the data, where a rapid increase in variance is required:
 ```math
     v_i(\tau) = \begin{cases}
       a \, \text{log} \left(\cfrac{\tau + 1 + b}{1 + b} \right ) + v_i, & 1 \leq \tau \leq \theta \\
       \bar {v}_i, & \tau \geq \theta,
   \end{cases}
 ```
-where ``a`` and ``b`` control the rate of growth.  In contrast, the exponential growth model corresponds to systems with a low sampling rate of the measurements:
+where ``a`` and ``b`` control the rate of growth.  In contrast, the exponential growth model corresponds to systems with a low sampling rate of the data:
 ```math
     v_i(\tau) = \begin{cases}
       v_i(1+b)^{a\tau}, & 1 \leq \tau \leq \theta \\

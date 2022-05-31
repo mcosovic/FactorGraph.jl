@@ -56,7 +56,7 @@ Same as before, the function accepts only the composite type `ContinuousModel`.
 ---
 
 #### Dynamic inference
-This framework is an extension to the real-time model that operates continuously and accepts asynchronous measurement mean and variance values. More precisely, in each GBP iteration user can change the mean and variance values of the corresponding factor nodes and continue the GBP iteration process. We advise the reader to read the section [dynamic GBP algorithm] (@ref dynamicGBP) which provides a detailed description of the input parameters.
+This framework is an extension to the real-time model that operates continuously and accepts asynchronous mean and variance values. More precisely, in each GBP iteration user can change the mean and variance values of the corresponding factor nodes and continue the GBP iteration process. We advise the reader to read the section [dynamic GBP algorithm] (@ref dynamicGBP) which provides a detailed description of the input parameters.
 ```julia-repl
 dynamicFactor!(gbp; factor = index, mean = value, variance = value)
 ```
@@ -65,7 +65,7 @@ The function accepts the composite type `ContinuousModel` and keywords `factor`,
 ---
 
 #### Dynamic inference with variance ageing
-The ageing framework represents an extension of the dynamic model and establishes a model for measurement arrival processes and for the process of measurement deterioration or ageing over time (or GBP iterations). We integrate these measurements regularly into the running instances of the GBP algorithm. We advise the reader to read the section [ageing GBP algorithm] (@ref ageingGBP) which provides a detailed description of the input parameters.
+The ageing framework represents an extension of the dynamic model and establishes a model for data arrival processes and for the process of data deterioration or ageing over time (or GBP iterations). We integrate these data regularly into the running instances of the GBP algorithm. We advise the reader to read the section [ageing GBP algorithm] (@ref ageingGBP) which provides a detailed description of the input parameters.
 ```julia-repl
 ageingVariance!(gbp; factor = index, initial = value, limit = value,
                 model = value, a = value, b = value, tau = value)

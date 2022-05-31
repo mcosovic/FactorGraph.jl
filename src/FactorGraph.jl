@@ -2,19 +2,17 @@ module FactorGraph
 
 using SparseArrays, LinearAlgebra
 using Random
-using PrettyTables, Printf
-using Test
 
 ### Form a continuous factor graph and initialize messages and marginals
-include("continuousgraph.jl")
+include("continuousGraph.jl")
 export continuousModel, continuousTreeModel
 
 ### Form a discrete factor graph and initialize messages and marginals
-include("discretegraph.jl")
+include("discreteGraph.jl")
 export discreteTreeModel
 
 ### Factor graph manipulation
-include("graphmanipulation.jl")
+include("graphManipulation.jl")
 export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
        freezeVariableFactor!, defreezeVariableFactor!, freezeFactorVariable!, defreezeFactorVariable!,
        hideFactor!, addFactors!
@@ -42,7 +40,7 @@ export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariab
        messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
 
 # Tree factor graph
-include("treeGBP.jl")
+include("treeGraph.jl")
 export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable, isTree
 
 # Compute and show results

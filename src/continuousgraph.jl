@@ -107,7 +107,7 @@ function continuousTreeModel(
 end
 
 
-########## Read in-Julia system model ##########
+########## Read system model ##########
 function readContinuousArguments(args)
     if typeof(args[1]) == Array{Float64, 2}
         jacobian = sparse(args[1])
@@ -234,7 +234,7 @@ function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbabili
             fromVariable, toFactor, meanVariableFactor, varianceVariableFactor, mean, variance)
 end
 
-########## Produce the graphical model ##########
+########## Produce the tree graphical model ##########
 function makeContinuousTreeGraph(system, virtualMean, virtualVariance, root)
     ### Number of factor and variable nodes
     Nfactor, Nvariable = size(system.jacobian)

@@ -56,7 +56,7 @@ function discreteTreeModel(
     return DiscreteTreeModel(graph, inference, system)
 end
 
-########## Read in-Julia discrete system model ##########
+########## Read discrete system model ##########
 function readDiscreteArguments(args)
     if isa(args[1], Dict)
         probability = []; table = []

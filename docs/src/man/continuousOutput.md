@@ -49,20 +49,20 @@ The first step in solving/analysing the above system/system of equations is form
 &nbsp;
 ```
 
-Additionaly, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is a singly connected factor node used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. To change defualt values of virtual factor nodes use:
+Additionaly, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is a singly connected factor node used when the variable node is not directly observed, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. To change defualt values of virtual factor nodes use:
 ```julia-repl
 gbp = continuousModel(H, z, v; mean = 0.1, variance = 1e60)
 ```
 ---
 
 #### Messages initialization
-The initialization step starts with messages from local factor nodes ``\{f_1, f_{v_1}, f_4 \}`` to variable nodes ``\mathcal{X}``. Then, variable nodes ``\mathcal{X}`` forward the incoming messages received from local factor nodes along remaining edges defined by ``\{f_2, f_3\}`` and ``\mathcal{X}``.
+The initialization step starts with messages from leaf factor nodes ``\{f_1, f_{v_1}, f_4 \}`` to variable nodes ``\mathcal{X}``. Then, variable nodes ``\mathcal{X}`` forward the incoming messages received from leaf factor nodes along remaining edges defined by ``\{f_2, f_3\}`` and ``\mathcal{X}``.
 
 ---
 
 
 #### Messages from factor nodes to variable nodes
-The GBP iterations computing messages from indirect factor nodes ``\{f_2, f_3\}`` to variable nodes ``\mathcal{X}``, using incoming messages from variable nodes ``\mathcal{X}`` to indirect factor nodes ``\{f_2, f_3\}`` obtained in the previus step.
+The GBP iterations computing messages from branch factor nodes ``\{f_2, f_3\}`` to variable nodes ``\mathcal{X}``, using incoming messages from variable nodes ``\mathcal{X}`` to branch factor nodes ``\{f_2, f_3\}`` obtained in the previus step.
 ```julia-repl
 messageFactorVariable(gbp)
 
@@ -80,7 +80,7 @@ The first row defines the message from factor node ``f_2`` to variable node ``x_
 ---
 
 #### Messages from variable nodes to factor nodes
-Next, the algorithm proceeds with computing messages from variable nodes ``\mathcal{X}`` to indirect factor nodes ``\{f_1, f_2\}``, using incoming messages from
+Next, the algorithm proceeds with computing messages from variable nodes ``\mathcal{X}`` to branch factor nodes ``\{f_1, f_2\}``, using incoming messages from
 factor nodes ``\mathcal{F}`` to variable nodes ``\mathcal{X}``.
 ```julia-repl
 messageVariableFactor(gbp)

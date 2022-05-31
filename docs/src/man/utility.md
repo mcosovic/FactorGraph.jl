@@ -4,7 +4,7 @@ The FactorGraph provides several utility functions to evaluate and compare obtai
 
 ---
 #### The WLS results
-The function provides the estimate obtained by the WLS method and root mean square error (RMSE), the mean absolute error (MAE) and the weighted residual sum of squares (WRSS) error metrics evaluated according to the WLS solutions. These results can be used to compare results obtained by the GBP algorithm.
+The function provides the estimate obtained by the weighted least-squares (WLS) method and root mean square error (RMSE), the mean absolute error (MAE) and the weighted residual sum of squares (WRSS) error metrics evaluated according to the WLS solutions. These results can be used to compare results obtained by the GBP algorithm.
 ```julia-repl
 exact = wls(gbp)
 ```
@@ -23,30 +23,6 @@ evaluation = errorMetric(gbp, exact)
 The function returns the composite type `ErrorMetricWiden` with fields `rmse`, `mae`, `wrss`, `rmseGBPWLS`, `maeGBPWLS`.
 
 ----
-#### Display results
-The function shows data display in the Julia REPL, and can provide different views depending on the input variables.
-
-The following function can be used to show GBP results:
-```julia-repl
-displayData(gbp)
-```
-
-To show the GBP results and error metric use:
-```julia-repl
-displayData(gbp, evaluation)
-```
-
-To show the GBP and WLS results use:
-```julia-repl
-displayData(gbp, exact)
-```
-
-To show the GBP and WLS results, and error metrics use:
-```julia-repl
-displayData(gbp, exact, evaluation)
-```
-
----
 
 #### Error metrics
 

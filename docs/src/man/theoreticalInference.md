@@ -51,12 +51,12 @@ where ``\mathcal{F}_s`` is the set of factor nodes incident to the variable node
 ### [Message passing schedule]  (@id MessagePassingSchedule)
 The message passing algorithm is an iterative algorithm, and requires a message-passing schedule. Typically, the message updating schedule can be implemented using:
  - synchronous, or
- - forward-backward schedule.
+ - forward-backward message passing.
 
-#### [Synchronous schedule]  (@id synchronousSchedule)
+#### [Synchronous message passing schedule]  (@id synchronousSchedule)
 The scheduling where messages from variable to factor nodes, and messages from factor nodes to variable nodes, are updated in parallel in respective half-iterations, is known as synchronous scheduling. Synchronous scheduling updates all messages in a given iteration using the output of the previous iteration as an input. The synchronous scheduling allows inference for an arbitrary factor graph structure.
 
-#### [Forward-backward schedule]  (@id treeSchedule)
+#### [Forward-backward message passing schedule]  (@id treeSchedule)
 The forward–backward schedule allows exact inference in tree factor graph. We start by viewing an arbitrary variable node as the root of the factor graph and initiating messages at the leaves of the tree factor graph using. The message passing steps from variable nodes to factor nodes and from factor nodes to variable nodes are then applied recursively until messages have been propagated along every link, and the root node has received messages from all of its neighbours. Each node can send a message towards the root once it has received messages from all of its other neighbours. This step is known as the forward recursion.
 
 The backward recursion starts when the root node received messages from all of its neighbours. It can therefore send out messages to all of its neighbours. These in turn will then have received messages from all of their neighbours and so can send out messages along the links going away from the root, and so on. In this way, messages are passed outwards from the root all the way to the leaves.

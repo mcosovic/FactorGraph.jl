@@ -40,13 +40,12 @@ H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
-gbp = continuousModel(H, z, v)              # initialize the graphical model via arguments
+gbp = continuousModel(H, z, v)              # initialize the graphical model
 for iteration = 1:50                        # the GBP inference
     messageFactorVariableBroadcast(gbp)     # compute messages using the broadcast GBP
     messageVariableFactorBroadcast(gbp)     # compute messages using the broadcast GBP
 end
 marginal(gbp)                               # compute marginals
-displayData(gbp)                            # show results
 ```
 
 - Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:
@@ -72,10 +71,9 @@ for iteration = 201:400                     # continues the GBP inference
     messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 marginal(gbp)                               # compute marginals
-displayData(gbp)                            # show results
 ```
 
-- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic ageing framework:
+- Synchronous message passing schedule using the vanilla GBP algorithm in the ageing framework:
 ```julia-repl
 using FactorGraph
 
@@ -101,7 +99,6 @@ for iteration = 1:400                       # continues the GBP inference
     messageVariableFactor(gbp)              # compute messages using the vanilla GBP
 end
 marginal(gbp)                               # compute marginals
-displayData(gbp)                            # show results
 ```
 
  - Forward–backward algorithm over the tree factor graph:
@@ -123,13 +120,12 @@ while gbp.graph.backward                    # inference from the root to leaves
      backwardFactorVariable(gbp)            # compute backward messages
 end
 marginal(gbp)                               # compute marginals
-displayData(gbp)                            # show results
 ```
 
 ---
 
 #### Quick start whitin discrete framework
-Following examples are intended for a quick introduction to FactorGraph package within the discrete framework.
+Following example is intended for a quick introduction to FactorGraph package within the discrete framework.
 
  - Forward–backward algorithm over the tree factor graph:
 ```julia-repl

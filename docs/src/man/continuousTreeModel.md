@@ -1,6 +1,6 @@
 # [Tree Graphical Model](@id graphicalTreeModelContinuous)
 
-The FactorGraph supports the composite type `ContinuousTreeModel` related with the [forward–backward schedule] (@ref synchronousSchedule), with three fields:
+The FactorGraph supports the composite type `ContinuousTreeModel` related with the [forward–backward message passing] (@ref synchronousSchedule), with three fields:
 - `ContinuousTreeGraph`;
 - `ContinuousInference`;
 - `ContinuousSystem`.
@@ -11,7 +11,7 @@ The subtype `ContinuousTreeGraph` describes the tree factor graph obtained based
 
 #### Build graphical model
 
-Input arguments DATA of the function `continuousTreeModel()` describe the tree graphical model, while the function returns `ContinuousTreeModel` type.
+Input arguments of the function `continuousTreeModel()` describe the tree graphical model, while the function returns `ContinuousTreeModel` type.
 
 Loads the system data passing arguments:
 ```julia-repl
@@ -22,7 +22,7 @@ gbp = continuousTreeModel(jacobian, observation, variances)
 
 #### Virtual factor nodes
 
-The GBP function `continuousTreeModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes to initiate messages from leaf variable nodes if the corresponding variable node does not have a singly connected factor node.
+The function `continuousTreeModel()` receives arguments by keyword to set the mean and variance of the virtual factor nodes to initiate messages from leaf variable nodes if the corresponding variable node does not have a singly connected factor node.
 
 ```julia-repl
 gbp = continuousTreeModel(DATA; mean = value, variance = value)
@@ -33,7 +33,7 @@ Default setting of the mean value is `mean = 0.0`, while the default variance is
 
 #### Root variable node
 
-The GBP function `continuousTreeModel()` receives argument by keyword to set the root variable node.
+The function `continuousTreeModel()` receives argument by keyword to set the root variable node.
 ```julia-repl
 gbp = continuousTreeModel(DATA; root = index)
 ```

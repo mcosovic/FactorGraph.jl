@@ -60,7 +60,7 @@ Additionally, we include the virtual factor node ``f_{v_1}``, to initiate messag
 ---
 
 #### Messages initialization
-The initialization step starts with messages from local factor nodes ``\{f_1, f_{v_1}, f_4\}`` to variable nodes ``\mathcal{X}``.
+The initialization step starts with messages from leaf factor nodes ``\{f_1, f_{v_1}, f_4\}`` to variable nodes ``\mathcal{X}``.
 
 ---
 

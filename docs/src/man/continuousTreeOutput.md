@@ -50,7 +50,7 @@ The first step in solving/analysing the above system/system of equations is form
 &nbsp;
 ```
 
-Additionally, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is singly connected used when the variable node is not directly measured, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. Further, the function `continuousTreeModel()` sets the first variable node ``x_1`` as the root node.
+Additionally, we include the virtual factor node ``f_{v_1}``, where factor node ``f_{v_1}`` is singly connected used when the variable node is not directly observed, hence having variance ``v_{x_1} \to \infty`` or a priori given mean and variance of state variables. Further, the function `continuousTreeModel()` sets the first variable node ``x_1`` as the root node.
 
 To change defualt values of virtual factor nodes and defualt root variable node use:
 ```julia-repl

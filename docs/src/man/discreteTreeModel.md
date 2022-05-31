@@ -11,7 +11,7 @@ The subtype `DiscreteTreeGraph` describes the tree factor graph obtained based o
 
 #### Build graphical model
 
-Input arguments DATA of the function `discreteTreeModel()` describe the tree graphical model, while the function returns `DiscreteTreeModel` type.
+Input arguments of the function `discreteTreeModel()` describe the tree graphical model, while the function returns `DiscreteTreeModel` type.
 
 Loads the system data passing arguments:
 ```julia-repl
@@ -33,7 +33,7 @@ Default setting of the mean value is `message = 1.0`.
 
 #### Root variable node
 
-The GBP function `discreteTreeModel()` receives argument by keyword to set the root variable node.
+The function `discreteTreeModel()` receives argument by keyword to set the root variable node.
 ```julia-repl
 bp = discreteTreeModel(DATA; root = index)
 ```
