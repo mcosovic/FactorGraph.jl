@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · FactorGraph</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script><link href="assets/style.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href><img src="assets/logo.svg" alt="FactorGraph logo"/></a><div class="docs-package-name"><span class="docs-autofit">FactorGraph</span></div><form class="docs-search" action="search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Home</a></li><li><span class="tocitem">Continuous Framework</span><ul><li><a class="tocitem" href="man/continuousInput/">Input Data</a></li><li><input class="collapse-toggle" id="menuitem-2-2" type="checkbox"/><label class="tocitem" for="menuitem-2-2"><span class="docs-label">General Factor Graph</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="man/continuousModel/">Graphical Model</a></li><li><a class="tocitem" href="man/continuousInference/">Inference</a></li><li><a class="tocitem" href="man/continuousOutput/">Output Data</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-2-3" type="checkbox"/><label class="tocitem" for="menuitem-2-3"><span class="docs-label">Tree Factor Graph</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="man/continuousTreeModel/">Graphical Model</a></li><li><a class="tocitem" href="man/continuousTreeInference/">Inference</a></li><li><a class="tocitem" href="man/continuousTreeOutput/">Output Data</a></li></ul></li><li><a class="tocitem" href="man/utility/">Utility Functions</a></li></ul></li><li><span class="tocitem">Discrete Framework</span><ul><li><a class="tocitem" href="man/discreteInput/">Input Data</a></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox"/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Tree Factor Graph</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="man/discreteTreeModel/">Graphical Model</a></li><li><a class="tocitem" href="man/discreteTreeInference/">Inference</a></li><li><a class="tocitem" href="man/discreteTreeOutput/">Output Data</a></li></ul></li></ul></li><li><span class="tocitem">Theoretical Background</span><ul><li><a class="tocitem" href="man/theoreticalInference/">Inference in Factor Graphs</a></li><li><a class="tocitem" href="man/theoreticalBelief/">Continuous Variables</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Home</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Home</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/mcosovic/FactorGraph.jl/blob/master/docs/src/index.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FactorGraph"><a class="docs-heading-anchor" href="#FactorGraph">FactorGraph</a><a id="FactorGraph-1"></a><a class="docs-heading-anchor-permalink" href="#FactorGraph" title="Permalink"></a></h1><p>The FactorGraph package provides the set of different functions to perform inference over the factor graph with continuous or discrete random variables using the belief propagation (BP) algorithm, also known as the sum-product algorithm.</p><hr/><h4 id="Continuous-framework"><a class="docs-heading-anchor" href="#Continuous-framework">Continuous framework</a><a id="Continuous-framework-1"></a><a class="docs-heading-anchor-permalink" href="#Continuous-framework" title="Permalink"></a></h4><p>In the case of continuous random variables described by Gaussian distributions, we are using the linear Gaussian belief propagation (GBP) algorithm to solve the inference problem. The linear GBP model requires the set of linear equations and provides the minimum mean squared error (MMSE) estimate of the state variables. To perform inference the FactorGraph package uses several algorithms based on the <a href="man/theoreticalInference/#synchronousSchedule">synchronous message passing schedule</a>:</p><ul><li><a href="man/theoreticalBelief/#vanillaGBP">vanilla GBP algorithm</a>;</li><li><a href="man/theoreticalBelief/#broadcastGBP">broadcast GBP algorithm</a>;</li><li><a href="man/theoreticalBelief/#kahanGBP">broadcast GBP with Kahan–Babuška algorithm</a>.</li></ul><p>Within these algorithms, the packege provides several routines to allow dynamic GBP framework:</p><ul><li><a href="man/theoreticalBelief/#dynamicGBP">dynamic GBP algorithm</a>;</li><li><a href="man/theoreticalBelief/#ageingGBP">ageing GBP algorithm</a>.</li></ul><p>Finally, the package also includes a message passing algorithm that allows inference in the tree factor graph:</p><ul><li><a href="man/theoreticalInference/#treeSchedule">forward–backward algorithm</a>.</li></ul><hr/><h4 id="Discrete-framework"><a class="docs-heading-anchor" href="#Discrete-framework">Discrete framework</a><a id="Discrete-framework-1"></a><a class="docs-heading-anchor-permalink" href="#Discrete-framework" title="Permalink"></a></h4><p>In the case of discrete random variables the package currently provides only the BP algorithm that allows exact inference in the tree factor graph:</p><ul><li><a href="man/theoreticalInference/#treeSchedule">forward–backward algorithm</a>.</li></ul><hr/><h4 id="Requirement"><a class="docs-heading-anchor" href="#Requirement">Requirement</a><a id="Requirement-1"></a><a class="docs-heading-anchor-permalink" href="#Requirement" title="Permalink"></a></h4><p>FactorGraph requires Julia 1.6 and higher.</p><hr/><h4 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h4><p>To install the FactorGraph package, run the following command:</p><pre><code class="language-julia-repl">pkg&gt; add FactorGraph</code></pre><p>To use FactorGraph package, add the following code to your script, or alternatively run the same command in Julia REPL:</p><pre><code class="language-julia-repl">using FactorGraph</code></pre><hr/><h4 id="Quick-start-whitin-continuous-framework"><a class="docs-heading-anchor" href="#Quick-start-whitin-continuous-framework">Quick start whitin continuous framework</a><a id="Quick-start-whitin-continuous-framework-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-start-whitin-continuous-framework" title="Permalink"></a></h4><p>The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.</p><ul><li>Synchronous message passing schedule using the broadcast GBP algorithm:</li></ul><pre><code class="language-julia-repl">using FactorGraph
+
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+z = [0.5; 0.8; 4.1]                         # observation vector
+v = [0.1; 1.0; 1.0]                         # variance vector
+
+gbp = continuousModel(H, z, v)              # initialize the graphical model
+for iteration = 1:50                        # the GBP inference
+    messageFactorVariableBroadcast(gbp)     # compute messages using the broadcast GBP
+    messageVariableFactorBroadcast(gbp)     # compute messages using the broadcast GBP
+end
+marginal(gbp)                               # compute marginals</code></pre><ul><li>Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:</li></ul><pre><code class="language-julia-repl">using FactorGraph
+
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+z = [0.5; 0.8; 4.1]                         # observation vector
+v = [0.1; 1.0; 1.0]                         # variance vector
+
+gbp = continuousModel(H, z, v)              # initialize the graphical model
+for iteration = 1:200                       # the GBP inference
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
+end
+
+dynamicFactor!(gbp;                         # integrate changes in the running GBP
+    factor = 1,
+    mean = 0.85,
+    variance = 1e-10)
+for iteration = 201:400                     # continues the GBP inference
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
+end
+marginal(gbp)                               # compute marginals</code></pre><ul><li>Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic ageing framework:</li></ul><pre><code class="language-julia-repl">using FactorGraph
+
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+z = [0.5; 0.8; 4.1]                         # observation vector
+v = [0.1; 1.0; 1.0]                         # variance vector
+
+gbp = continuousModel(H, z, v)              # initialize the graphical model
+for iteration = 1:200                       # the GBP inference
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
+end
+
+for iteration = 1:400                       # continues the GBP inference
+    ageingVariance!(gbp;                    # integrate changes in the running GBP
+        factor = 4,
+        initial = 1,
+        limit = 50,
+        model = 1,
+        a = 0.05,
+        tau = iteration)
+    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
+    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
+end
+marginal(gbp)                               # compute marginals</code></pre><ul><li>Forward–backward algorithm over the tree factor graph:</li></ul><pre><code class="language-julia-repl">using FactorGraph
+
+H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # jacobian matrix
+     0 0 2 0 0; 0 0 3 8 2]
+z = [1; 2; 3; 4; 5]                         # observation vector
+v = [3; 4; 2; 5; 1]                         # variance vector
+
+gbp = continuousTreeModel(H, z, v)          # initialize the tree graphical model
+while gbp.graph.forward                     # inference from leaves to the root
+     forwardVariableFactor(gbp)             # compute forward messages
+     forwardFactorVariable(gbp)             # compute forward messages
+end
+while gbp.graph.backward                    # inference from the root to leaves
+     backwardVariableFactor(gbp)            # compute backward messages
+     backwardFactorVariable(gbp)            # compute backward messages
+end
+marginal(gbp)                               # compute marginals</code></pre><hr/><h4 id="Quick-start-whitin-discrete-framework"><a class="docs-heading-anchor" href="#Quick-start-whitin-discrete-framework">Quick start whitin discrete framework</a><a id="Quick-start-whitin-discrete-framework-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-start-whitin-discrete-framework" title="Permalink"></a></h4><p>Following example is intended for a quick introduction to FactorGraph package within the discrete framework.</p><ul><li>Forward–backward algorithm over the tree factor graph:</li></ul><pre><code class="language-julia-repl">using FactorGraph
+
+probability1 = [1]
+table1 = [0.2; 0.3; 0.4; 0.1]
+
+probability2 = [1; 2; 3]
+table2 = zeros(4, 3, 1)
+table2[1, 1, 1] = 0.2; table2[2, 1, 1] = 0.5; table2[3, 1, 1] = 0.3; table2[4, 1, 1] = 0.0
+table2[1, 2, 1] = 0.1; table2[2, 2, 1] = 0.1; table2[3, 2, 1] = 0.7; table2[4, 2, 1] = 0.1
+table2[1, 3, 1] = 0.5; table2[2, 3, 1] = 0.2; table2[3, 3, 1] = 0.1; table2[4, 3, 1] = 0.1
+
+probability3 = [4; 2]
+table3 = zeros(2, 3)
+table3[1, 1] = 0.2; table3[2, 1] = 0.8
+table3[1, 2] = 0.5; table3[2, 2] = 0.5
+table3[1, 3] = 0.5; table3[2, 3] = 0.5
+
+probability4 = [4]
+table4 = [0.4; 0.6]
+
+probability = [probability1, probability2, probability3, probability4]
+table = [table1, table2, table3, table4]
+
+bp = discreteTreeModel(probability, table)  # initialize the tree graphical model
+while bp.graph.forward                      # inference from leaves to the root
+    forwardVariableFactor(bp)               # compute forward messages
+    forwardFactorVariable(bp)               # compute forward messages
+end
+while bp.graph.backward                     # inference from the root to leaves
+    backwardVariableFactor(bp)              # compute backward messages
+    backwardFactorVariable(bp)              # compute backward messages
+end
+marginal(bp)                                # compute normalized marginals</code></pre><hr/><h4 id="More-information"><a class="docs-heading-anchor" href="#More-information">More information</a><a id="More-information-1"></a><a class="docs-heading-anchor-permalink" href="#More-information" title="Permalink"></a></h4><ul><li>M. Cosovic and D. Vukobratovic, &quot;Distributed Gauss-Newton Method for State Estimation Using Belief Propagation,&quot; in IEEE Transactions on  Power Systems, vol. 34, no. 1, pp. 648-658, Jan. 2019. <a href="https://arxiv.org/pdf/1702.05781.pdf">arxiv.org</a></li><li>M. Cosovic, &quot;Design and Analysis of Distributed State Estimation Algorithms Based on Belief Propagation and Applications in Smart Grids.&quot; arXiv preprint arXiv:1811.08355 (2018). <a href="https://arxiv.org/pdf/1811.08355.pdf">arxiv.org</a></li></ul></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="man/continuousInput/">Input Data »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 31 May 2022 08:32">Tuesday 31 May 2022</span>. Using Julia version 1.6.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
