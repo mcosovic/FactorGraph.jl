@@ -126,7 +126,7 @@ where:
 ---
 
 ### [Broadcast GBP and Kahan–Babuška algorithm]  (@id kahanGBP)
-The major drawback of the computation-efficient GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in the values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisely, we do summation that exists in the messages as:
+The major drawback of the broadcast GBP algorithm is sensitivity to numerical errors because of the summation of floating-point numbers, due to possible significant differences in the values of incoming means and variances. However, this limitation can be alleviated with a compensated summation algorithm, such as the Kahan summation or the improved Kahan–Babuška algorithm. These algorithms increase the complexity of the operations by a constant factor, which means the time complexity of the worst-case remains unaffected. More precisely, we do summation that exists in the messages as:
 ```julia-repl
 function kahan(summands, total, epsilon)
     t = total + summands

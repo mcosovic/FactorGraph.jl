@@ -49,9 +49,9 @@ where ``\mathcal{F}_s`` is the set of factor nodes incident to the variable node
 ---
 
 ### [Message passing schedule]  (@id MessagePassingSchedule)
-The message passing algorithm is an iterative algorithm, and requires a message-passing schedule. Typically, the message updating schedule can be implemented using:
- - synchronous, or
- - forward-backward message passing.
+The GBP or BP is an iterative algorithm, and requires a message-passing schedule. Typically, the message updating procedure can be implemented using:
+ - synchronous schedule, or
+ - forward-backward schedule.
 
 #### [Synchronous message passing schedule]  (@id synchronousSchedule)
 The scheduling where messages from variable to factor nodes, and messages from factor nodes to variable nodes, are updated in parallel in respective half-iterations, is known as synchronous scheduling. Synchronous scheduling updates all messages in a given iteration using the output of the previous iteration as an input. The synchronous scheduling allows inference for an arbitrary factor graph structure.

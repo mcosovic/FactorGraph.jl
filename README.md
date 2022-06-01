@@ -32,7 +32,7 @@ using FactorGraph
 #### Quick start whitin continuous framework
 The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.
 
-- Synchronous message passing schedule using the broadcast GBP algorithm:
+- The broadcast GBP algorithm:
 ```julia-repl
 using FactorGraph
 
@@ -48,7 +48,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:
+- The vanilla GBP algorithm in the dynamic framework:
 ```julia-repl
 using FactorGraph
 
@@ -73,7 +73,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the vanilla GBP algorithm in the ageing framework:
+- The vanilla GBP algorithm in the ageing framework:
 ```julia-repl
 using FactorGraph
 
@@ -101,7 +101,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
- - Forward–backward algorithm over the tree factor graph:
+ - The forward–backward GBP algorithm over the tree factor graph:
 ```julia-repl
 using FactorGraph
 
@@ -127,7 +127,7 @@ marginal(gbp)                               # compute marginals
 #### Quick start whitin discrete framework
 Following example is intended for a quick introduction to FactorGraph package within the discrete framework.
 
- - Forward–backward algorithm over the tree factor graph:
+ - The forward–backward BP algorithm over the tree factor graph:
 ```julia-repl
 using FactorGraph
 

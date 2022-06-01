@@ -36,7 +36,6 @@ varianceFactorVariableKahan(gbp); varianceVariableFactorKahan(gbp)
 ```
 ---
 
-
 #### Randomised damping inference
 Additionaly, we provide the set of functions to preform damping inference:
 ```julia-repl

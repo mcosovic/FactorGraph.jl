@@ -14,13 +14,13 @@ Within these algorithms, the packege provides several routines to allow dynamic 
  - [dynamic GBP algorithm] (@ref dynamicGBP);
  - [ageing GBP algorithm] (@ref ageingGBP).
 Finally, the package also includes a message passing algorithm that allows inference in the tree factor graph:
-- [forward–backward algorithm] (@ref treeSchedule).
+- [forward–backward GBP algorithm] (@ref treeSchedule).
 
 ---
 
 #### Discrete framework
 In the case of discrete random variables the package currently provides only the BP algorithm that allows exact inference in the tree factor graph:
-- [forward–backward algorithm] (@ref treeSchedule).
+- [forward–backward BP algorithm] (@ref treeSchedule).
 
 ---
 
@@ -44,7 +44,7 @@ using FactorGraph
 #### Quick start whitin continuous framework
 The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.
 
-- Synchronous message passing schedule using the broadcast GBP algorithm:
+- The broadcast GBP algorithm:
 ```julia-repl
 using FactorGraph
 
@@ -60,7 +60,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic framework:
+- The vanilla GBP algorithm in the dynamic framework:
 ```julia-repl
 using FactorGraph
 
@@ -85,7 +85,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
-- Synchronous message passing schedule using the vanilla GBP algorithm in the dynamic ageing framework:
+- The vanilla GBP algorithm in the dynamic ageing framework:
 ```julia-repl
 using FactorGraph
 
@@ -113,7 +113,7 @@ end
 marginal(gbp)                               # compute marginals
 ```
 
- - Forward–backward algorithm over the tree factor graph:
+ - The forward–backward GBP algorithm over the tree factor graph:
 ```julia-repl
 using FactorGraph
 
@@ -139,7 +139,7 @@ marginal(gbp)                               # compute marginals
 #### Quick start whitin discrete framework
 Following example is intended for a quick introduction to FactorGraph package within the discrete framework.
 
- - Forward–backward algorithm over the tree factor graph:
+ - The forward–backward BP algorithm over the tree factor graph:
 ```julia-repl
 using FactorGraph
 

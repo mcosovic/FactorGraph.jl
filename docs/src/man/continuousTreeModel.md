@@ -1,6 +1,6 @@
 # [Tree Graphical Model](@id graphicalTreeModelContinuous)
 
-The FactorGraph supports the composite type `ContinuousTreeModel` related with the [forward–backward message passing] (@ref synchronousSchedule), with three fields:
+The FactorGraph supports the composite type `ContinuousTreeModel` based on the [forward–backward message passing schedule] (@ref synchronousSchedule), with three fields:
 - `ContinuousTreeGraph`;
 - `ContinuousInference`;
 - `ContinuousSystem`.

@@ -30,7 +30,7 @@ variance = [1.1; 3.5]
 
 gbp = continuousModel(jacobian, observation, variance)
 ```
-Here, the variable `gbp` holds the main composite type related to the continuous model. In the case of a tree factor graph, when you want to use a forward-backward algorithm, then the following command can be used:
+Here, the variable `gbp` holds the main composite type related to the continuous model. In the case of a tree factor graph, when you want to use a forward-backward GBP algorithm, then the following command can be used:
 ```julia-repl
 gbp = continuousTreeModel(jacobian, observation, variance)
 ```
