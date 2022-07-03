@@ -9,7 +9,7 @@ Thus, as an input, we observe a noisy linear system of equations with real coeff
 ```math
         \mathbf{z}=\mathbf{h}(\mathbf{x})+\mathbf{u},
 ```
-where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation or measurement functions,  ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of observation values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated observation errors. The linear system of equations is an overdetermined ``m>n`` arising in many technical fields, such as statistics, signal processing, and control theory.
+where ``\mathbf {x}=[x_1,\dots,x_{n}]^{{T}}`` is the vector of the state variables, ``\mathbf{h}(\mathbf{x})= [h_1(\mathbf{x})``, ``\dots``, ``h_k(\mathbf{x})]^{{T}}`` is the vector of observation functions, ``\mathbf{z} = [z_1,\dots,z_m]^{{T}}`` is the vector of observation values, and ``\mathbf{u} = [u_1,\dots,u_k]^{{T}}`` is the vector of uncorrelated observation errors. The linear system of equations is an overdetermined ``m>n`` arising in many technical fields, such as statistics, signal processing, and control theory.
 
 Each observation is associated with observed value ``z_i``, error  ``u_i``, and function ``h_i(\mathbf{x})``. Under the assumption that observation errors ``u_i`` follow a zero-mean Gaussian distribution, the probability density function associated with the ``i``-th observation is proportional to:
 ```math
@@ -156,9 +156,9 @@ The randomised damping parameter pairs lead to a trade-off between the number of
 ---
 
 ### [Dynamic GBP algorithm]  (@id dynamicGBP)
-To recall, each factor node is associated with the mean ``z_i`` and variance value ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous data. Such data are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
+To recall, each factor node is associated with the observation ``z_i`` and variance value ``v_i``. The dynamic framework allows the update of these values in any GBP iteration ``\tau``. This framework is an extension to the real-time model that operates continuously and accepts asynchronous data. Such data are continuously integrated into the running instances of the GBP algorithm. Hence, the GBP algorithm can update the state estimate vector in a time-continuous process.
 
-Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the Jacobian matrix, should include all possible factor nodes. Factor nodes that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to variances whose values are much smaller than ``10^{60}``.
+Additionally, this framework allows for the artificial addition and removal of factor nodes. Then, the initial factor graph, described with the coefficient matrix, should include all possible factor nodes. Factor nodes that are not active are then taken into account via extremely large values of variances (e.g., ``10^{60}``). Consequently, estimates will have a unique solution according to variances whose values are much smaller than ``10^{60}``.
 
 ---
 

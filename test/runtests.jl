@@ -81,13 +81,13 @@ end
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
     end
-    dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
-    dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
+    dynamicFactor!(gbp; factor = 1, observation = 6, variance = 1)
+    dynamicFactor!(gbp; factor = 3, observation = 4, variance = 1)
     for iteration = 10:99
         messageDampFactorVariable(gbp)
         messageVariableFactor(gbp)
     end
-    dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
+    dynamicFactor!(gbp; factor = 2, observation = 3, variance = 1)
     for iteration = 100:2000
         messageDampFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -102,9 +102,9 @@ end
         messageVariableFactor(gbp)
         marginal(gbp)
     end
-    dynamicFactor!(gbp; factor = 1, mean = 6, variance = 1)
-    dynamicFactor!(gbp; factor = 3, mean = 4, variance = 1)
-    dynamicFactor!(gbp; factor = 2, mean = 3, variance = 1)
+    dynamicFactor!(gbp; factor = 1, observation = 6, variance = 1)
+    dynamicFactor!(gbp; factor = 3, observation = 4, variance = 1)
+    dynamicFactor!(gbp; factor = 2, observation = 3, variance = 1)
     for iteration = 10:1000
         messageDampFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -294,11 +294,11 @@ end
     hideFactor!(gbp; factor = 2)
     mean = [2.2; 3.1; 0.5]
     variance = [0.001; 0.001; 0.001]
-    jacobian = zeros(3, 14)
-    jacobian[1, 5] = 2.0
-    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
-    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
-    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
+    coefficient = zeros(3, 14)
+    coefficient[1, 5] = 2.0
+    coefficient[2, 1] = 0.45; coefficient[2, 5] = 0.23; coefficient[2, 14] = 0.1
+    coefficient[3, 3] = 0.25; coefficient[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, coefficient = coefficient)
     for iteration = 1:200
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)
@@ -316,11 +316,11 @@ end
     end
     mean = [2.2; 3.1; 0.5]
     variance = [0.001; 0.001; 0.001]
-    jacobian = zeros(3, 14)
-    jacobian[1, 5] = 2.0
-    jacobian[2, 1] = 0.45; jacobian[2, 5] = 0.23; jacobian[2, 14] = 0.1
-    jacobian[3, 3] = 0.25; jacobian[3, 6] = 0.8
-    addFactors!(gbp; mean = mean, variance = variance, jacobian = jacobian)
+    coefficient = zeros(3, 14)
+    coefficient[1, 5] = 2.0
+    coefficient[2, 1] = 0.45; coefficient[2, 5] = 0.23; coefficient[2, 14] = 0.1
+    coefficient[3, 3] = 0.25; coefficient[3, 6] = 0.8
+    addFactors!(gbp; mean = mean, variance = variance, coefficient = coefficient)
     for iteration = 1:200
         messageFactorVariable(gbp)
         messageVariableFactor(gbp)

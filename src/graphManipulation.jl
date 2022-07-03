@@ -83,7 +83,7 @@ function freezeVariableFactor!(gbp::ContinuousModel; variable = 0::Int64, factor
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
     errorFactorLocal(gbp.graph.dynamic[factor]; state = "frozen")
-    errorEdge(gbp.system.jacobian, factor, variable)
+    errorEdge(gbp.system.coefficient, factor, variable)
 
     whereIs = 0
     @inbounds for (k, i) in enumerate(gbp.graph.colptr[variable])
@@ -102,7 +102,7 @@ function defreezeVariableFactor!(gbp::ContinuousModel; variable = 0::Int64, fact
     errorNodeIndex(factor, gbp.graph.Nfactor; name = "factor")
     errorNodeIndex(variable, gbp.graph.Nvariable; name = "variable")
     errorFactorLocal(gbp.graph.dynamic[factor]; state = "frozen")
-    errorEdge(gbp.system.jacobian, factor, variable)
+    errorEdge(gbp.system.coefficient, factor, variable)
 
     @inbounds for i = 1:gbp.graph.Nlink
         if gbp.inference.fromFactor[i] == factor && gbp.inference.toVariable[i] == variable
@@ -132,7 +132,7 @@ function freezeFactorVariable!(gbp::ContinuousModel; factor = 0::Int64, variable
 
     factorLocal = gbp.graph.dynamic[factor]
     errorFactorLocal(factorLocal; state = "frozen")
-    errorEdge(gbp.system.jacobian, factor, variable)
+    errorEdge(gbp.system.coefficient, factor, variable)
 
     whereIs = 0
     @inbounds for (k, i) in enumerate(gbp.graph.rowptr[factorLocal])
@@ -153,7 +153,7 @@ function defreezeFactorVariable!(gbp::ContinuousModel; factor = 0::Int64, variab
 
     factorLocal = gbp.graph.dynamic[factor]
     errorFactorLocal(factorLocal; state = "frozen")
-    errorEdge(gbp.system.jacobian, factor, variable)
+    errorEdge(gbp.system.coefficient, factor, variable)
 
     @inbounds for i = 1:gbp.graph.Nlink
         if gbp.inference.fromVariable[i] == variable && gbp.inference.toFactor[i] == factor
@@ -215,34 +215,34 @@ function hideFactor!(gbp::ContinuousModel; factor = 0::Int64)
             gbp.inference.varianceFactorVariable[i] = 0.0
         end
     else
-        idx = gbp.system.jacobianTranspose.colptr[factor]
-        variable = gbp.system.jacobianTranspose.rowval[idx]
+        idx = gbp.system.coefficientTranspose.colptr[factor]
+        variable = gbp.system.coefficientTranspose.rowval[idx]
 
-        gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.jacobianTranspose[variable, factor] / gbp.system.variance[factor]
-        gbp.graph.weightDirect[variable] -= gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
+        gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.coefficientTranspose[variable, factor] / gbp.system.variance[factor]
+        gbp.graph.weightDirect[variable] -= gbp.system.coefficientTranspose[variable, factor]^2 / gbp.system.variance[factor]
         if gbp.graph.weightDirect[variable] == 0.0
             gbp.graph.weightDirect[variable] = 1 /  gbp.graph.virtualVariance
             gbp.graph.meanDirect[variable] =  gbp.graph.virtualMean /  gbp.graph.virtualVariance
         end
     end
     gbp.system.observation[factor] = 0.0
-    @inbounds for i in gbp.system.jacobianTranspose.colptr[factor]:(gbp.system.jacobianTranspose.colptr[factor + 1] - 1)
-        col = gbp.system.jacobianTranspose.rowval[i]
-        gbp.system.jacobianTranspose.nzval[i] = 0.0
-        gbp.system.jacobian[factor, col] = 0.0
+    @inbounds for i in gbp.system.coefficientTranspose.colptr[factor]:(gbp.system.coefficientTranspose.colptr[factor + 1] - 1)
+        col = gbp.system.coefficientTranspose.rowval[i]
+        gbp.system.coefficientTranspose.nzval[i] = 0.0
+        gbp.system.coefficient[factor, col] = 0.0
         gbp.graph.toFactor[factor, col] = 0
     end
 end
 
 ######### Add factor nodes ##########
-function addFactors!(gbp::ContinuousModel; mean = 0.0, variance = 0.0, jacobian = [])
+function addFactors!(gbp::ContinuousModel; coefficient = [], mean = 0.0, variance = 0.0)
     ### Update system model
     append!(gbp.system.observation, mean)
     append!(gbp.system.variance, variance)
-    newFactors = sparse(jacobian)
+    newFactors = sparse(coefficient)
     newFactorsTranspose = copy(transpose(newFactors))
-    gbp.system.jacobian = [gbp.system.jacobian; newFactors]
-    gbp.system.jacobianTranspose = copy(transpose(gbp.system.jacobian))
+    gbp.system.coefficient = [gbp.system.coefficient; newFactors]
+    gbp.system.coefficientTranspose = copy(transpose(gbp.system.coefficient))
 
     ### Add singly connected factor nodes and update dynamic vector
     Nfactor = length(mean)
@@ -334,9 +334,9 @@ function addFactors!(gbp::ContinuousModel; mean = 0.0, variance = 0.0, jacobian 
     gbp.graph.toVariable = [gbp.graph.toVariable transpose(sendToFactor)]
     idxi = 1; prev = 1
     @inbounds for col = 1:gbp.graph.Nvariable
-        for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
-            row = gbp.system.jacobian.rowval[i]
-            if gbp.system.jacobianTranspose.colptr[row + 1] - gbp.system.jacobianTranspose.colptr[row] != 1
+        for i = gbp.system.coefficient.colptr[col]:(gbp.system.coefficient.colptr[col + 1] - 1)
+            row = gbp.system.coefficient.rowval[i]
+            if gbp.system.coefficientTranspose.colptr[row + 1] - gbp.system.coefficientTranspose.colptr[row] != 1
                 if prev == col
                     gbp.graph.colptr[col] = Int64[]
                     gbp.graph.colptrMarginal[col] = Int64[]
@@ -404,8 +404,8 @@ end
 end
 
 ######### Error egde ##########
-@inline function errorEdge(jacobian, factor, variable)
-    if jacobian[factor, variable] == 0.0
+@inline function errorEdge(coefficient, factor, variable)
+    if coefficient[factor, variable] == 0.0
         error("The edge does not exist.")
     end
 end

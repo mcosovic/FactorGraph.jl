@@ -55,11 +55,11 @@ Same as before, the function accepts only the composite type `ContinuousModel`.
 ---
 
 #### Dynamic inference
-This framework is an extension to the real-time model that operates continuously and accepts asynchronous mean and variance values. More precisely, in each GBP iteration user can change the mean and variance values of the corresponding factor nodes and continue the GBP iteration process. We advise the reader to read the section [dynamic GBP algorithm] (@ref dynamicGBP) which provides a detailed description of the input parameters.
+This framework is an extension to the real-time model that operates continuously and accepts asynchronous observation (i.e., mean) and variance values. More precisely, in each GBP iteration user can change the observation and variance values of the corresponding factor nodes and continue the GBP iteration process. We advise the reader to read the section [dynamic GBP algorithm] (@ref dynamicGBP) which provides a detailed description of the input parameters.
 ```julia-repl
-dynamicFactor!(gbp; factor = index, mean = value, variance = value)
+dynamicFactor!(gbp; factor = index, observation = value, variance = value)
 ```
-The function accepts the composite type `ContinuousModel` and keywords `factor`, `mean` and `variance`, which defines the dynamic update scheme of the factor nodes. The factor node index corresponding to the row index of the jacobian matrix. Note that during each function call, `ContinuousSystem.observation` and `ContinuousSystem.variance` fields also change values according to the scheme.
+The function accepts the composite type `ContinuousModel` and keywords `factor`, `observation` and `variance`, which defines the dynamic update scheme of the factor nodes. The factor node index corresponding to the row index of the coefficient matrix. Note that during each function call, `ContinuousSystem.observation` and `ContinuousSystem.variance` fields also change values according to the scheme.
 
 ---
 

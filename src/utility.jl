@@ -21,7 +21,7 @@ end
 
 ########## Compute the GBP error metrics ##########
 function errorMetric(gbp::Union{ContinuousModel, ContinuousTreeModel})
-    observationGBP = gbp.system.jacobian * gbp.inference.mean
+    observationGBP = gbp.system.coefficient * gbp.inference.mean
     NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
@@ -38,7 +38,7 @@ end
 
 ########## Compute the GBP error metrics and error according to the WLS ##########
 @inline function errorMetric(gbp::Union{ContinuousModel, ContinuousTreeModel}, wls::WeightedLeastSquares)
-    observationGBP = gbp.system.jacobian * gbp.inference.mean
+    observationGBP = gbp.system.coefficient * gbp.inference.mean
     NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
@@ -64,12 +64,12 @@ end
 ########## Compute WLS solution and error metrics ##########
 function wls(gbp::Union{ContinuousModel, ContinuousTreeModel})
     W = spdiagm(0 =>  @. 1.0 / sqrt(gbp.system.variance))
-    A = W * gbp.system.jacobian
+    A = W * gbp.system.coefficient
     G = A' * A
     b = A' * W * gbp.system.observation
     x = G \ b
 
-    observationWLS = gbp.system.jacobian * x
+    observationWLS = gbp.system.coefficient * x
     NactiveRows = activeRows(gbp)
 
     rmse = 0.0; mae = 0.0; wrss = 0.0
@@ -89,7 +89,7 @@ end
     NactiveRows = length(gbp.system.observation)
     @inbounds for (k, i) in enumerate(gbp.system.observation)
         if i == 0.0
-            if all(gbp.system.jacobianTranspose[:, k] .== 0.0)
+            if all(gbp.system.coefficientTranspose[:, k] .== 0.0)
                 NactiveRows -= 1
             end
         end

@@ -17,7 +17,7 @@ Input arguments of the function `continuousModel()` describe the graphical model
 
 Loads the system data passing arguments:
 ```julia-repl
-gbp = continuousModel(jacobian, observation, variances)
+gbp = continuousModel(coefficient, observation, variances)
 ```
 
 ---
@@ -64,7 +64,7 @@ freezeVariableFactor!(gbp; variable = index, factor = index)
 ```julia-repl
 freezeFactorVariable!(gbp; factor = index, variable = index)
 ```
-The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
+The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the coefficient matrix; and the variable node index corresponding to the column index of the coefficient matrix. Note that the singly connected factor nodes can not be frozen because they always send the same message.
 
 ---
 
@@ -85,7 +85,7 @@ defreezeVariableFactor!(gbp; variable = index, factor = index)
 defreezeFactorVariable!(gbp; factor = index, variable = index)
 ```
 
-The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the Jacobian matrix; and the variable node index corresponding to the column index of the Jacobian matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
+The functions accept following parameters: composite type `ContinuousModel`; the factor node index corresponding to the row index of the coefficient matrix; and the variable node index corresponding to the column index of the coefficient matrix. Since singly connected factors cannot be frozen, they cannot be unfreezed.
 
 ---
 
@@ -94,14 +94,14 @@ Utilising a hiding mechanism, the function softly deletes factor node. Hence, th
 ```julia-repl
 hideFactor!(gbp; factor = index)
 ```
-If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function also affects `ContinuousSystem.observation`, `ContinuousSystem.jacobian` and `ContinuousSystem.jacobianTranspose` fields by setting non-zero elements to zero.
+If the function targets the singly connected factor node, the function obliterates the target factor only if there are two or more singly connected factor nodes at the same variable node. If there is only one singly connected factor node at the variable node, the function transforms the target factor node to the virtual factor node. Note that to maintain consistency, the function also affects `ContinuousSystem.observation`, `ContinuousSystem.coefficient` and `ContinuousSystem.coefficientTranspose` fields by setting non-zero elements to zero.
 
 ---
 
 #### Add factor nodes
 The function adds new factor nodes to the existing factor graph.
 ```julia-repl
-addFactors!(gbp; mean = vector, variance = vector, jacobian = matrix)
+addFactors!(gbp; coefficient = matrix, observation = vector, variance = vector)
 ```
-The function supports addition of the multiple factor nodes to initial (existing) formation of the factor graph using the same input data format. The function accepts the following parameters: composite type `ContinuousModel`; the `mean` and `variance` vectors representing new measurement values and variances, respectively. The keyword `jacobian` with corresponding coefficients defines the set of equations describing new factor nodes. Also, function initializes messages from variable nodes to a new factor node using results from the last GBP iteration. Note that the function also affects `ContinuousSystem.observation`, `ContinuousSystem.variance`, `ContinuousSystem.jacobian` and `ContinuousSystem.jacobianTranspose` fields.
+The function supports addition of the multiple factor nodes to initial (existing) formation of the factor graph using the same input data format. The function accepts the following parameters: composite type `ContinuousModel`; the `observation` and `variance` vectors representing new observation values and variances, respectively. The keyword `coefficient` with corresponding coefficients defines the set of equations describing new factor nodes. Also, function initializes messages from variable nodes to a new factor node using results from the last GBP iteration. Note that the function also affects `ContinuousSystem.observation`, `ContinuousSystem.variance`, `ContinuousSystem.coefficient` and `ContinuousSystem.coefficientTranspose` fields.
 

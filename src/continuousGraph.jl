@@ -1,6 +1,6 @@
 mutable struct ContinuousSystem
-    jacobian::SparseMatrixCSC{Float64,Int64}
-    jacobianTranspose::SparseMatrixCSC{Float64,Int64}
+    coefficient::SparseMatrixCSC{Float64,Int64}
+    coefficientTranspose::SparseMatrixCSC{Float64,Int64}
     observation::Array{Float64,1}
     variance::Array{Float64,1}
 end
@@ -110,22 +110,22 @@ end
 ########## Read system model ##########
 function readContinuousArguments(args)
     if typeof(args[1]) == Array{Float64, 2}
-        jacobian = sparse(args[1])
+        coefficient = sparse(args[1])
     else
-        jacobian = args[1]
+        coefficient = args[1]
     end
 
-    jacobianTranspose = copy(transpose(jacobian))
+    coefficientTranspose = copy(transpose(coefficient))
     observation = args[2]
     variance = args[3]
 
-    return ContinuousSystem(jacobian, jacobianTranspose, observation, variance)
+    return ContinuousSystem(coefficient, coefficientTranspose, observation, variance)
 end
 
 ########## Produce the graphical model ##########
 function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbability, dampAlpha)
     ### Number of factor and variable nodes
-    Nfactor, Nvariable = size(system.jacobian)
+    Nfactor, Nvariable = size(system.coefficient)
 
     ### Find graph numbers, set the direct mean and variance and internal factor numeration
     Ndirect = 0; Nlink = 0; Nindirect = 0
@@ -134,10 +134,10 @@ function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbabili
     dynamic = fill(0, Nfactor)
 
     @inbounds for i = 1:Nfactor
-        NvariableInRow = system.jacobianTranspose.colptr[i + 1] - system.jacobianTranspose.colptr[i]
+        NvariableInRow = system.coefficientTranspose.colptr[i + 1] - system.coefficientTranspose.colptr[i]
         if NvariableInRow == 1
             Ndirect += NvariableInRow
-            variable = system.jacobianTranspose.rowval[system.jacobianTranspose.colptr[i]]
+            variable = system.coefficientTranspose.rowval[system.coefficientTranspose.colptr[i]]
             meanDirect[variable] = 0.0
             weightDirect[variable] = 0.0
         else
@@ -154,12 +154,12 @@ function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbabili
     fromFactor = similar(toVariable)
     idxi = 1
     @inbounds for col = 1:Nvariable
-        for i = system.jacobian.colptr[col]:(system.jacobian.colptr[col + 1] - 1)
-            row = system.jacobian.rowval[i]
-            NvariableInRow = system.jacobianTranspose.colptr[row + 1] - system.jacobianTranspose.colptr[row]
+        for i = system.coefficient.colptr[col]:(system.coefficient.colptr[col + 1] - 1)
+            row = system.coefficient.rowval[i]
+            NvariableInRow = system.coefficientTranspose.colptr[row + 1] - system.coefficientTranspose.colptr[row]
             if NvariableInRow == 1
-                meanDirect[col] += system.observation[row] * system.jacobian[row, col] / system.variance[row]
-                weightDirect[col] += system.jacobian[row, col]^2 / system.variance[row]
+                meanDirect[col] += system.observation[row] * system.coefficient[row, col] / system.variance[row]
+                weightDirect[col] += system.coefficient[row, col]^2 / system.variance[row]
             else
                 push!(colptr[col], idxi)
                 push!(colptrMarginal[col], idxi)
@@ -185,10 +185,10 @@ function makeContinuousGraph(system, meanVirtual, varianceVirtual, dampProbabili
     idxi = 1
     @inbounds for (col, val) in enumerate(dynamic)
         if val != 0
-            for i = system.jacobianTranspose.colptr[col]:(system.jacobianTranspose.colptr[col + 1] - 1)
-                row = system.jacobianTranspose.rowval[i]
+            for i = system.coefficientTranspose.colptr[col]:(system.coefficientTranspose.colptr[col + 1] - 1)
+                row = system.coefficientTranspose.rowval[i]
 
-                coefficient[idxi] = system.jacobianTranspose[row, col]
+                coefficient[idxi] = system.coefficientTranspose[row, col]
                 meanIndirect[idxi] = system.observation[col]
                 varianceIndirect[idxi] = system.variance[col]
 
@@ -237,7 +237,7 @@ end
 ########## Produce the tree graphical model ##########
 function makeContinuousTreeGraph(system, virtualMean, virtualVariance, root)
     ### Number of factor and variable nodes
-    Nfactor, Nvariable = size(system.jacobian)
+    Nfactor, Nvariable = size(system.coefficient)
 
     ### Find graph numbers, set the direct mean and variance, set factor numeration and pass through the rows
     Nlink = 0; Nindirect = 0
@@ -247,16 +247,16 @@ function makeContinuousTreeGraph(system, virtualMean, virtualVariance, root)
     rowForward = [Int[] for i = 1:Nfactor]; rowBackward = [Int[] for i = 1:Nfactor]
     incomingToVariable = [Int[] for i = 1:Nvariable]
     @inbounds for i = 1:Nfactor
-        NvariableInRow = system.jacobianTranspose.colptr[i + 1] - system.jacobianTranspose.colptr[i]
+        NvariableInRow = system.coefficientTranspose.colptr[i + 1] - system.coefficientTranspose.colptr[i]
         if NvariableInRow == 1
-            variable = system.jacobianTranspose.rowval[system.jacobianTranspose.colptr[i]]
+            variable = system.coefficientTranspose.rowval[system.coefficientTranspose.colptr[i]]
             meanDirect[variable] = 0.0
             weightDirect[variable] = 0.0
         else
             Nlink += NvariableInRow
             Nindirect += 1
-            for j = system.jacobianTranspose.colptr[i]:(system.jacobianTranspose.colptr[i + 1] - 1)
-                row = system.jacobianTranspose.rowval[j]
+            for j = system.coefficientTranspose.colptr[i]:(system.coefficientTranspose.colptr[i + 1] - 1)
+                row = system.coefficientTranspose.rowval[j]
                 push!(rowForward[i], row)
                 push!(rowBackward[i], row)
             end
@@ -269,12 +269,12 @@ function makeContinuousTreeGraph(system, virtualMean, virtualVariance, root)
     colForward = [Int[] for i = 1:Nvariable]; colBackward = [Int[] for i = 1:Nvariable]
     incomingToFactor = [Int[] for i = 1:Nfactor]
     @inbounds for col = 1:Nvariable
-        for i = system.jacobian.colptr[col]:(system.jacobian.colptr[col + 1] - 1)
-            row = system.jacobian.rowval[i]
-            NvariableInRow = system.jacobianTranspose.colptr[row + 1] - system.jacobianTranspose.colptr[row]
+        for i = system.coefficient.colptr[col]:(system.coefficient.colptr[col + 1] - 1)
+            row = system.coefficient.rowval[i]
+            NvariableInRow = system.coefficientTranspose.colptr[row + 1] - system.coefficientTranspose.colptr[row]
             if NvariableInRow == 1
-                meanDirect[col] += system.observation[row] * system.jacobian[row, col] / system.variance[row]
-                weightDirect[col] += system.jacobian[row, col]^2 / system.variance[row]
+                meanDirect[col] += system.observation[row] * system.coefficient[row, col] / system.variance[row]
+                weightDirect[col] += system.coefficient[row, col]^2 / system.variance[row]
             else
                 push!(colForward[col], row)
                 push!(colBackward[col], row)

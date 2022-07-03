@@ -15,7 +15,7 @@ Input arguments of the function `continuousTreeModel()` describe the tree graphi
 
 Loads the system data passing arguments:
 ```julia-repl
-gbp = continuousTreeModel(jacobian, observation, variances)
+gbp = continuousTreeModel(coefficient, observation, variances)
 ```
 
 ---

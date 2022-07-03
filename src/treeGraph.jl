@@ -39,12 +39,12 @@ function forwardFactorVariable(gbp::ContinuousTreeModel)
 
         Mrow = gbp.system.observation[factor]; Vrow = gbp.system.variance[factor]
         for j in gbp.graph.incomingToFactor[factor]
-            coeff = gbp.system.jacobian[gbp.inference.toFactor[j], gbp.inference.fromVariable[j]]
+            coeff = gbp.system.coefficient[gbp.inference.toFactor[j], gbp.inference.fromVariable[j]]
             Mrow -= coeff * gbp.inference.meanVariableFactor[j]
             Vrow += coeff^2 * gbp.inference.varianceVariableFactor[j]
         end
-        gbp.inference.meanFactorVariable[gbp.graph.passFactorVariable] = Mrow / gbp.system.jacobian[factor, variable]
-        gbp.inference.varianceFactorVariable[gbp.graph.passFactorVariable] = Vrow / (gbp.system.jacobian[factor, variable]^2)
+        gbp.inference.meanFactorVariable[gbp.graph.passFactorVariable] = Mrow / gbp.system.coefficient[factor, variable]
+        gbp.inference.varianceFactorVariable[gbp.graph.passFactorVariable] = Vrow / (gbp.system.coefficient[factor, variable]^2)
 
         push!(gbp.graph.incomingToVariable[variable], gbp.graph.passFactorVariable)
         for (k, factors) in enumerate(gbp.graph.colForward[variable])
@@ -106,13 +106,13 @@ function backwardFactorVariable(gbp::ContinuousTreeModel)
             Mrow = gbp.system.observation[factor]; Vrow = gbp.system.variance[factor]
             for j in gbp.graph.incomingToFactor[factor]
                 if gbp.inference.fromVariable[j] != variable
-                    coeff = gbp.system.jacobian[factor, gbp.inference.fromVariable[j]]
+                    coeff = gbp.system.coefficient[factor, gbp.inference.fromVariable[j]]
                     Mrow -= coeff * gbp.inference.meanVariableFactor[j]
                     Vrow += coeff^2 * gbp.inference.varianceVariableFactor[j]
                 end
             end
-            gbp.inference.meanFactorVariable[gbp.graph.passFactorVariable] = Mrow / gbp.system.jacobian[factor, variable]
-            gbp.inference.varianceFactorVariable[gbp.graph.passFactorVariable] = Vrow / (gbp.system.jacobian[factor, variable]^2)
+            gbp.inference.meanFactorVariable[gbp.graph.passFactorVariable] = Mrow / gbp.system.coefficient[factor, variable]
+            gbp.inference.varianceFactorVariable[gbp.graph.passFactorVariable] = Vrow / (gbp.system.coefficient[factor, variable]^2)
             push!(gbp.graph.incomingToVariable[variable], gbp.graph.passFactorVariable)
             for (k, factors) in enumerate(gbp.graph.colBackward[variable])
                 if factor == factors
@@ -287,9 +287,9 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel})
     rowptr = [Int[] for i = 1:gbp.graph.Nfactor]
     iterateFactor = Int64[]
     @inbounds for i = 1:gbp.graph.Nfactor
-        if gbp.system.jacobianTranspose.colptr[i + 1] - gbp.system.jacobianTranspose.colptr[i] != 1
-            for j = gbp.system.jacobianTranspose.colptr[i]:(gbp.system.jacobianTranspose.colptr[i + 1] - 1)
-                row = gbp.system.jacobianTranspose.rowval[j]
+        if gbp.system.coefficientTranspose.colptr[i + 1] - gbp.system.coefficientTranspose.colptr[i] != 1
+            for j = gbp.system.coefficientTranspose.colptr[i]:(gbp.system.coefficientTranspose.colptr[i + 1] - 1)
+                row = gbp.system.coefficientTranspose.rowval[j]
                 push!(rowptr[i], row)
             end
         end
@@ -300,9 +300,9 @@ function isTree(gbp::Union{ContinuousModel, ContinuousTreeModel})
     colptr = [Int[] for col = 1:gbp.graph.Nvariable]
     counter = 0
     @inbounds for col = 1:gbp.graph.Nvariable
-        for i = gbp.system.jacobian.colptr[col]:(gbp.system.jacobian.colptr[col + 1] - 1)
-            row = gbp.system.jacobian.rowval[i]
-            if gbp.system.jacobianTranspose.colptr[row + 1] - gbp.system.jacobianTranspose.colptr[row] != 1
+        for i = gbp.system.coefficient.colptr[col]:(gbp.system.coefficient.colptr[col + 1] - 1)
+            row = gbp.system.coefficient.rowval[i]
+            if gbp.system.coefficientTranspose.colptr[row + 1] - gbp.system.coefficientTranspose.colptr[row] != 1
                 push!(colptr[col], row)
             end
         end

@@ -48,7 +48,7 @@ The following examples are intended for a quick introduction to FactorGraph pack
 ```julia-repl
 using FactorGraph
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
@@ -64,7 +64,7 @@ marginal(gbp)                               # compute marginals
 ```julia-repl
 using FactorGraph
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
@@ -89,7 +89,7 @@ marginal(gbp)                               # compute marginals
 ```julia-repl
 using FactorGraph
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # jacobian matrix
+H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
 z = [0.5; 0.8; 4.1]                         # observation vector
 v = [0.1; 1.0; 1.0]                         # variance vector
 
@@ -117,7 +117,7 @@ marginal(gbp)                               # compute marginals
 ```julia-repl
 using FactorGraph
 
-H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # jacobian matrix
+H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # coefficient matrix
      0 0 2 0 0; 0 0 3 8 2]
 z = [1; 2; 3; 4; 5]                         # observation vector
 v = [3; 4; 2; 5; 1]                         # variance vector

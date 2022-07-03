@@ -8,7 +8,7 @@ The function provides the estimate obtained by the weighted least-squares (WLS) 
 ```julia-repl
 exact = wls(gbp)
 ```
-The function returns the composite type `WeightedLeastSquares` with fields `estimate`, `rmse`, `mae`, `wrss`. Note that results are obtained according to variables `ContinuousSystem.jacobian`, `ContinuousSystem.observation` and `ContinuousSystem.variance`.
+The function returns the composite type `WeightedLeastSquares` with fields `estimate`, `rmse`, `mae`, `wrss`. Note that results are obtained according to variables `ContinuousSystem.coefficient`, `ContinuousSystem.observation` and `ContinuousSystem.variance`.
 
 ----
 #### The GBP error metrics

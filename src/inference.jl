@@ -49,37 +49,37 @@ function marginalUnnormalized(bp::DiscreteTreeModel)
 end
 
 ########## Dynamic the GBP update ##########
-@inline function dynamicFactor!(gbp::ContinuousModel; factor = 0::Int64, mean = 0, variance = 0)
-    if (gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]) == 1
-        idx = gbp.system.jacobianTranspose.colptr[factor]
-        variable = trunc(Int, gbp.system.jacobianTranspose.rowval[idx])
+@inline function dynamicFactor!(gbp::ContinuousModel; factor = 0::Int64, observation = 0, variance = 0)
+    if (gbp.system.coefficientTranspose.colptr[factor + 1] - gbp.system.coefficientTranspose.colptr[factor]) == 1
+        idx = gbp.system.coefficientTranspose.colptr[factor]
+        variable = trunc(Int, gbp.system.coefficientTranspose.rowval[idx])
 
-        gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.jacobianTranspose[variable, factor] / gbp.system.variance[factor]
-        gbp.graph.weightDirect[variable] -= gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
+        gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.coefficientTranspose[variable, factor] / gbp.system.variance[factor]
+        gbp.graph.weightDirect[variable] -= gbp.system.coefficientTranspose[variable, factor]^2 / gbp.system.variance[factor]
 
-        gbp.graph.meanDirect[variable] += mean * gbp.system.jacobianTranspose[variable, factor] / variance
-        gbp.graph.weightDirect[variable] += gbp.system.jacobianTranspose[variable, factor]^2 / variance
+        gbp.graph.meanDirect[variable] += observation * gbp.system.coefficientTranspose[variable, factor] / variance
+        gbp.graph.weightDirect[variable] += gbp.system.coefficientTranspose[variable, factor]^2 / variance
     else
         k = gbp.graph.dynamic[factor]
         @inbounds for i in gbp.graph.rowptr[k]
-            gbp.graph.meanIndirect[i] = mean
+            gbp.graph.meanIndirect[i] = observation
             gbp.graph.varianceIndirect[i] = variance
         end
     end
-    gbp.system.observation[factor] = mean
+    gbp.system.observation[factor] = observation
     gbp.system.variance[factor] = variance
 end
 
 ######### Ageing the GBP update ##########
 @inline function ageingVariance!(gbp::ContinuousModel; factor = 0::Int64, initial = 0, limit = 0, model = 0::Int64, a = 0, b = 0, tau = 0)
     if gbp.system.variance[factor] < limit
-        Nvariable = gbp.system.jacobianTranspose.colptr[factor + 1] - gbp.system.jacobianTranspose.colptr[factor]
+        Nvariable = gbp.system.coefficientTranspose.colptr[factor + 1] - gbp.system.coefficientTranspose.colptr[factor]
         if Nvariable == 1
-            idx = gbp.system.jacobianTranspose.colptr[factor]
-            variable = trunc(Int, gbp.system.jacobianTranspose.rowval[idx])
+            idx = gbp.system.coefficientTranspose.colptr[factor]
+            variable = trunc(Int, gbp.system.coefficientTranspose.rowval[idx])
 
-            gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.jacobianTranspose[variable, factor] / gbp.system.variance[factor]
-            gbp.graph.weightDirect[variable] -= gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
+            gbp.graph.meanDirect[variable] -= gbp.system.observation[factor] * gbp.system.coefficientTranspose[variable, factor] / gbp.system.variance[factor]
+            gbp.graph.weightDirect[variable] -= gbp.system.coefficientTranspose[variable, factor]^2 / gbp.system.variance[factor]
         end
 
         if model == 1
@@ -95,8 +95,8 @@ end
         end
 
         if Nvariable == 1
-            gbp.graph.meanDirect[variable] += gbp.system.observation[factor] * gbp.system.jacobianTranspose[variable, factor] / gbp.system.variance[factor]
-            gbp.graph.weightDirect[variable] += gbp.system.jacobianTranspose[variable, factor]^2 / gbp.system.variance[factor]
+            gbp.graph.meanDirect[variable] += gbp.system.observation[factor] * gbp.system.coefficientTranspose[variable, factor] / gbp.system.variance[factor]
+            gbp.graph.weightDirect[variable] += gbp.system.coefficientTranspose[variable, factor]^2 / gbp.system.variance[factor]
         else
             k = gbp.graph.dynamic[factor]
             @inbounds for i in gbp.graph.rowptr[k]
