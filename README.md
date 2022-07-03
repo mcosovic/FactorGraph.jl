@@ -64,7 +64,7 @@ end
 
 dynamicFactor!(gbp;                         # integrate changes in the running GBP
     factor = 1,
-    mean = 0.85,
+    observation = 0.85,
     variance = 1e-10)
 for iteration = 201:400                     # continues the GBP inference
     messageFactorVariable(gbp)              # compute messages using the vanilla GBP
