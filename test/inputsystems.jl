@@ -29,8 +29,8 @@ function discrete6_4()
 
        probability3 = [2, 3, 4, 5]
        table3 = zeros(2, 3, 2, 3)
-       table3[1, 1, 1, 1] =	0.2
-       table3[2, 1, 1, 1] =	0.1
+       table3[1, 1, 1, 1] = 0.2
+       table3[2, 1, 1, 1] = 0.1
        table3[1, 2, 1, 1] = 0.5
        table3[2, 2, 1, 1] = 0.6
        table3[1, 3, 1, 1] = 0.2
