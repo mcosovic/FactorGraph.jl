@@ -1,3 +1,6 @@
 docs/build/
 docs/figures/
 docs/makeLocal.jl
+Manifest.toml
+docs/Manifest.toml
+AGENTS.md

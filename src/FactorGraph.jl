@@ -1,50 +1,159 @@
 module FactorGraph
 
-using SparseArrays, LinearAlgebra
-using Random
+using LinearAlgebra, Random
 
-### Form a continuous factor graph and initialize messages and marginals
-include("continuousGraph.jl")
-export continuousModel, continuousTreeModel
+# Factor Graph
+include("graph/core.jl")
+include("graph/gaussian.jl")
+include("graph/discrete.jl")
 
-### Form a discrete factor graph and initialize messages and marginals
-include("discreteGraph.jl")
-export discreteTreeModel
+# Inference
+include("inference/core.jl")
+include("inference/gaussianMoment.jl")
+include("inference/gaussianCanonical.jl")
+include("inference/discreteSumProduct.jl")
+include("inference/discreteMinSum.jl")
+include("inference/gaussianMinSum.jl")
+include("schedule/forwardBackward.jl")
+include("inference/tree.jl")
 
-### Factor graph manipulation
-include("graphManipulation.jl")
-export freezeFactor!, defreezeFactor!, freezeVariable!, defreezeVariable!,
-       freezeVariableFactor!, defreezeVariableFactor!, freezeFactorVariable!, defreezeFactorVariable!,
-       hideFactor!, addFactors!
+# Schedule
+include("schedule/core.jl")
+include("schedule/sequential.jl")
+include("schedule/flooding.jl")
+include("schedule/residual.jl")
 
-### Inference
-include("inference.jl")
-export marginal, marginalUnnormalized, dynamicFactor!, ageingVariance!, damping!
+# Utility
+include("utility/diagnostics.jl")
+include("utility/wls.jl")
+include("utility/print.jl")
 
-### Vanilla GBP algorithm
-include("vanillaGBP.jl")
-export messageFactorVariable, meanFactorVariable, varianceFactorVariable,
-       messageDampFactorVariable, meanDampFactorVariable,
-       messageVariableFactor, meanVariableFactor, varianceVariableFactor
+export AbstractFactorGraph,
+    GaussianFactorGraph,
+    DiscreteFactorGraph,
+    TreeFactorGraph
 
-### Broadcast GBP algorithm
-include("broadcastGBP.jl")
-export messageFactorVariableBroadcast, meanFactorVariableBroadcast, varianceFactorVariableBroadcast,
-       messageDampFactorVariableBroadcast, meanDampFactorVariableBroadcast,
-       messageVariableFactorBroadcast, meanVariableFactorBroadcast, varianceVariableFactorBroadcast
+export VariableId,
+    VariableRef,
+    FactorRef,
+    StateRef,
+    ComponentRef
 
-### Broadcast GBP with Kahan-Babuska algorithm
-include("kahanGBP.jl")
-export messageFactorVariableKahan, meanFactorVariableKahan, varianceFactorVariableKahan,
-       messageDampFactorVariableKahan, meanDampFactorVariableKahan,
-       messageVariableFactorKahan, meanVariableFactorKahan, varianceVariableFactorKahan
+export GaussianVariable,
+    GaussianFactor,
+    DiscreteVariable,
+    DiscreteFactor,
+    Edge
 
-# Tree factor graph
-include("treeGraph.jl")
-export forwardVariableFactor, forwardFactorVariable, backwardVariableFactor, backwardFactorVariable, isTree
+export factorGraph,
+    treeFactorGraph,
+    addVariable!,
+    addFactor!,
+    updateFactor!
 
-# Compute and show results
-include("utility.jl")
-export wls, errorMetric
+export variableIndex,
+    variableDimension,
+    factorIndex,
+    edgeIndex,
+    edgeIndices
 
-end # FactorGraph
+export componentIndex,
+    componentValue,
+    coefficientBlock,
+    coefficientBlocks
+
+export stateIndex,
+    stateValue,
+    factorAxis,
+    factorAxes
+
+export AbstractInference,
+    GaussianInference,
+    GaussianSumProductInference,
+    DiscreteInference,
+    AbstractSumProductInference,
+    AbstractMinSumInference,
+    GaussianMomentInference,
+    GaussianCanonicalInference,
+    GaussianMinSumInference,
+    DiscreteSumProductInference,
+    DiscreteMinSumInference,
+    QuadraticMessage
+
+export moment,
+    canonical,
+    minsum,
+    sumproduct
+
+export factorToVariableMessages!,
+    variableToFactorMessages!,
+    messages!,
+    marginals!,
+    gbp!
+
+export marginals,
+    marginal,
+    marginalMean,
+    marginalCovariance,
+    marginalProbability,
+    estimates,
+    estimate,
+    estimates!,
+    maxEstimateChange
+
+export ForwardBackwardSchedule,
+    SequentialSchedule,
+    FloodingSchedule,
+    ResidualSchedule
+
+export forwardBackwardSchedule,
+    sequentialSchedule,
+    floodingSchedule,
+    residualSchedule
+
+export reset!,
+    refresh!,
+    forwardStep!,
+    backwardStep!,
+    forward!,
+    backward!,
+    forwardBackward!,
+    residualStep!
+
+export isFrozenFactor,
+    isFrozenVariable,
+    freezeFactor!,
+    freezeVariable!,
+    unfreezeFactor!,
+    unfreezeVariable!,
+    isFrozenEdge,
+    freezeEdge!,
+    unfreezeEdge!
+
+export isDampedEdge,
+    dampEdges!,
+    undampEdges!
+
+export WeightedLeastSquaresResult,
+    solveWLS
+
+export residuals,
+    normalizedResiduals,
+    compareMeanWithWLS,
+    maxMeanError,
+    compareCovarianceWithWLS,
+    maxCovarianceError
+
+export maxVariableMessageChange,
+    maxFactorMessageChange,
+    maxMessageChange,
+    maxMarginalChange
+
+export printModel,
+    printGraph,
+    printEdges,
+    printMessages,
+    printMarginal,
+    printEstimate,
+    printWLS
+end

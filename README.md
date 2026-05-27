@@ -1,160 +1,121 @@
 # FactorGraph
 
-[![Documentation][documentation-badge]][documentation] ![Build][build-badge]
+[![Build][build-badge]][build]
+[![Documentation][documentation-badge]][documentation]
 
+<a href="https://mcosovic.github.io/FactorGraph.jl/stable/">
+  <img align="left" width="160" src="/docs/src/assets/logo2.png" />
+</a>
 
-<a href="https://mcosovic.github.io/FactorGraph.jl/stable/"><img align="left" width="320" src="/docs/src/assets/logo2.svg" /></a>
+FactorGraph is a Julia package for constructing factor graphs and running
+belief propagation algorithms.
 
-FactorGraph is an open-source, easy-to-use simulation tool/solver for researchers and educators provided as a Julia package, with source code released under MIT License. The FactorGraph package provides the set of different functions to perform inference over the factor graph with continuous or discrete random variables using the belief propagation (BP) algorithm, also known as the sum-product algorithm.
+Gaussian models can use scalar or vector variables, linear Gaussian factors,
+belief propagation in moment, canonical, and min-sum form, and weighted
+least-squares validation utilities.
 
-We have tested and verified simulation tool using different scenarios to the best of our ability. As a user of this simulation tool, you can help us to improve future versions, we highly appreciate your feedback about any errors, inaccuracies, and bugs. For more information, please visit [documentation][documentation] site.
+Discrete finite-state models are represented with variables over finite state
+spaces and factor tables, with iterative sum-product inference for marginals
+and min-sum inference for MAP estimates.
 
----
+The Gaussian and discrete APIs share support for sequential, flooding, and
+residual schedules, damping, exact forward-backward inference on
+tree-structured graphs, dynamic graph updates, and inspection helpers for
+graphs, messages, marginals, and estimates.
 
-#### Requirement
-FactorGraph requires Julia 1.6 and higher.
+<br clear="left"/>
 
----
+## Installation
 
-#### Installation
-To install the FactorGraph package, run the following command:
+FactorGraph is registered as `FactorGraph.jl`. Install it from the Julia package
+manager:
+
 ```julia-repl
 pkg> add FactorGraph
 ```
 
-To use FactorGraph package, add the following code to your script, or alternatively run the same command in Julia REPL:
-```julia-repl
+Then load it in Julia:
+
+```julia
 using FactorGraph
 ```
 
----
+## Quick Start
 
-#### Quick start whitin continuous framework
-The following examples are intended for a quick introduction to FactorGraph package within the continuous framework.
-
-- The broadcast GBP algorithm:
-```julia-repl
+```julia
 using FactorGraph
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
-z = [0.5; 0.8; 4.1]                         # observation vector
-v = [0.1; 1.0; 1.0]                         # variance vector
+variables = [
+    GaussianVariable(:x1, 1),
+    GaussianVariable(:x2, 1),
+]
 
-gbp = continuousModel(H, z, v)              # initialize the graphical model
-for iteration = 1:50                        # the GBP inference
-    messageFactorVariableBroadcast(gbp)     # compute messages using the broadcast GBP
-    messageVariableFactorBroadcast(gbp)     # compute messages using the broadcast GBP
-end
-marginal(gbp)                               # compute marginals
+factors = [
+    GaussianFactor(:x1, 1.0, 1.0, 0.1; label = "prior_x1"),
+    GaussianFactor(:x2, 2.0, 1.0, 0.1; label = "prior_x2"),
+    GaussianFactor(:x1, :x2, -1.0, [1.0 -1.0], 0.2; label = "link"),
+]
+
+graph = factorGraph(variables, factors)
+inference = moment(graph)
+
+gbp!(graph, inference; iterations = 30)
+
+marginalMean(graph, inference, :x1)
+marginalCovariance(graph, inference, :x1)
 ```
 
-- The vanilla GBP algorithm in the dynamic framework:
-```julia-repl
-using FactorGraph
+## Tree Inference
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
-z = [0.5; 0.8; 4.1]                         # observation vector
-v = [0.1; 1.0; 1.0]                         # variance vector
+When the graph is tree-structured, pass a root variable to construct a
+`TreeFactorGraph` and run exact forward-backward belief propagation:
 
-gbp = continuousModel(H, z, v)              # initialize the graphical model
-for iteration = 1:200                       # the GBP inference
-    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
-    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
-end
+```julia
+tree = treeFactorGraph(graph; root = :x1)
+inference = moment(graph)
 
-dynamicFactor!(gbp;                         # integrate changes in the running GBP
-    factor = 1,
-    observation = 0.85,
-    variance = 1e-10)
-for iteration = 201:400                     # continues the GBP inference
-    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
-    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
-end
-marginal(gbp)                               # compute marginals
+forwardBackward!(tree, inference)
 ```
 
-- The vanilla GBP algorithm in the ageing framework:
-```julia-repl
-using FactorGraph
+## Discrete Models
 
-H = [1.0 0.0 0.0; 1.5 0.0 2.0; 0.0 3.1 4.6] # coefficient matrix
-z = [0.5; 0.8; 4.1]                         # observation vector
-v = [0.1; 1.0; 1.0]                         # variance vector
+```julia
+variables = [
+    DiscreteVariable(:x1, 2; states = [:off, :on]),
+    DiscreteVariable(:x2, 2; states = [:low, :high]),
+]
 
-gbp = continuousModel(H, z, v)              # initialize the graphical model
-for iteration = 1:200                       # the GBP inference
-    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
-    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
-end
+factors = [
+    DiscreteFactor(:x1, [0.8, 0.2]; label = "prior_x1"),
+    DiscreteFactor(:x1, :x2, [1.0 0.2; 0.1 0.9]; label = "link"),
+]
 
-for iteration = 1:400                       # continues the GBP inference
-    ageingVariance!(gbp;                    # integrate changes in the running GBP
-        factor = 3,
-        initial = 1,
-        limit = 50,
-        model = 1,
-        a = 0.05,
-        tau = iteration)
-    messageFactorVariable(gbp)              # compute messages using the vanilla GBP
-    messageVariableFactor(gbp)              # compute messages using the vanilla GBP
-end
-marginal(gbp)                               # compute marginals
+graph = factorGraph(variables, factors)
+inference = sumproduct(graph)
+
+gbp!(graph, inference; iterations = 10)
+
+marginalProbability(graph, inference, :x1, :on)
 ```
 
- - The forward–backward GBP algorithm over the tree factor graph:
-```julia-repl
-using FactorGraph
+## Documentation
 
-H = [1 0 0 0 0; 6 8 2 0 0; 0 5 0 0 0;       # coefficient matrix
-     0 0 2 0 0; 0 0 3 8 2]
-z = [1; 2; 3; 4; 5]                         # observation vector
-v = [3; 4; 2; 5; 1]                         # variance vector
+The full documentation is available at
+[mcosovic.github.io/FactorGraph.jl/stable][documentation].
 
-gbp = continuousTreeModel(H, z, v)          # initialize the tree graphical model
-while gbp.graph.forward                     # inference from leaves to the root
-     forwardVariableFactor(gbp)             # compute forward messages
-     forwardFactorVariable(gbp)             # compute forward messages
-end
-while gbp.graph.backward                    # inference from the root to leaves
-     backwardVariableFactor(gbp)            # compute backward messages
-     backwardFactorVariable(gbp)            # compute backward messages
-end
-marginal(gbp)                               # compute marginals
-```
+It includes:
 
----
+- Gaussian and discrete factor graph construction
+- Iterative sum-product and min-sum belief propagation
+- Forward-backward inference on tree-structured graphs
+- Dynamic graph updates and stale-inference checks
+- API references for types, graphs, inference, validation, and printing helpers
 
-#### Quick start whitin discrete framework
-Following example is intended for a quick introduction to FactorGraph package within the discrete framework.
+## License
 
- - The forward–backward BP algorithm over the tree factor graph:
-```julia-repl
-using FactorGraph
+FactorGraph is released under the MIT License.
 
-probability1 = [1]
-table1 = [0.2; 0.3; 0.4; 0.1]
-
-probability2 = [1; 2; 3]
-table2 = zeros(4, 3, 1)
-table2[1, 1, 1] = 0.2; table2[2, 1, 1] = 0.5; table2[3, 1, 1] = 0.3; table2[4, 1, 1] = 0.0
-table2[1, 2, 1] = 0.1; table2[2, 2, 1] = 0.1; table2[3, 2, 1] = 0.7; table2[4, 2, 1] = 0.1
-table2[1, 3, 1] = 0.5; table2[2, 3, 1] = 0.2; table2[3, 3, 1] = 0.1; table2[4, 3, 1] = 0.1
-
-probability = [probability1, probability2]
-table = [table1, table2]
-
-bp = discreteTreeModel(probability, table)  # initialize the tree graphical model
-while bp.graph.forward                      # inference from leaves to the root
-    forwardVariableFactor(bp)               # compute forward messages
-    forwardFactorVariable(bp)               # compute forward messages
-end
-while bp.graph.backward                     # inference from the root to leaves
-    backwardVariableFactor(bp)              # compute backward messages
-    backwardFactorVariable(bp)              # compute backward messages
-end
-marginal(bp)                                # compute normalized marginals
-```
-
-[documentation-badge]: https://github.com/mcosovic/FactorGraph.jl/workflows/Documentation/badge.svg
-[build-badge]: https://github.com/mcosovic/FactorGraph.jl/workflows/Build/badge.svg
+[build-badge]: https://github.com/mcosovic/FactorGraph.jl/actions/workflows/Build.yml/badge.svg
+[build]: https://github.com/mcosovic/FactorGraph.jl/actions/workflows/Build.yml
+[documentation-badge]: https://github.com/mcosovic/FactorGraph.jl/actions/workflows/Documentation.yml/badge.svg
 [documentation]: https://mcosovic.github.io/FactorGraph.jl/stable/

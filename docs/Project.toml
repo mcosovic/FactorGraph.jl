@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+FactorGraph = "528f6532-2a0d-4856-bb42-8bcefd89a10f"
 
 [compat]
-Documenter = "0.25.5"
+Documenter = "1"
