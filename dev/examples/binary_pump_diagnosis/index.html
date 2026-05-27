@@ -35,11 +35,11 @@ gbp!(
 )</code></pre><p>Inspect the posterior health estimates:</p><pre><code class="language-julia hljs">printMarginal(graph, inference; variable = :power)
 printMarginal(graph, inference; variable = :fuse)
 printMarginal(graph, inference; variable = :motor)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Marginal for variable node &quot;power&quot; (sum-product form):
-  probability = [0.9887902589374079, 0.011209741062592081]
+  probability = [0.9887902573065965, 0.011209742693403475]
 Marginal for variable node &quot;fuse&quot; (sum-product form):
-  probability = [0.9964131068770375, 0.0035868931229624656]
+  probability = [0.9964131071557111, 0.0035868928442889607]
 Marginal for variable node &quot;motor&quot; (sum-product form):
-  probability = [0.900269308090883, 0.09973069190911683]</code></pre><hr/><h2 id="MAP-Diagnosis"><a class="docs-heading-anchor" href="#MAP-Diagnosis">MAP Diagnosis</a><a id="MAP-Diagnosis-1"></a><a class="docs-heading-anchor-permalink" href="#MAP-Diagnosis" title="Permalink"></a></h2><p>Use min-sum when only the most likely binary assignment is needed:</p><pre><code class="language-julia hljs">mapInference = minsum(graph)
+  probability = [0.9002693139793491, 0.099730686020651]</code></pre><hr/><h2 id="MAP-Diagnosis"><a class="docs-heading-anchor" href="#MAP-Diagnosis">MAP Diagnosis</a><a id="MAP-Diagnosis-1"></a><a class="docs-heading-anchor-permalink" href="#MAP-Diagnosis" title="Permalink"></a></h2><p>Use min-sum when only the most likely binary assignment is needed:</p><pre><code class="language-julia hljs">mapInference = minsum(graph)
 gbp!(graph, mapInference; iterations = 80, tolerance = 0.0, schedule = :residual)
 
 estimates(graph, mapInference)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">6-element Vector{Union{Int64, String, Symbol}}:
