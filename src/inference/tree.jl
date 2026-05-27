@@ -298,13 +298,13 @@ function unfreezeEdge!(
     return unfreezeEdge!(tree.graph, inference; variable = variable, factor = factor)
 end
 
-function isDampedEdge(
+function areDampedEdges(
     tree::TreeFactorGraph{GaussianFactorGraph},
     inference::GaussianControlledInference;
     variable::VariableRef,
     factor::FactorRef
 )
-    return isDampedEdge(tree.graph, inference; variable = variable, factor = factor)
+    return areDampedEdges(tree.graph, inference; variable = variable, factor = factor)
 end
 
 function dampEdges!(
@@ -409,13 +409,13 @@ function unfreezeEdge!(
     return unfreezeEdge!(tree.graph, inference; variable = variable, factor = factor)
 end
 
-function isDampedEdge(
+function areDampedEdges(
     tree::TreeFactorGraph{DiscreteFactorGraph},
     inference::DiscreteControlledInference;
     variable::VariableRef,
     factor::FactorRef
 )
-    return isDampedEdge(tree.graph, inference; variable = variable, factor = factor)
+    return areDampedEdges(tree.graph, inference; variable = variable, factor = factor)
 end
 
 function dampEdges!(

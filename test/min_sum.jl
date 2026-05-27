@@ -136,13 +136,13 @@ end
         inference = minsum(graph)
 
         dampEdges!(graph, inference; variable = :x2, factor = "factor_x1_x2")
-        @test isDampedEdge(graph, inference; variable = :x2, factor = "factor_x1_x2")
+        @test areDampedEdges(graph, inference; variable = :x2, factor = "factor_x1_x2")
 
         gbp!(graph, inference; iterations = 120, damping = true, prob = 1.0, alpha = 0.25)
         assertMinSumMatchesWLS(graph, inference)
 
         undampEdges!(graph, inference; variable = :x2, factor = "factor_x1_x2")
-        @test !isDampedEdge(graph, inference; variable = :x2, factor = "factor_x1_x2")
+        @test !areDampedEdges(graph, inference; variable = :x2, factor = "factor_x1_x2")
     end
 
     @testset "Freezing preserves selected outgoing messages" begin

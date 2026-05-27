@@ -365,7 +365,7 @@ Use [`dampEdges!`](@ref) to damp selected edges:
 
 ```@example iterative_discrete_inference
 dampEdges!(graph, inference; variable = :x2, factor = "f2", prob = 1.0, alpha = 0.35)
-isDampedEdge(graph, inference; variable = :x2, factor = "f2")
+areDampedEdges(graph, inference; variable = :x2, factor = "f2")
 
 nothing # hide
 ```

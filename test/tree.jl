@@ -253,7 +253,7 @@ end
         variable = graph.variables[edge.variableIndex].id
         factor = graph.factors[edge.factorIndex].label
 
-        @test !isDampedEdge(tree, inference; variable = variable, factor = factor)
+        @test !areDampedEdges(tree, inference; variable = variable, factor = factor)
 
         dampEdges!(
             tree,
@@ -263,12 +263,12 @@ end
             prob = 1.0,
             alpha = 0.25
         )
-        @test isDampedEdge(tree, inference; variable = variable, factor = factor)
+        @test areDampedEdges(tree, inference; variable = variable, factor = factor)
         @test inference.edgeDampingProb[edgeId] == 1.0
         @test inference.edgeDampingAlpha[edgeId] == 0.25
 
         undampEdges!(tree, inference; variable = variable, factor = factor)
-        @test !isDampedEdge(tree, inference; variable = variable, factor = factor)
+        @test !areDampedEdges(tree, inference; variable = variable, factor = factor)
 
         dampEdges!(tree, inference; prob = 1.0, alpha = 0.3)
         @test all(inference.dampedEdges)

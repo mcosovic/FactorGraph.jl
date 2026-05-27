@@ -841,7 +841,7 @@ function unfreezeEdge!(
 end
 
 """
-    isDampedEdge(
+    areDampedEdges(
         graph::AbstractFactorGraph, inference::AbstractInference;
         variable = nothing, factor = nothing
     )
@@ -858,6 +858,13 @@ Return whether all selected edges are marked for damping.
 - `variable`: Optional variable id or label.
 - `factor`: Optional factor index or label.
 
+# Notes
+
+If both `variable` and `factor` are provided, only that edge is selected.
+If only `variable` is provided, all edges incident to that variable are selected.
+If only `factor` is provided, all edges incident to that factor are selected.
+If neither is provided, all graph edges are selected.
+
 # Returns
 
 `true` if all selected edges are damped.
@@ -871,10 +878,10 @@ f1 = GaussianFactor(:x1, 0.0, 1.0, 0.1; label = "f1")
 graph = factorGraph([x1], [f1])
 inference = moment(graph)
 
-isDampedEdge(graph, inference; variable = :x1, factor = "f1")
+areDampedEdges(graph, inference; variable = :x1, factor = "f1")
 ```
 """
-function isDampedEdge(
+function areDampedEdges(
     graph::GaussianFactorGraph,
     inference::GaussianInference;
     variable::Union{Nothing, VariableRef} = nothing,
@@ -902,6 +909,13 @@ Enable damping for selected edges.
 - `factor`: Optional factor index or label.
 - `prob`: Damping probability.
 - `alpha`: Previous-message mixing weight.
+
+# Notes
+
+If both `variable` and `factor` are provided, only that edge is selected.
+If only `variable` is provided, all edges incident to that variable are selected.
+If only `factor` is provided, all edges incident to that factor are selected.
+If neither is provided, all graph edges are selected.
 
 # Example
 
@@ -947,7 +961,10 @@ Disable damping for selected edges.
 
 # Notes
 
-The same selector rules as [`dampEdges!`](@ref) apply.
+If both `variable` and `factor` are provided, only that edge is selected.
+If only `variable` is provided, all edges incident to that variable are selected.
+If only `factor` is provided, all edges incident to that factor are selected.
+If neither is provided, all graph edges are selected.
 
 # Example
 

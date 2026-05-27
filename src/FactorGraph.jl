@@ -130,7 +130,7 @@ export isFrozenFactor,
     freezeEdge!,
     unfreezeEdge!
 
-export isDampedEdge,
+export areDampedEdges,
     dampEdges!,
     undampEdges!
 

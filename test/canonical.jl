@@ -248,7 +248,7 @@ function assertDampedEdge(;
         flooding = flooding
     )
 
-    @test !isDampedEdge(
+    @test !areDampedEdges(
         graph,
         inference;
         variable = variable,
@@ -263,7 +263,7 @@ function assertDampedEdge(;
         prob = 1.0,
         alpha = 0.35
     )
-    @test isDampedEdge(
+    @test areDampedEdges(
         graph,
         inference;
         variable = variable,
@@ -292,7 +292,7 @@ function assertDampedEdge(;
         variable = variable,
         factor = factor
     )
-    @test !isDampedEdge(
+    @test !areDampedEdges(
         graph,
         inference;
         variable = variable,

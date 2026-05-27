@@ -1139,7 +1139,7 @@ function unfreezeEdge!(
     unsupportedDiscreteControlError(inference)
 end
 
-function isDampedEdge(
+function areDampedEdges(
     graph::DiscreteFactorGraph,
     inference::DiscreteInference;
     variable::Union{Nothing, VariableRef} = nothing,
@@ -1345,7 +1345,7 @@ function unfreezeEdgeImpl!(
     return nothing
 end
 
-function isDampedEdgeImpl(
+function areDampedEdgesImpl(
     graph::AbstractFactorGraph,
     inference::ControlledInference,
     variable::Union{Nothing, VariableRef},
@@ -1555,22 +1555,22 @@ function unfreezeEdge!(
     return unfreezeEdgeImpl!(graph, inference, variable, factor)
 end
 
-function isDampedEdge(
+function areDampedEdges(
     graph::GaussianFactorGraph,
     inference::GaussianControlledInference;
     variable::Union{Nothing, VariableRef} = nothing,
     factor::Union{Nothing, FactorRef} = nothing
 )
-    return isDampedEdgeImpl(graph, inference, variable, factor)
+    return areDampedEdgesImpl(graph, inference, variable, factor)
 end
 
-function isDampedEdge(
+function areDampedEdges(
     graph::DiscreteFactorGraph,
     inference::DiscreteControlledInference;
     variable::Union{Nothing, VariableRef} = nothing,
     factor::Union{Nothing, FactorRef} = nothing
 )
-    return isDampedEdgeImpl(graph, inference, variable, factor)
+    return areDampedEdgesImpl(graph, inference, variable, factor)
 end
 
 function dampEdges!(

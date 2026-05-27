@@ -168,10 +168,10 @@ end
               0.5 .* [0.5, 0.5] .+ 0.5 .* ([0.82, 0.34] ./ 1.16)
 
         dampEdges!(graph, inference; variable = :x2, factor = "x1_x2", prob = 1.0, alpha = 0.5)
-        @test isDampedEdge(graph, inference; variable = :x2, factor = "x1_x2")
+        @test areDampedEdges(graph, inference; variable = :x2, factor = "x1_x2")
 
         undampEdges!(graph, inference; variable = :x2, factor = "x1_x2")
-        @test !isDampedEdge(graph, inference; variable = :x2, factor = "x1_x2")
+        @test !areDampedEdges(graph, inference; variable = :x2, factor = "x1_x2")
 
         dampEdges!(graph, inference; prob = 1.0, alpha = 0.25)
         @test all(inference.dampedEdges)
@@ -384,7 +384,7 @@ end
 
         edgeId = edgeIndex(graph; variable = :x1, factor = "x1_x2")
 
-        @test !isDampedEdge(tree, inference; variable = :x1, factor = "x1_x2")
+        @test !areDampedEdges(tree, inference; variable = :x1, factor = "x1_x2")
 
         dampEdges!(
             tree,
@@ -394,12 +394,12 @@ end
             prob = 1.0,
             alpha = 0.25
         )
-        @test isDampedEdge(tree, inference; variable = :x1, factor = "x1_x2")
+        @test areDampedEdges(tree, inference; variable = :x1, factor = "x1_x2")
         @test inference.edgeDampingProb[edgeId] == 1.0
         @test inference.edgeDampingAlpha[edgeId] == 0.25
 
         undampEdges!(tree, inference; variable = :x1, factor = "x1_x2")
-        @test !isDampedEdge(tree, inference; variable = :x1, factor = "x1_x2")
+        @test !areDampedEdges(tree, inference; variable = :x1, factor = "x1_x2")
 
         dampEdges!(tree, inference; prob = 1.0, alpha = 0.3)
         @test all(inference.dampedEdges)
@@ -416,7 +416,7 @@ end
             factor = "x1_x2",
             prob = 1.0
         )
-        @test isDampedEdge(tree, mapInference; variable = :x1, factor = "x1_x2")
+        @test areDampedEdges(tree, mapInference; variable = :x1, factor = "x1_x2")
     end
 
     @testset "Tree warm-start addition refreshes view" begin
@@ -530,7 +530,7 @@ end
         priorEdge = edgeIndex(graph; variable = :x1, factor = "prior_x1")
 
         dampEdges!(graph, inference; variable = :x1, factor = "prior_x1", prob = 1.0)
-        @test isDampedEdge(graph, inference; variable = :x1, factor = "prior_x1")
+        @test areDampedEdges(graph, inference; variable = :x1, factor = "prior_x1")
 
         freezeFactor!(graph, inference, "prior_x1")
         @test isFrozenFactor(graph, inference, "prior_x1")
@@ -545,7 +545,7 @@ end
         @test !isFrozenFactor(graph, inference, "prior_x1")
 
         undampEdges!(graph, inference; variable = :x1, factor = "prior_x1")
-        @test !isDampedEdge(graph, inference; variable = :x1, factor = "prior_x1")
+        @test !areDampedEdges(graph, inference; variable = :x1, factor = "prior_x1")
     end
 
     @testset "Tree forward-backward matches brute-force MAP" begin

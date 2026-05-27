@@ -69,7 +69,7 @@ unfreezeEdge!
 isFrozenEdge
 dampEdges!
 undampEdges!
-isDampedEdge
+areDampedEdges
 ```
 
 ---
