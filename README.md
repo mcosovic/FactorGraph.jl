@@ -4,7 +4,7 @@
 [![Documentation][documentation-badge]][documentation]
 
 <a href="https://mcosovic.github.io/FactorGraph.jl/stable/">
-  <img align="left" width="240" src="/docs/src/assets/logo2.png" />
+  <img align="left" width="230" src="/docs/src/assets/logo2.png" />
 </a>
 
 FactorGraph is a Julia package for constructing factor graphs and running
