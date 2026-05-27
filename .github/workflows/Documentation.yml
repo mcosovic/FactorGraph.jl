@@ -9,26 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v3
-        with:
-          version: '1'
-      - uses: julia-actions/cache@v2
-      - name: Install dependencies
-        run: julia --color=yes --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build documentation
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: julia --color=yes --project=docs docs/make.jl
-
-  deploy:
-    if: github.event_name != 'pull_request'
+  docs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -41,7 +22,7 @@ jobs:
       - uses: julia-actions/cache@v2
       - name: Install dependencies
         run: julia --color=yes --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build and deploy
+      - name: Build documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: julia --color=yes --project=docs docs/make.jl
