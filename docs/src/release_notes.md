@@ -37,8 +37,3 @@
   models, examples, schedules, validation, and API references.
 - Expanded the test suite across graph construction, inference, schedules, tree
   inference, validation, diagnostics, and printing.
-
-#### Infrastructure
-
-- Updated CI and documentation deployment workflows.
-- Corrected package metadata for registration.
