@@ -39,6 +39,7 @@ makedocs(
             "Validation" => "api/validation.md",
             "Print Functions" => "api/printing.md",
         ],
+        "Release Notes" => "release_notes.md",
     ],
     repo = "https://github.com/mcosovic/FactorGraph.jl/{commit}{path}#L{line}",
     authors = "Mirsad Cosovic",
