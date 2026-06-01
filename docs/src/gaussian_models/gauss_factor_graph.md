@@ -208,8 +208,7 @@ adjacency lists used for message passing.
 
 For quick debugging, the graph structure can be rendered as a SVG with
 [`saveGraphFigure`](@ref). This is useful for checking that factors connect to the intended
-variables before running inference. The SVG includes hover tooltips by default;
-use `label = (tooltipDetail = :full,)` to inspect full Gaussian parameters:
+variables before running inference:
 
 ```@example general_gaussian_factor_graph
 saveGraphFigure("gfg.svg", graph)
@@ -222,6 +221,11 @@ nothing # hide
   <img src="../gfg.svg" alt="Gaussian factor graph" style="width: 45%; height: auto;">
 </div>
 ```
+
+The rendered SVG is interactive: hover over variables, factors, and edges to inspect
+summary metadata while checking the graph structure. Full Gaussian parameter tooltips are
+available through the graph figure API; see [`graphFigure`](@ref) and
+[`saveGraphFigure`](@ref).
 
 ---
 

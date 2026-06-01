@@ -158,8 +158,7 @@ adjacency lists used for message passing.
 
 For quick debugging, the graph structure can be rendered as a SVG with
 [`saveGraphFigure`](@ref). This is useful for checking that factor-table dimensions match
-the intended variable connections before running inference. The SVG includes hover tooltips
-by default; use `label = (tooltipDetail = :full,)` to inspect full discrete parameters:
+the intended variable connections before running inference:
 
 ```@example discrete_factor_graph
 saveGraphFigure("dfg.svg", graph)
@@ -172,6 +171,11 @@ nothing # hide
   <img src="../dfg.svg" alt="Discrete factor graph" style="width: 40%; height: auto;">
 </div>
 ```
+
+The rendered SVG is interactive: hover over variables, factors, and edges to inspect
+summary metadata while checking the graph structure. Full discrete probability, state, and
+table tooltips are available through the graph figure API; see [`graphFigure`](@ref) and
+[`saveGraphFigure`](@ref).
 
 ---
 
