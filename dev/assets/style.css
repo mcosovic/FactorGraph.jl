@@ -7,3 +7,48 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.graph-figure {
+  background-color: #fff;
+  border: 2px solid #dbdbdb;
+  border-radius: 4px;
+  margin: 1rem 0;
+  overflow-x: auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+html.theme--documenter-light .graph-figure {
+  background-color: #fff;
+  border-color: #dbdbdb;
+}
+
+html.theme--documenter-dark .graph-figure {
+  background-color: #1f2424;
+  border-color: #5e6d6f;
+}
+
+html.theme--catppuccin-latte .graph-figure {
+  background-color: #eff1f5;
+  border-color: #acb0be;
+}
+
+html.theme--catppuccin-frappe .graph-figure {
+  background-color: #303446;
+  border-color: #626880;
+}
+
+html.theme--catppuccin-macchiato .graph-figure {
+  background-color: #24273a;
+  border-color: #5b6078;
+}
+
+html.theme--catppuccin-mocha .graph-figure {
+  background-color: #1e1e2e;
+  border-color: #585b70;
+}
+
+.graph-figure img {
+  display: inline-block;
+  max-width: 100%;
+}
