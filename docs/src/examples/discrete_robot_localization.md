@@ -98,14 +98,14 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example discrete_robot_localization
-saveGraphFigure("drl.svg", graph; layout = (columnSpacing = 120,))
+saveGraphFigure(joinpath(@OUTPUT, "drl.svg"), graph; layout = (columnSpacing = 120,))
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="drl.svg" alt="Discrete robot localization factor graph"">
+  <img src="drl.svg" alt="Discrete robot localization factor graph">
 </div>
 ```
 

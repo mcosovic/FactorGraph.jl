@@ -116,7 +116,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example ldpc_decoding
-saveGraphFigure("ldpcd.svg", graph)
+saveGraphFigure(joinpath(@OUTPUT, "ldpcd.svg"), graph)
 
 nothing # hide
 ```

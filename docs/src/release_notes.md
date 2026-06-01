@@ -19,6 +19,8 @@
 ### Documentation
 
 - Added rendered factor graph figures to the examples.
+- Fixed generated SVG graph figures so Documenter includes them in deployed HTML
+  documentation.
 - Added quick graph drawing sections to the Gaussian and discrete factor graph
   guides.
 - Documented damping selector rules for `areDampedEdges`, `dampEdges!`, and

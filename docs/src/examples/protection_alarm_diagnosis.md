@@ -95,7 +95,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example protection_alarm_diagnosis
-saveGraphFigure("pad.svg", graph)
+saveGraphFigure(joinpath(@OUTPUT, "pad.svg"), graph)
 
 nothing # hide
 ```

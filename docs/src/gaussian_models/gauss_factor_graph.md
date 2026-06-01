@@ -211,7 +211,7 @@ For quick debugging, the graph structure can be rendered as a SVG with
 variables before running inference:
 
 ```@example general_gaussian_factor_graph
-saveGraphFigure("gfg.svg", graph)
+saveGraphFigure(joinpath(@OUTPUT, "gfg.svg"), graph)
 
 nothing # hide
 ```

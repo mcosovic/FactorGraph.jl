@@ -161,7 +161,7 @@ For quick debugging, the graph structure can be rendered as a SVG with
 the intended variable connections before running inference:
 
 ```@example discrete_factor_graph
-saveGraphFigure("dfg.svg", graph)
+saveGraphFigure(joinpath(@OUTPUT, "dfg.svg"), graph)
 
 nothing # hide
 ```
