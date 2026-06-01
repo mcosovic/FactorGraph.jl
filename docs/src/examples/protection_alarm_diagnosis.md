@@ -81,13 +81,38 @@ nothing # hide
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
-Collect the factors, build the graph, and run damped sum-product belief propagation:
+Collect the factors and build the factor graph:
 
 ```@example protection_alarm_diagnosis
 factors = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
 graph = factorGraph(variables, factors)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example protection_alarm_diagnosis
+saveGraphFigure("pad.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="pad.svg" alt="Protection alarm diagnosis factor graph" style="width: 60%; height: auto;">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run damped sum-product belief propagation on the graph:
+
+```@example protection_alarm_diagnosis
 inference = sumproduct(graph)
 
 gbp!(

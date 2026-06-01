@@ -55,6 +55,19 @@ include("setup.jl")
         @test_throws ErrorException GaussianVariable(:bad, 1; components = [""])
     end
 
+    @testset "Default Gaussian labels are compact" begin
+        graph = GaussianFactorGraph(
+            [GaussianVariable(:x_1, 1)],
+            [GaussianFactor(:x_1, 0.25, 1.0, 0.15)]
+        )
+
+        @test graph.variables[1].label == "x1"
+        @test graph.factors[1].label == "f1"
+
+        explicit = GaussianVariable(:x_2, 1; label = "x_2")
+        @test explicit.label == "x_2"
+    end
+
     @testset "Gaussian variable nodes can be used to construct factors" begin
         x1 = GaussianVariable(:x1, 1; label = "x1")
         x2 = GaussianVariable(:x2, 1; label = "x2")

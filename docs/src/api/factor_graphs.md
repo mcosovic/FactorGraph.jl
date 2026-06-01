@@ -69,3 +69,12 @@ stateValue
 factorAxis
 factorAxes
 ```
+
+---
+
+## Graph Figures
+
+```@docs
+graphFigure
+saveGraphFigure
+```

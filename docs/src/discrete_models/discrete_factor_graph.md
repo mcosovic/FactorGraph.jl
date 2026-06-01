@@ -156,6 +156,22 @@ nothing # hide
 The resulting [`DiscreteFactorGraph`](@ref) stores the validated model, edge list, and
 adjacency lists used for message passing.
 
+For quick debugging, the graph structure can be rendered as a SVG with
+[`saveGraphFigure`](@ref). This is useful for checking that factor-table dimensions match
+the intended variable connections before running inference:
+
+```@example discrete_factor_graph
+saveGraphFigure("dfg.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="dfg.svg" alt="Discrete factor graph" style="width: 40%; height: auto;">
+</div>
+```
+
 ---
 
 ## Incremental Construction

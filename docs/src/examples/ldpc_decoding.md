@@ -103,12 +103,37 @@ For each parity factor, table axes follow the order of `checkVariables`.
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
-Build the factor graph and run loopy discrete belief propagation:
+Build the factor graph:
 
 ```@example ldpc_decoding
 graph = factorGraph(variables, vcat(channelFactors, parityFactors))
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example ldpc_decoding
+saveGraphFigure("ldpcd.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="ldpcd.svg" alt="LDPC decoding factor graph" style="width: 55%; height: auto;">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run loopy discrete belief propagation on the graph:
+
+```@example ldpc_decoding
 inference = sumproduct(graph)
 
 gbp!(graph, inference; iterations = 25, tolerance = 1e-8, schedule = :flooding)

@@ -32,7 +32,7 @@ makedocs(
             "Discrete Robot Localization" => "examples/discrete_robot_localization.md",
             "LDPC-Style Decoding" => "examples/ldpc_decoding.md",
         ],
-        "API" => [
+        "API Reference" => [
             "Types" => "api/types.md",
             "Factor Graphs" => "api/factor_graphs.md",
             "Inference" => "api/inference.md",

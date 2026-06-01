@@ -206,6 +206,22 @@ nothing # hide
 The resulting [`GaussianFactorGraph`](@ref) stores the validated model, edge list, and
 adjacency lists used for message passing.
 
+For quick debugging, the graph structure can be rendered as a SVG with
+[`saveGraphFigure`](@ref). This is useful for checking that factors connect to the intended
+variables before running inference:
+
+```@example general_gaussian_factor_graph
+saveGraphFigure("gfg.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="gfg.svg" alt="Gaussian factor graph" style="width: 45%; height: auto;">
+</div>
+```
+
 ---
 
 ## Incremental Construction

@@ -78,7 +78,7 @@ This factor does not create a cycle because it is unary.
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
 Collect the factors and build the graph with a selected root for
 forward-backward Gaussian belief propagation:
@@ -87,6 +87,31 @@ forward-backward Gaussian belief propagation:
 factors = [prior, odom12, odom23, odom34, landmark]
 
 graph = factorGraph(variables, factors; root = :x1)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example robot_localization
+saveGraphFigure("rl.svg", graph; layout = (columnSpacing = 120,))
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="rl.svg" alt="Robot localization factor graph"">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run Gaussian belief propagation on the graph:
+
+```@example robot_localization
 inference = canonical(graph)
 
 forwardBackward!(graph, inference)

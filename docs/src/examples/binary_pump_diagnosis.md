@@ -102,14 +102,39 @@ nothing # hide
 
 ---
 
-## Sum-Product Diagnosis
+## Factor Graph Construction
 
-Build the graph and run damped loopy sum-product belief propagation to estimate posterior fault
-probabilities:
+Collect the factors and build the factor graph:
 
 ```@example binary_pump_diagnosis
 factors = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11]
 graph = factorGraph(variables, factors)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example binary_pump_diagnosis
+saveGraphFigure("bpd.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="bpd.svg" alt="Binary pump diagnosis factor graph" style="width: 65%; height: auto;">
+</div>
+```
+
+---
+
+## Sum-Product Diagnosis
+
+Run damped loopy sum-product belief propagation to estimate posterior fault
+probabilities:
+
+```@example binary_pump_diagnosis
 inference = sumproduct(graph)
 
 gbp!(

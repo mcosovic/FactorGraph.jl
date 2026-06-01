@@ -83,7 +83,7 @@ nothing # hide
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
 Collect the factors and build a tree graph with a selected root:
 
@@ -91,6 +91,31 @@ Collect the factors and build a tree graph with a selected root:
 factors = [prior, motion12, motion23, motion34, beacon3, beacon4]
 
 graph = factorGraph(variables, factors; root = :x1)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example discrete_robot_localization
+saveGraphFigure("drl.svg", graph; layout = (columnSpacing = 120,))
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="drl.svg" alt="Discrete robot localization factor graph"">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run discrete belief propagation on the graph:
+
+```@example discrete_robot_localization
 inference = sumproduct(graph)
 
 forwardBackward!(graph, inference)

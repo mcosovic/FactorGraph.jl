@@ -81,14 +81,39 @@ nothing # hide
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
-Collect the factors, build the graph, and run Gaussian belief propagation:
+Collect the factors and build the factor graph:
 
 ```@example pmu_state_estimation
 factors = [V1, V2, I12, I31]
 
 graph = factorGraph(variables, factors)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example pmu_state_estimation
+saveGraphFigure("pmuse.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="pmuse.svg" alt="PMU state estimation factor graph" style="width: 45%; height: auto;">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run Gaussian belief propagation on the graph:
+
+```@example pmu_state_estimation
 inference = canonical(graph)
 
 gbp!(graph, inference; iterations = 30)

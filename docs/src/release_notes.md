@@ -1,14 +1,26 @@
 # Release Notes
 
-## Version 0.2.1 - Unreleased
+---
+
+## Version 0.2.1 - 2026-06-01
+
+#### Added
+
+- Added `graphFigure` and `saveGraphFigure` for SVG factor
+  graph visualization.
 
 #### Changed
 
+- Changed automatically assigned graph labels to compact forms such as `x1` and
+  `f1` instead of `x_1` and `f_1`.
 - Renamed `isDampedEdge` to `areDampedEdges` to reflect that the selector can
   match one or more edges.
 
 ### Documentation
 
+- Added rendered factor graph figures to the examples.
+- Added quick graph drawing sections to the Gaussian and discrete factor graph
+  guides.
 - Documented damping selector rules for `areDampedEdges`, `dampEdges!`, and
   `undampEdges!`.
 

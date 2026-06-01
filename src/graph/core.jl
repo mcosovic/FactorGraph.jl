@@ -72,6 +72,14 @@ order used by factor table dimensions.
 """
 const StateRef = Union{Int, Symbol, String}
 
+function defaultNodeLabel(id::Union{Int, Symbol, String})
+    return replace(string(id), "_" => "")
+end
+
+function defaultFactorLabel(id::Int)
+    return "f$id"
+end
+
 """
     Edge
 

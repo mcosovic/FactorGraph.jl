@@ -1,0 +1,2601 @@
+"""
+    graphFigure(graph::AbstractFactorGraph; kwargs...)
+
+Return a SVG visualization of a factor graph.
+
+# Arguments
+
+- `graph`: Factor graph or tree view to draw.
+
+# Keywords
+
+Canvas options control the size, padding, and displayed scale of the SVG:
+- `canvas = NamedTuple()`: Override canvas options. Supported keys are:
+  - `width`: Minimum SVG canvas width. If `nothing`, fit the graph tightly with
+    `padding`.
+  - `height`: Minimum SVG canvas height. If `nothing`, fit the graph tightly
+    with `padding`.
+  - `padding`: Minimum padding around the drawn graph.
+  - `zoom`: Scale the displayed SVG size while preserving the same view box.
+
+Layout options control graph orientation, spacing, and edge geometry:
+- `layout = NamedTuple()`: Override layout options. Supported keys are:
+  - `orientation`: Use `:horizontal` or `:vertical` layout.
+  - `rowSpacing`: Vertical spacing between node rows.
+  - `columnSpacing`: Horizontal spacing between node columns.
+  - `unaryFactorOffset`: Distance between unary factors and variables in the
+    general factor graph layout.
+  - `multiFactorOffset`: Distance between variables and multi-variable factors
+    in the general factor graph layout.
+  - `curvedEdges`: Draw edges as cubic curves instead of straight lines.
+
+Node options control the size of variable and factor nodes:
+- `node = NamedTuple()`: Override node options. Supported keys are:
+  - `variableRadius`: Default variable node radius.
+  - `factorSize`: Default factor node size.
+
+Label options control label placement, visibility, and font size:
+- `label = NamedTuple()`: Override label options. Supported keys are:
+  - `placement`: Place labels `:outside` nodes or `:inside` nodes.
+  - `outsideGap`: Gap between a node and its outside label.
+  - `showVariables`: Draw variable labels.
+  - `showFactors`: Draw factor labels.
+  - `fontSize`: Label font size in SVG user units.
+
+Style options control default graph colors and stroke widths:
+- `style = NamedTuple()`: Override default SVG styles. Supported keys are:
+  - `backgroundFill`: SVG background fill color.
+  - `variableFill`: Variable node fill color.
+  - `variableStroke`: Variable node stroke color.
+  - `variableStrokeWidth`: Variable node stroke width.
+  - `factorFill`: Factor node fill color.
+  - `factorStroke`: Factor node stroke color.
+  - `factorStrokeWidth`: Factor node stroke width.
+  - `edgeStroke`: Edge stroke color.
+  - `edgeStrokeWidth`: Edge stroke width.
+  - `edgeOpacity`: Edge stroke opacity.
+  - `labelFill`: Label text fill color.
+
+Highlight options control highlighted variables, factors, and edges:
+- `highlight = NamedTuple[]`: Highlight entries. Supported entry selectors are:
+  - `(variable = x1, ...)`: Highlight a variable node.
+  - `(factor = f1, ...)`: Highlight a factor node.
+  - `(edge = 1, ...)`: Highlight an edge by edge id or edge object.
+  - `(variable = x1, factor = f1, ...)`: Highlight the edge connecting a
+    variable and factor.
+
+  Supported style keys are:
+  - `stroke`: Node or edge stroke color.
+  - `fill`: Node fill color. Applies only to variable and factor entries.
+  - `strokeWidth`: Stroke width for the selected variable, factor, or edge.
+  - `incidentEdges`: Whether a variable or factor entry highlights incident
+    edges. Defaults to `true`.
+  - `edgeStroke`: Incident edge stroke color for variable and factor entries.
+  - `edgeStrokeWidth`: Incident edge stroke width for variable and factor
+    entries. Defaults to `strokeWidth`.
+
+# Returns
+
+An SVG document as a `String`.
+
+# Notes
+
+For a general factor graph, horizontal layout draws unary factors on the left,
+variables in the middle, and multi-variable factors on the right. Vertical
+layout draws unary factors above variables and multi-variable factors below
+variables.
+
+For a `TreeFactorGraph`, the layout uses graph depth. In horizontal tree layout,
+`columnSpacing` separates depth levels and `rowSpacing` separates nodes within a
+level. In vertical tree layout, `rowSpacing` separates depth levels and
+`columnSpacing` separates nodes within a level.
+
+# Example
+
+```julia
+variables = [
+    GaussianVariable(:x1, 1; label = "x1"),
+    GaussianVariable(:x2, 1; label = "x2")
+]
+factors = [
+    GaussianFactor(:x1, 0.0, 1.0, 1.0; label = "prior"),
+    GaussianFactor(:x1, :x2, 0.0, [1.0 -1.0], 1.0; label = "link")
+]
+graph = factorGraph(variables, factors)
+
+svg = graphFigure(
+    graph;
+    highlight = [(variable = :x1, stroke = "#16a34a", fill = "#dcfce7", strokeWidth = 4)]
+)
+```
+"""
+function graphFigure(
+    graph::AbstractFactorGraph;
+    canvas::NamedTuple = NamedTuple(),
+    layout::NamedTuple = NamedTuple(),
+    node::NamedTuple = NamedTuple(),
+    label::NamedTuple = NamedTuple(),
+    style::NamedTuple = NamedTuple(),
+    highlight::AbstractVector = NamedTuple[],
+)
+    canvasOptions = graphFigureCanvasOptions(canvas)
+    layoutOptions = graphFigureLayoutOptions(layout)
+    nodeOptions = graphFigureNodeOptions(node)
+    labelOptions = graphFigureLabelOptions(label)
+    graphStyle = graphFigureStyle(style)
+
+    variableCount = length(graph.variables)
+    unaryFactors = [index for index in eachindex(graph.factors) if isUnaryFactor(graph, index)]
+    multiFactors = [index for index in eachindex(graph.factors) if !isUnaryFactor(graph, index)]
+    margin = 48
+    nodeGap = 10
+
+    if layoutOptions.orientation == :vertical
+        return verticalGraphFigure(
+            graph,
+            variableCount,
+            unaryFactors,
+            multiFactors;
+            width = canvasOptions.width,
+            height = canvasOptions.height,
+            canvasPadding = canvasOptions.padding,
+            zoom = canvasOptions.zoom,
+            margin = margin,
+            rowSpacing = layoutOptions.rowSpacing,
+            columnSpacing = layoutOptions.columnSpacing,
+            variableRadius = nodeOptions.variableRadius,
+            factorSize = nodeOptions.factorSize,
+            labelPlacement = labelOptions.placement,
+            outsideLabelGap = labelOptions.outsideGap,
+            nodeGap = nodeGap,
+            unaryFactorOffset = layoutOptions.unaryFactorOffset,
+            multiFactorOffset = layoutOptions.multiFactorOffset,
+            curvedEdges = layoutOptions.curvedEdges,
+            style = graphStyle,
+            highlight = highlight,
+            showVariableLabels = labelOptions.showVariables,
+            showFactorLabels = labelOptions.showFactors,
+            fontSize = labelOptions.fontSize
+        )
+    end
+
+    rowCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
+    defaultLayoutHeight = 2 * margin + (rowCount - 1) * layoutOptions.rowSpacing
+    layoutHeight = isnothing(canvasOptions.height) ?
+        defaultLayoutHeight : max(canvasOptions.height, defaultLayoutHeight)
+    minCanvasHeight = isnothing(canvasOptions.height) ? 0 : canvasOptions.height
+
+    layoutNodeSpacing = rowCount <= 1 ?
+        layoutOptions.rowSpacing : (layoutHeight - 2 * margin) / (rowCount - 1)
+
+    variableRadii = nodeRadii(
+        graph.variables,
+        nodeOptions.variableRadius,
+        labelOptions.placement,
+        labelOptions.showVariables,
+        labelOptions.fontSize
+    )
+    factorWidths = factorNodeWidths(
+        graph.factors,
+        nodeOptions.factorSize,
+        labelOptions.placement,
+        labelOptions.showFactors,
+        labelOptions.fontSize
+    )
+    factorHeights = factorNodeHeights(
+        graph.factors,
+        nodeOptions.factorSize,
+        labelOptions.placement,
+        labelOptions.showFactors
+    )
+    leftLabelReserve = labelOptions.placement == :outside && labelOptions.showFactors ?
+        labelReserve(graph.factors, unaryFactors, labelOptions.fontSize) : 0.0
+    rightLabelReserve = labelOptions.placement == :outside && labelOptions.showFactors ?
+        labelReserve(graph.factors, multiFactors, labelOptions.fontSize) : 0.0
+
+    maxFactorWidth = maximum(factorWidths; init = nodeOptions.factorSize)
+    defaultLayoutWidth = 2 * margin + leftLabelReserve + maxFactorWidth +
+        layoutOptions.unaryFactorOffset + layoutOptions.multiFactorOffset + rightLabelReserve
+    layoutWidth = isnothing(canvasOptions.width) ?
+        defaultLayoutWidth : max(canvasOptions.width, defaultLayoutWidth)
+    minCanvasWidth = isnothing(canvasOptions.width) ? 0 : canvasOptions.width
+    variableX, unaryFactorX, multiFactorX = centeredColumns(
+        layoutWidth,
+        margin,
+        leftLabelReserve,
+        rightLabelReserve,
+        maxFactorWidth,
+        layoutOptions.unaryFactorOffset,
+        layoutOptions.multiFactorOffset
+    )
+    variableY = nodeRows(variableCount, rowCount, margin, layoutNodeSpacing)
+    factorY = Dict{Int, Float64}()
+    factorX = Dict{Int, Float64}()
+
+    rawFactorY = [
+        average(variableY[edge.variableIndex] for edge in graph.edges if edge.factorIndex == factorIndex)
+        for factorIndex in eachindex(graph.factors)
+    ]
+    unaryFactorY = spreadCloseRows(
+        rawFactorY[unaryFactors],
+        minimumNodeGap(factorHeights, unaryFactors, nodeGap)
+    )
+    multiFactorY = spreadCloseRows(
+        rawFactorY[multiFactors],
+        minimumNodeGap(factorHeights, multiFactors, nodeGap)
+    )
+
+    for (position, factorIndex) in pairs(unaryFactors)
+        factorY[factorIndex] = unaryFactorY[position]
+        factorX[factorIndex] = unaryFactorX
+    end
+
+    for (position, factorIndex) in pairs(multiFactors)
+        factorY[factorIndex] = multiFactorY[position]
+        factorX[factorIndex] = multiFactorX
+    end
+
+    canvasWidth, variableX = fitGeneralHorizontalCanvas!(
+        variableX,
+        factorX,
+        variableRadii,
+        factorWidths,
+        minCanvasWidth,
+        graph.variables,
+        graph.factors,
+        labelOptions.placement,
+        labelOptions.showVariables,
+        labelOptions.showFactors,
+        labelOptions.outsideGap,
+        labelOptions.fontSize,
+        canvasOptions.padding
+    )
+    canvasHeight = fitVerticalCanvas!(
+        variableY,
+        factorY,
+        variableRadii,
+        factorHeights,
+        minCanvasHeight,
+        labelOptions.placement,
+        labelOptions.showVariables,
+        labelOptions.showFactors,
+        labelOptions.outsideGap,
+        labelOptions.fontSize,
+        canvasOptions.padding
+    )
+
+    highlightState = graphFigureHighlightState(
+        graph,
+        highlight,
+        graphStyle
+    )
+    buffer = startGraphFigureBuffer(
+        canvasWidth,
+        canvasHeight,
+        canvasOptions.zoom,
+        labelOptions.fontSize,
+        graphStyle
+    )
+
+    for edge in graph.edges
+        currentFactorX = factorX[edge.factorIndex]
+
+        if currentFactorX < variableX
+            x1 = currentFactorX + factorWidths[edge.factorIndex] / 2
+            y1 = factorY[edge.factorIndex]
+            x2 = variableX - variableRadii[edge.variableIndex]
+            y2 = variableY[edge.variableIndex]
+        else
+            x1 = variableX + variableRadii[edge.variableIndex]
+            y1 = variableY[edge.variableIndex]
+            x2 = currentFactorX - factorWidths[edge.factorIndex] / 2
+            y2 = factorY[edge.factorIndex]
+        end
+
+        edgeClass = edgeClassName(
+            edge,
+            highlightState.edges
+        )
+        println(buffer, svgEdge(x1, y1, x2, y2, layoutOptions.curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+    end
+
+    for (index, variable) in pairs(graph.variables)
+        label = escapeXML(variable.label)
+        y = variableY[index]
+        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        println(buffer, svgCircle(variableX, y, variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+        if labelOptions.showVariables
+            drawVariableLabel!(
+                buffer,
+                variableX,
+                y,
+                variableRadii[index],
+                label,
+                labelOptions.placement,
+                labelOptions.outsideGap,
+                labelOptions.fontSize
+            )
+        end
+    end
+
+    for (index, factor) in pairs(graph.factors)
+        label = escapeXML(factor.label)
+        width = factorWidths[index]
+        height = factorHeights[index]
+        y = factorY[index]
+        x = factorX[index] - width / 2
+        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        println(buffer, svgRect(x, y - height / 2, width, height, labelOptions.placement, className, get(highlightState.factorStyles, index, nothing)))
+        if labelOptions.showFactors
+            drawFactorLabel!(
+                buffer,
+                factorX[index],
+                y,
+                width,
+                variableX,
+                label,
+                labelOptions.placement,
+                labelOptions.outsideGap,
+                labelOptions.fontSize
+            )
+        end
+    end
+
+    println(buffer, "</svg>")
+
+    return String(take!(buffer))
+end
+
+function verticalGraphFigure(
+    graph::AbstractFactorGraph,
+    variableCount::Int,
+    unaryFactors::AbstractVector{Int},
+    multiFactors::AbstractVector{Int};
+    width::Union{Nothing, Int},
+    height::Union{Nothing, Int},
+    canvasPadding::Int,
+    zoom::Real,
+    margin::Int,
+    rowSpacing::Int,
+    columnSpacing::Int,
+    variableRadius::Int,
+    factorSize::Int,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    nodeGap::Int,
+    unaryFactorOffset::Int,
+    multiFactorOffset::Int,
+    curvedEdges::Bool,
+    style::NamedTuple,
+    highlight::AbstractVector,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    fontSize::Int
+)
+    columnCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
+    defaultLayoutWidth = 2 * margin + (columnCount - 1) * columnSpacing
+    layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
+    minCanvasWidth = isnothing(width) ? 0 : width
+    layoutColumnSpacing = columnCount <= 1 ?
+        columnSpacing : (layoutWidth - 2 * margin) / (columnCount - 1)
+
+    variableRadii = nodeRadii(
+        graph.variables,
+        variableRadius,
+        labelPlacement,
+        showVariableLabels,
+        fontSize
+    )
+    rawVariableX = nodeRows(variableCount, columnCount, margin, layoutColumnSpacing)
+    rawFactorX = [
+        average(rawVariableX[edge.variableIndex] for edge in graph.edges if edge.factorIndex == factorIndex)
+        for factorIndex in eachindex(graph.factors)
+    ]
+    rotateFactorLabels = verticalFactorLabelRotations(
+        graph.factors,
+        rawFactorX,
+        unaryFactors,
+        multiFactors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels,
+        fontSize,
+        nodeGap
+    )
+    factorWidths = verticalFactorNodeWidths(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels,
+        fontSize,
+        rotateFactorLabels
+    )
+    factorHeights = verticalFactorNodeHeights(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels,
+        fontSize,
+        rotateFactorLabels
+    )
+    topLabelReserve = labelPlacement == :outside && showFactorLabels ?
+        labelReserve(graph.factors, unaryFactors, fontSize) : 0.0
+    bottomLabelReserve = labelPlacement == :outside && showFactorLabels ?
+        labelReserve(graph.factors, multiFactors, fontSize) : 0.0
+
+    maxFactorHeight = maximum(factorHeights; init = factorSize)
+    defaultLayoutHeight = 2 * margin + topLabelReserve + maxFactorHeight +
+        unaryFactorOffset + multiFactorOffset + bottomLabelReserve
+    layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
+    minCanvasHeight = isnothing(height) ? 0 : height
+    variableY, unaryFactorY, multiFactorY = centeredRows(
+        layoutHeight,
+        margin,
+        topLabelReserve,
+        bottomLabelReserve,
+        maxFactorHeight,
+        unaryFactorOffset,
+        multiFactorOffset
+    )
+
+    variableX = rawVariableX
+    factorX = Dict{Int, Float64}()
+    factorY = Dict{Int, Float64}()
+    unaryFactorX = spreadCloseRows(
+        rawFactorX[unaryFactors],
+        minimumNodeGap(factorWidths, unaryFactors, nodeGap)
+    )
+    multiFactorX = spreadCloseRows(
+        rawFactorX[multiFactors],
+        minimumNodeGap(factorWidths, multiFactors, nodeGap)
+    )
+
+    for (position, factorIndex) in pairs(unaryFactors)
+        factorX[factorIndex] = unaryFactorX[position]
+        factorY[factorIndex] = unaryFactorY
+    end
+
+    for (position, factorIndex) in pairs(multiFactors)
+        factorX[factorIndex] = multiFactorX[position]
+        factorY[factorIndex] = multiFactorY
+    end
+
+    canvasWidth = fitVerticalGraphHorizontalCanvas!(
+        variableX,
+        factorX,
+        variableRadii,
+        factorWidths,
+        minCanvasWidth,
+        graph.variables,
+        graph.factors,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        rotateFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+    canvasHeight, variableY = fitVerticalGraphVerticalCanvas!(
+        variableY,
+        factorY,
+        variableRadii,
+        factorHeights,
+        minCanvasHeight,
+        graph.variables,
+        graph.factors,
+        rotateFactorLabels,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+
+    highlightState = graphFigureHighlightState(
+        graph,
+        highlight,
+        style
+    )
+    buffer = startGraphFigureBuffer(
+        canvasWidth,
+        canvasHeight,
+        zoom,
+        fontSize,
+        style
+    )
+
+    for edge in graph.edges
+        if factorY[edge.factorIndex] < variableY
+            x1 = factorX[edge.factorIndex]
+            y1 = factorY[edge.factorIndex] + factorHeights[edge.factorIndex] / 2
+            x2 = variableX[edge.variableIndex]
+            y2 = variableY - variableRadii[edge.variableIndex]
+        else
+            x1 = variableX[edge.variableIndex]
+            y1 = variableY + variableRadii[edge.variableIndex]
+            x2 = factorX[edge.factorIndex]
+            y2 = factorY[edge.factorIndex] - factorHeights[edge.factorIndex] / 2
+        end
+
+        edgeClass = edgeClassName(
+            edge,
+            highlightState.edges
+        )
+        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+    end
+
+    for (index, variable) in pairs(graph.variables)
+        label = escapeXML(variable.label)
+        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        println(buffer, svgCircle(variableX[index], variableY, variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+
+        if showVariableLabels
+            drawVariableLabel!(
+                buffer,
+                variableX[index],
+                variableY,
+                variableRadii[index],
+                label,
+                labelPlacement,
+                outsideLabelGap,
+                fontSize
+            )
+        end
+    end
+
+    for (index, factor) in pairs(graph.factors)
+        label = escapeXML(factor.label)
+        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        x = factorX[index] - factorWidths[index] / 2
+        y = factorY[index] - factorHeights[index] / 2
+        println(
+            buffer,
+            svgRect(
+                x,
+                y,
+                factorWidths[index],
+                factorHeights[index],
+                labelPlacement,
+                className,
+                get(highlightState.factorStyles, index, nothing)
+            )
+        )
+
+        if showFactorLabels
+            drawAdaptiveVerticalFactorLabel!(
+                buffer,
+                factorX[index],
+                factorY[index],
+                factorHeights[index],
+                variableY,
+                label,
+                rotateFactorLabels[index],
+                labelPlacement,
+                outsideLabelGap,
+                fontSize
+            )
+        end
+    end
+
+    println(buffer, "</svg>")
+
+    return String(take!(buffer))
+end
+
+function graphFigure(
+    tree::TreeFactorGraph;
+    canvas::NamedTuple = NamedTuple(),
+    layout::NamedTuple = NamedTuple(),
+    node::NamedTuple = NamedTuple(),
+    label::NamedTuple = NamedTuple(),
+    style::NamedTuple = NamedTuple(),
+    highlight::AbstractVector = NamedTuple[]
+)
+    margin = 48
+    canvasOptions = graphFigureCanvasOptions(canvas)
+    layoutOptions = graphFigureLayoutOptions(layout)
+    nodeOptions = graphFigureNodeOptions(node)
+    labelOptions = graphFigureLabelOptions(label)
+    graphStyle = graphFigureStyle(style)
+
+    return treeGraphFigure(
+        tree;
+        width = canvasOptions.width,
+        height = canvasOptions.height,
+        canvasPadding = canvasOptions.padding,
+        zoom = canvasOptions.zoom,
+        margin = margin,
+        rowSpacing = layoutOptions.rowSpacing,
+        columnSpacing = layoutOptions.columnSpacing,
+        variableRadius = nodeOptions.variableRadius,
+        factorSize = nodeOptions.factorSize,
+        labelPlacement = labelOptions.placement,
+        outsideLabelGap = labelOptions.outsideGap,
+        curvedEdges = layoutOptions.curvedEdges,
+        orientation = layoutOptions.orientation,
+        style = graphStyle,
+        highlight = highlight,
+        showVariableLabels = labelOptions.showVariables,
+        showFactorLabels = labelOptions.showFactors,
+        fontSize = labelOptions.fontSize
+    )
+end
+
+"""
+    saveGraphFigure(path::AbstractString, graph::AbstractFactorGraph; kwargs...)
+
+Write a dependency-free SVG visualization of a factor graph to `path`.
+
+# Arguments
+
+- `path`: Output SVG file path.
+- `graph`: Factor graph or tree view to draw.
+
+# Keywords
+
+All keyword arguments are forwarded to [`graphFigure`](@ref).
+
+# Returns
+
+The written `path`.
+
+# Notes
+
+The output is an SVG document. Parent directories must already exist.
+
+# Example
+
+```julia
+saveGraphFigure(
+    "graph.svg",
+    graph;
+    layout = (orientation = :vertical,),
+    label = (placement = :inside,)
+)
+```
+"""
+function saveGraphFigure(path::AbstractString, graph::AbstractFactorGraph; kwargs...)
+    open(path, "w") do io
+        write(io, graphFigure(graph; kwargs...))
+    end
+
+    return path
+end
+
+function saveGraphFigure(path::AbstractString, tree::TreeFactorGraph; kwargs...)
+    open(path, "w") do io
+        write(io, graphFigure(tree; kwargs...))
+    end
+
+    return path
+end
+
+function treeGraphFigure(
+    tree::TreeFactorGraph;
+    width::Union{Nothing, Int},
+    height::Union{Nothing, Int},
+    canvasPadding::Int,
+    zoom::Real,
+    margin::Int,
+    rowSpacing::Int,
+    columnSpacing::Int,
+    variableRadius::Int,
+    factorSize::Int,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    curvedEdges::Bool,
+    orientation::Symbol,
+    style::NamedTuple,
+    highlight::AbstractVector,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    fontSize::Int
+)
+    if !(orientation in (:horizontal, :vertical))
+        error("orientation must be :horizontal or :vertical.")
+    end
+
+    if zoom <= 0
+        error("zoom must be positive.")
+    end
+
+    if canvasPadding < 0
+        error("canvasPadding must be non-negative.")
+    end
+
+    if rowSpacing <= 0 || columnSpacing <= 0
+        error("rowSpacing and columnSpacing must be positive.")
+    end
+
+    if orientation == :vertical
+        return verticalTreeGraphFigure(
+            tree;
+            width = width,
+            height = height,
+            canvasPadding = canvasPadding,
+            zoom = zoom,
+            margin = margin,
+            rowSpacing = rowSpacing,
+            columnSpacing = columnSpacing,
+            variableRadius = variableRadius,
+            factorSize = factorSize,
+            labelPlacement = labelPlacement,
+            outsideLabelGap = outsideLabelGap,
+            curvedEdges = curvedEdges,
+            style = style,
+            highlight = highlight,
+            showVariableLabels = showVariableLabels,
+            showFactorLabels = showFactorLabels,
+            fontSize = fontSize
+        )
+    end
+
+    graph = tree.graph
+
+    if !(labelPlacement in (:inside, :outside))
+        error("labelPlacement must be :inside or :outside.")
+    end
+
+    variableDepths, factorDepths = treeNodeDepths(tree)
+    maxDepth = maximum(vcat(variableDepths, factorDepths))
+    depthCounts = [
+        count(==(depth), variableDepths) + count(==(depth), factorDepths)
+        for depth in 1:maxDepth
+    ]
+    maxDepthCount = maximum(depthCounts; init = 1)
+    defaultLayoutHeight = 2 * margin + (maxDepthCount - 1) * rowSpacing
+    layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
+    minCanvasHeight = isnothing(height) ? 0 : height
+
+    layoutNodeSpacing = maxDepthCount <= 1 ?
+        rowSpacing : (layoutHeight - 2 * margin) / (maxDepthCount - 1)
+    defaultLayoutWidth = 2 * margin + (maxDepth - 1) * columnSpacing
+    layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
+    minCanvasWidth = isnothing(width) ? 0 : width
+    levelGap = maxDepth == 1 ? 0.0 : (layoutWidth - 2 * margin) / (maxDepth - 1)
+
+    variableRadii = nodeRadii(
+        graph.variables,
+        variableRadius,
+        labelPlacement,
+        showVariableLabels,
+        fontSize
+    )
+    factorWidths = factorNodeWidths(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels,
+        fontSize
+    )
+    factorHeights = factorNodeHeights(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels
+    )
+    variableX = [margin + (depth - 1) * levelGap for depth in variableDepths]
+    factorX = [margin + (depth - 1) * levelGap for depth in factorDepths]
+    variableY = zeros(Float64, length(graph.variables))
+    factorY = zeros(Float64, length(graph.factors))
+
+    for depth in 1:maxDepth
+        nodes = Tuple{Symbol, Int}[]
+
+        for index in eachindex(graph.variables)
+            if variableDepths[index] == depth
+                push!(nodes, (:variable, index))
+            end
+        end
+
+        for index in eachindex(graph.factors)
+            if factorDepths[index] == depth
+                push!(nodes, (:factor, index))
+            end
+        end
+
+        rows = nodeRows(length(nodes), maxDepthCount, margin, layoutNodeSpacing)
+
+        for (position, (kind, index)) in pairs(nodes)
+            if kind == :variable
+                variableY[index] = rows[position]
+            else
+                factorY[index] = rows[position]
+            end
+        end
+    end
+
+    canvasHeight = fitVerticalCanvas!(
+        variableY,
+        factorY,
+        variableRadii,
+        factorHeights,
+        minCanvasHeight,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+    canvasWidth = fitSideLabelHorizontalCanvas!(
+        variableX,
+        factorX,
+        variableRadii,
+        factorWidths,
+        minCanvasWidth,
+        graph.variables,
+        graph.factors,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+
+    highlightState = graphFigureHighlightState(
+        graph,
+        highlight,
+        style
+    )
+    buffer = startGraphFigureBuffer(
+        canvasWidth,
+        canvasHeight,
+        zoom,
+        fontSize,
+        style
+    )
+
+    for edge in graph.edges
+        factorLeft = factorX[edge.factorIndex] - factorWidths[edge.factorIndex] / 2
+        factorRight = factorX[edge.factorIndex] + factorWidths[edge.factorIndex] / 2
+
+        if variableX[edge.variableIndex] <= factorX[edge.factorIndex]
+            x1 = variableX[edge.variableIndex] + variableRadii[edge.variableIndex]
+            y1 = variableY[edge.variableIndex]
+            x2 = factorLeft
+            y2 = factorY[edge.factorIndex]
+        else
+            x1 = factorRight
+            y1 = factorY[edge.factorIndex]
+            x2 = variableX[edge.variableIndex] - variableRadii[edge.variableIndex]
+            y2 = variableY[edge.variableIndex]
+        end
+
+        edgeClass = edgeClassName(
+            edge,
+            highlightState.edges
+        )
+        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+    end
+
+    for (index, variable) in pairs(graph.variables)
+        label = escapeXML(variable.label)
+        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        println(buffer, svgCircle(variableX[index], variableY[index], variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+
+        if showVariableLabels
+            drawVariableLabel!(
+                buffer,
+                variableX[index],
+                variableY[index],
+                variableRadii[index],
+                label,
+                labelPlacement,
+                outsideLabelGap,
+                fontSize
+            )
+        end
+    end
+
+    for (index, factor) in pairs(graph.factors)
+        label = escapeXML(factor.label)
+        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        x = factorX[index] - factorWidths[index] / 2
+        y = factorY[index] - factorHeights[index] / 2
+        println(
+            buffer,
+            svgRect(
+                x,
+                y,
+                factorWidths[index],
+                factorHeights[index],
+                labelPlacement,
+                className,
+                get(highlightState.factorStyles, index, nothing)
+            )
+        )
+
+        if showFactorLabels
+            drawTreeFactorLabel!(
+                buffer,
+                factorX[index],
+                factorY[index],
+                factorHeights[index],
+                label,
+                labelPlacement,
+                outsideLabelGap,
+                fontSize
+            )
+        end
+    end
+
+    println(buffer, "</svg>")
+
+    return String(take!(buffer))
+end
+
+function verticalTreeGraphFigure(
+    tree::TreeFactorGraph;
+    width::Union{Nothing, Int},
+    height::Union{Nothing, Int},
+    canvasPadding::Int,
+    zoom::Real,
+    margin::Int,
+    rowSpacing::Int,
+    columnSpacing::Int,
+    variableRadius::Int,
+    factorSize::Int,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    curvedEdges::Bool,
+    style::NamedTuple,
+    highlight::AbstractVector,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    fontSize::Int
+)
+    if zoom <= 0
+        error("zoom must be positive.")
+    end
+
+    if canvasPadding < 0
+        error("canvasPadding must be non-negative.")
+    end
+
+    graph = tree.graph
+    variableDepths, factorDepths = treeNodeDepths(tree)
+    maxDepth = maximum(vcat(variableDepths, factorDepths))
+    depthCounts = [
+        count(==(depth), variableDepths) + count(==(depth), factorDepths)
+        for depth in 1:maxDepth
+    ]
+    maxDepthCount = maximum(depthCounts; init = 1)
+    minCanvasWidth = isnothing(width) ? 0 : width
+    defaultLayoutHeight = 2 * margin + (maxDepth - 1) * rowSpacing
+    layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
+    minCanvasHeight = isnothing(height) ? 0 : height
+
+    levelGap = maxDepth == 1 ? 0.0 : (layoutHeight - 2 * margin) / (maxDepth - 1)
+
+    variableRadii = nodeRadii(
+        graph.variables,
+        variableRadius,
+        labelPlacement,
+        showVariableLabels,
+        fontSize
+    )
+    factorWidths = factorNodeWidths(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels,
+        fontSize
+    )
+    factorHeights = factorNodeHeights(
+        graph.factors,
+        factorSize,
+        labelPlacement,
+        showFactorLabels
+    )
+    variableX = zeros(Float64, length(graph.variables))
+    factorX = zeros(Float64, length(graph.factors))
+    variableY = [margin + (depth - 1) * levelGap for depth in variableDepths]
+    factorY = [margin + (depth - 1) * levelGap for depth in factorDepths]
+
+    for depth in 1:maxDepth
+        nodes = Tuple{Symbol, Int}[]
+
+        for index in eachindex(graph.variables)
+            if variableDepths[index] == depth
+                push!(nodes, (:variable, index))
+            end
+        end
+
+        for index in eachindex(graph.factors)
+            if factorDepths[index] == depth
+                push!(nodes, (:factor, index))
+            end
+        end
+
+        levelSpacing = treeLevelSpacing(
+            graph,
+            nodes,
+            factorWidths,
+            variableRadii,
+            columnSpacing,
+            outsideLabelGap,
+            labelPlacement,
+            showVariableLabels,
+            showFactorLabels,
+            fontSize
+        )
+        columns = nodeRows(length(nodes), maxDepthCount, margin, levelSpacing)
+
+        for (position, (kind, index)) in pairs(nodes)
+            if kind == :variable
+                variableX[index] = columns[position]
+            else
+                factorX[index] = columns[position]
+            end
+        end
+    end
+
+    canvasWidth = fitHorizontalCanvas(
+        variableX,
+        factorX,
+        variableRadii,
+        factorWidths,
+        minCanvasWidth,
+        graph.variables,
+        graph.factors,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+    canvasHeight = fitVerticalCanvas!(
+        variableY,
+        factorY,
+        variableRadii,
+        factorHeights,
+        minCanvasHeight,
+        labelPlacement,
+        showVariableLabels,
+        showFactorLabels,
+        outsideLabelGap,
+        fontSize,
+        canvasPadding
+    )
+
+    highlightState = graphFigureHighlightState(
+        graph,
+        highlight,
+        style
+    )
+    buffer = startGraphFigureBuffer(
+        canvasWidth,
+        canvasHeight,
+        zoom,
+        fontSize,
+        style
+    )
+
+    for edge in graph.edges
+        if variableY[edge.variableIndex] <= factorY[edge.factorIndex]
+            x1 = variableX[edge.variableIndex]
+            y1 = variableY[edge.variableIndex] + variableRadii[edge.variableIndex]
+            x2 = factorX[edge.factorIndex]
+            y2 = factorY[edge.factorIndex] - factorHeights[edge.factorIndex] / 2
+        else
+            x1 = factorX[edge.factorIndex]
+            y1 = factorY[edge.factorIndex] + factorHeights[edge.factorIndex] / 2
+            x2 = variableX[edge.variableIndex]
+            y2 = variableY[edge.variableIndex] - variableRadii[edge.variableIndex]
+        end
+
+        edgeClass = edgeClassName(
+            edge,
+            highlightState.edges
+        )
+        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+    end
+
+    for (index, variable) in pairs(graph.variables)
+        label = escapeXML(variable.label)
+        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        println(buffer, svgCircle(variableX[index], variableY[index], variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+
+        if showVariableLabels
+            drawSideLabel!(
+                buffer,
+                variableX[index] + variableRadii[index] + outsideLabelGap,
+                variableY[index],
+                label,
+                labelPlacement,
+                :right
+            )
+        end
+    end
+
+    for (index, factor) in pairs(graph.factors)
+        label = escapeXML(factor.label)
+        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        x = factorX[index] - factorWidths[index] / 2
+        y = factorY[index] - factorHeights[index] / 2
+        println(
+            buffer,
+            svgRect(
+                x,
+                y,
+                factorWidths[index],
+                factorHeights[index],
+                labelPlacement,
+                className,
+                get(highlightState.factorStyles, index, nothing)
+            )
+        )
+
+        if showFactorLabels
+            drawSideLabel!(
+                buffer,
+                factorX[index] + factorWidths[index] / 2 + outsideLabelGap,
+                factorY[index],
+                label,
+                labelPlacement,
+                :right
+            )
+        end
+    end
+
+    println(buffer, "</svg>")
+
+    return String(take!(buffer))
+end
+
+function treeNodeDepths(tree::TreeFactorGraph)
+    graph = tree.graph
+    variableDepths = zeros(Int, length(graph.variables))
+    factorDepths = zeros(Int, length(graph.factors))
+    variableDepths[tree.rootVariableIndex] = 1
+
+    for edgeId in tree.backwardOrder
+        edge = graph.edges[edgeId]
+
+        if tree.factorParentEdge[edge.factorIndex] == edgeId
+            factorDepths[edge.factorIndex] = variableDepths[edge.variableIndex] + 1
+        elseif tree.variableParentEdge[edge.variableIndex] == edgeId
+            variableDepths[edge.variableIndex] = factorDepths[edge.factorIndex] + 1
+        end
+    end
+
+    return variableDepths, factorDepths
+end
+
+function treeLevelSpacing(
+    graph::AbstractFactorGraph,
+    nodes::AbstractVector{Tuple{Symbol, Int}},
+    factorWidths::AbstractVector,
+    variableRadii::AbstractVector,
+    columnSpacing::Int,
+    outsideLabelGap::Int,
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    fontSize::Int
+)
+    if labelPlacement == :inside
+        return columnSpacing
+    end
+
+    maxWidth = 0.0
+
+    for (kind, index) in nodes
+        if kind == :variable
+            labelWidth = showVariableLabels ?
+                outsideLabelGap + approximateTextWidth(graph.variables[index].label, fontSize) : 0.0
+            maxWidth = max(maxWidth, 2 * variableRadii[index] + labelWidth)
+        else
+            labelWidth = showFactorLabels ?
+                outsideLabelGap + approximateTextWidth(graph.factors[index].label, fontSize) : 0.0
+            maxWidth = max(maxWidth, factorWidths[index] + labelWidth)
+        end
+    end
+
+    return max(columnSpacing, ceil(Int, maxWidth + outsideLabelGap))
+end
+
+function isUnaryFactor(graph::AbstractFactorGraph, factorIndex::Int)
+    return length(graph.factorEdges[factorIndex]) == 1
+end
+
+function edgeClassName(
+    edge::Edge,
+    highlightedEdges::Set{Int}
+)
+    highlighted = edge.id in highlightedEdges
+
+    return highlighted ? "edge edge-highlight" : "edge"
+end
+
+function graphFigureCanvasOptions(canvas::NamedTuple)
+    defaultCanvas = (
+        width = nothing,
+        height = nothing,
+        padding = 16,
+        zoom = 1.0
+    )
+
+    for key in propertynames(canvas)
+        if !(key in propertynames(defaultCanvas))
+            error("Unknown graph figure canvas key $key.")
+        end
+    end
+
+    options = merge(defaultCanvas, canvas)
+
+    if options.zoom <= 0
+        error("canvas.zoom must be positive.")
+    end
+
+    if options.padding < 0
+        error("canvas.padding must be non-negative.")
+    end
+
+    return options
+end
+
+function graphFigureLayoutOptions(layout::NamedTuple)
+    defaultLayout = (
+        orientation = :horizontal,
+        rowSpacing = 80,
+        columnSpacing = 160,
+        unaryFactorOffset = 90,
+        multiFactorOffset = 210,
+        curvedEdges = true
+    )
+
+    for key in propertynames(layout)
+        if !(key in propertynames(defaultLayout))
+            error("Unknown graph figure layout key $key.")
+        end
+    end
+
+    options = merge(defaultLayout, layout)
+
+    if !(options.orientation in (:horizontal, :vertical))
+        error("layout.orientation must be :horizontal or :vertical.")
+    end
+
+    if options.unaryFactorOffset <= 0 || options.multiFactorOffset <= 0
+        error("layout unary and multi-factor offsets must be positive.")
+    end
+
+    if options.rowSpacing <= 0 || options.columnSpacing <= 0
+        error("layout rowSpacing and columnSpacing must be positive.")
+    end
+
+    return options
+end
+
+function graphFigureNodeOptions(node::NamedTuple)
+    defaultNode = (
+        variableRadius = 24,
+        factorSize = 22
+    )
+
+    for key in propertynames(node)
+        if !(key in propertynames(defaultNode))
+            error("Unknown graph figure node key $key.")
+        end
+    end
+
+    options = merge(defaultNode, node)
+
+    if options.variableRadius <= 0 || options.factorSize <= 0
+        error("node variableRadius and factorSize must be positive.")
+    end
+
+    return options
+end
+
+function graphFigureLabelOptions(label::NamedTuple)
+    defaultLabel = (
+        placement = :outside,
+        outsideGap = 6,
+        showVariables = true,
+        showFactors = true,
+        fontSize = 14
+    )
+
+    for key in propertynames(label)
+        if !(key in propertynames(defaultLabel))
+            error("Unknown graph figure label key $key.")
+        end
+    end
+
+    options = merge(defaultLabel, label)
+
+    if !(options.placement in (:inside, :outside))
+        error("label.placement must be :inside or :outside.")
+    end
+
+    if options.outsideGap < 0
+        error("label.outsideGap must be non-negative.")
+    end
+
+    if options.fontSize <= 0
+        error("label.fontSize must be positive.")
+    end
+
+    return options
+end
+
+function graphFigureStyle(style::NamedTuple)
+    defaultStyle = (
+        backgroundFill = "#ffffff",
+        variableFill = "#e0f2fe",
+        variableStroke = "#0369a1",
+        variableStrokeWidth = 1.8,
+        factorFill = "#dc2626",
+        factorStroke = "#991b1b",
+        factorStrokeWidth = 1.8,
+        edgeStroke = "#64748b",
+        edgeStrokeWidth = 1.6,
+        edgeOpacity = 1.0,
+        labelFill = "#111827"
+    )
+
+    for key in propertynames(style)
+        if !(key in propertynames(defaultStyle))
+            error("Unknown graph figure style key $key.")
+        end
+    end
+
+    graphStyle = merge(defaultStyle, style)
+
+    if graphStyle.variableStrokeWidth <= 0 ||
+            graphStyle.factorStrokeWidth <= 0 ||
+            graphStyle.edgeStrokeWidth <= 0
+        error("Graph figure style stroke widths must be positive.")
+    end
+
+    return graphStyle
+end
+
+function graphFigureHighlightState(
+    graph::AbstractFactorGraph,
+    highlight::AbstractVector,
+    style::NamedTuple
+)
+    variableStyles = Dict{Int, NamedTuple}()
+    factorStyles = Dict{Int, NamedTuple}()
+    edgeStyles = Dict{Int, NamedTuple}()
+
+    applyNamedTupleHighlights!(
+        variableStyles,
+        factorStyles,
+        edgeStyles,
+        graph,
+        highlight,
+        style
+    )
+
+    return (
+        variableStyles = variableStyles,
+        factorStyles = factorStyles,
+        edgeStyles = edgeStyles,
+        variables = Set(keys(variableStyles)),
+        factors = Set(keys(factorStyles)),
+        edges = Set(keys(edgeStyles))
+    )
+end
+
+function applyNamedTupleHighlights!(
+    variableStyles::AbstractDict{Int},
+    factorStyles::AbstractDict{Int},
+    edgeStyles::AbstractDict{Int},
+    graph::AbstractFactorGraph,
+    highlights::AbstractVector,
+    graphStyle::NamedTuple
+)
+    for highlight in highlights
+        if !(highlight isa NamedTuple)
+            error("Graph figure highlight entries must be named tuples.")
+        end
+
+        hasVariable = hasproperty(highlight, :variable)
+        hasFactor = hasproperty(highlight, :factor)
+        hasEdge = hasproperty(highlight, :edge)
+
+        if hasEdge && (hasVariable || hasFactor)
+            error("A highlight entry cannot combine edge with variable or factor.")
+        elseif hasEdge
+            edgeIndexValue = graphFigureEdgeIndex(graph, highlight.edge)
+            edgeStyles[edgeIndexValue] = graphFigureEdgeHighlightStyle(
+                highlight,
+                graphStyle.edgeStroke,
+                graphStyle.edgeStrokeWidth
+            )
+        elseif hasVariable && hasFactor
+            edgeIndexValue = graphFigureEdgeIndex(graph, highlight.variable, highlight.factor)
+            edgeStyles[edgeIndexValue] = graphFigureEdgeHighlightStyle(
+                highlight,
+                graphStyle.edgeStroke,
+                graphStyle.edgeStrokeWidth
+            )
+        elseif hasVariable
+            variableIndexValue = graphFigureVariableIndex(graph, highlight.variable)
+            nodeStyle = graphFigureNodeHighlightStyle(
+                highlight,
+                graphStyle.variableStroke,
+                graphStyle.variableFill,
+                graphStyle.variableStrokeWidth
+            )
+            variableStyles[variableIndexValue] = nodeStyle
+
+            if graphFigureHighlightOption(highlight, :incidentEdges, true)
+                addVariableIncidentEdgeStyles!(
+                    edgeStyles,
+                    graph,
+                    variableIndexValue,
+                    graphFigureIncidentEdgeHighlightStyle(highlight, nodeStyle)
+                )
+            end
+        elseif hasFactor
+            factorIndexValue = graphFigureFactorIndex(graph, highlight.factor)
+            nodeStyle = graphFigureNodeHighlightStyle(
+                highlight,
+                graphStyle.factorStroke,
+                graphStyle.factorFill,
+                graphStyle.factorStrokeWidth
+            )
+            factorStyles[factorIndexValue] = nodeStyle
+
+            if graphFigureHighlightOption(highlight, :incidentEdges, true)
+                addFactorIncidentEdgeStyles!(
+                    edgeStyles,
+                    graph,
+                    factorIndexValue,
+                    graphFigureIncidentEdgeHighlightStyle(highlight, nodeStyle)
+                )
+            end
+        else
+            error("A highlight entry must contain variable, factor, edge, or variable and factor.")
+        end
+    end
+
+    return variableStyles, factorStyles, edgeStyles
+end
+
+function graphFigureHighlightOption(highlight::NamedTuple, key::Symbol, default)
+    return hasproperty(highlight, key) ? getproperty(highlight, key) : default
+end
+
+function graphFigureNodeHighlightStyle(
+    highlight::NamedTuple,
+    defaultStroke,
+    defaultFill,
+    defaultStrokeWidth
+)
+    return (
+        stroke = something(
+            graphFigureHighlightOption(highlight, :stroke, defaultStroke),
+            defaultStroke
+        ),
+        fill = something(graphFigureHighlightOption(highlight, :fill, defaultFill), defaultFill),
+        strokeWidth = something(
+            graphFigureHighlightOption(highlight, :strokeWidth, defaultStrokeWidth),
+            defaultStrokeWidth
+        )
+    )
+end
+
+function graphFigureEdgeHighlightStyle(
+    highlight::NamedTuple,
+    defaultStroke,
+    defaultStrokeWidth
+)
+    return (
+        stroke = something(
+            graphFigureHighlightOption(highlight, :stroke, defaultStroke),
+            defaultStroke
+        ),
+        fill = nothing,
+        strokeWidth = something(
+            graphFigureHighlightOption(highlight, :strokeWidth, defaultStrokeWidth),
+            defaultStrokeWidth
+        )
+    )
+end
+
+function graphFigureIncidentEdgeHighlightStyle(highlight::NamedTuple, nodeStyle::NamedTuple)
+    return (
+        stroke = something(
+            graphFigureHighlightOption(highlight, :edgeStroke, nodeStyle.stroke),
+            nodeStyle.stroke
+        ),
+        fill = nothing,
+        strokeWidth = something(
+            graphFigureHighlightOption(highlight, :edgeStrokeWidth, nodeStyle.strokeWidth),
+            nodeStyle.strokeWidth
+        )
+    )
+end
+
+function addVariableIncidentEdgeStyles!(
+    edgeStyles::AbstractDict{Int},
+    graph::AbstractFactorGraph,
+    variableIndexValue::Int,
+    style::NamedTuple
+)
+    for edge in graph.edges
+        if edge.variableIndex == variableIndexValue && !haskey(edgeStyles, edge.id)
+            edgeStyles[edge.id] = style
+        end
+    end
+
+    return edgeStyles
+end
+
+function addFactorIncidentEdgeStyles!(
+    edgeStyles::AbstractDict{Int},
+    graph::AbstractFactorGraph,
+    factorIndexValue::Int,
+    style::NamedTuple
+)
+    for edge in graph.edges
+        if edge.factorIndex == factorIndexValue && !haskey(edgeStyles, edge.id)
+            edgeStyles[edge.id] = style
+        end
+    end
+
+    return edgeStyles
+end
+
+function graphFigureVariableIndex(graph::AbstractFactorGraph, variable)
+    return variableIndex(graph, variableRef(variable))
+end
+
+function graphFigureFactorIndex(graph::AbstractFactorGraph, factor)
+    if factor isa FactorRef
+        return factorIndex(graph, factor)
+    end
+
+    error("Factor references must be Int, Symbol, String, GaussianFactor, or DiscreteFactor.")
+end
+
+function graphFigureFactorIndex(
+    graph::AbstractFactorGraph,
+    factor::Union{GaussianFactor, DiscreteFactor}
+)
+    if 1 <= factor.id <= length(graph.factors) && graph.factors[factor.id] == factor
+        return factor.id
+    end
+
+    if !isempty(factor.label)
+        return factorIndex(graph, factor.label)
+    end
+
+    matches = Int[]
+
+    for (index, graphFactor) in pairs(graph.factors)
+        if sameGraphFigureFactor(graphFactor, factor)
+            push!(matches, index)
+        end
+    end
+
+    if length(matches) == 1
+        return only(matches)
+    elseif isempty(matches)
+        error("Factor node is not defined in the graph.")
+    end
+
+    error("Factor node matches multiple graph factors; use a factor index or label.")
+end
+
+function sameGraphFigureFactor(graphFactor::GaussianFactor, factor::GaussianFactor)
+    return graphFactor.variables == factor.variables &&
+        graphFactor.mean == factor.mean &&
+        graphFactor.coefficient == factor.coefficient &&
+        graphFactor.covariance == factor.covariance &&
+        graphFactor.initialize == factor.initialize &&
+        (isempty(factor.label) || graphFactor.label == factor.label)
+end
+
+function sameGraphFigureFactor(graphFactor::DiscreteFactor, factor::DiscreteFactor)
+    return graphFactor.variables == factor.variables &&
+        graphFactor.table == factor.table &&
+        graphFactor.initialize == factor.initialize &&
+        (isempty(factor.label) || graphFactor.label == factor.label)
+end
+
+sameGraphFigureFactor(_, _) = false
+
+function graphFigureEdgeIndex(graph::AbstractFactorGraph, variable, factor)
+    variableIndexValue = graphFigureVariableIndex(graph, variable)
+    factorIndexValue = graphFigureFactorIndex(graph, factor)
+
+    for edge in graph.edges
+        if edge.variableIndex == variableIndexValue && edge.factorIndex == factorIndexValue
+            return edge.id
+        end
+    end
+
+    error("Variable and factor are not connected by an edge.")
+end
+
+function graphFigureEdgeIndex(graph::AbstractFactorGraph, edge::Int)
+    if edge < 1 || edge > length(graph.edges)
+        error("Edge reference $edge is not defined.")
+    end
+
+    return edge
+end
+
+function graphFigureEdgeIndex(graph::AbstractFactorGraph, edge::Edge)
+    if 1 <= edge.id <= length(graph.edges) && graph.edges[edge.id] == edge
+        return edge.id
+    end
+
+    return graphFigureEdgeIndex(graph, edge.variableIndex, edge.factorIndex)
+end
+
+function graphFigureEdgeIndex(graph::AbstractFactorGraph, selector::Tuple)
+    return graphFigureEdgeIndex(graph, selector[1], selector[2])
+end
+
+function nodeRadii(
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    defaultRadius::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool,
+    fontSize::Int
+)
+    if labelPlacement == :outside || !showLabels
+        return fill(max(12, min(defaultRadius, 16)), length(variables))
+    end
+
+    return [
+        max(defaultRadius, ceil(Int, approximateTextWidth(variable.label, fontSize) / 2 + 12))
+        for variable in variables
+    ]
+end
+
+function factorNodeWidths(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool,
+    fontSize::Int
+)
+    if labelPlacement == :outside || !showLabels
+        return fill(max(12, min(defaultSize, 18)), length(factors))
+    end
+
+    return [
+        max(defaultSize, ceil(Int, approximateTextWidth(factor.label, fontSize) + 18))
+        for factor in factors
+    ]
+end
+
+function factorNodeHeights(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool
+)
+    if labelPlacement == :outside || !showLabels
+        return fill(max(12, min(defaultSize, 18)), length(factors))
+    end
+
+    return fill(max(defaultSize, 34), length(factors))
+end
+
+function verticalFactorNodeWidths(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool,
+    fontSize::Int,
+    rotateLabels::AbstractVector{Bool}
+)
+    if labelPlacement == :outside || !showLabels
+        return fill(max(12, min(defaultSize, 18)), length(factors))
+    end
+
+    return [
+        rotateLabels[index] ?
+            max(defaultSize, 34) :
+            max(defaultSize, ceil(Int, approximateTextWidth(factor.label, fontSize) + 18))
+        for (index, factor) in pairs(factors)
+    ]
+end
+
+function verticalFactorNodeHeights(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool,
+    fontSize::Int,
+    rotateLabels::AbstractVector{Bool}
+)
+    if labelPlacement == :outside || !showLabels
+        return fill(max(12, min(defaultSize, 18)), length(factors))
+    end
+
+    return [
+        rotateLabels[index] ?
+            max(defaultSize, ceil(Int, approximateTextWidth(factor.label, fontSize) + 18)) :
+            max(defaultSize, 34)
+        for (index, factor) in pairs(factors)
+    ]
+end
+
+function approximateTextWidth(label::AbstractString, fontSize::Int)
+    return 0.62 * fontSize * length(label)
+end
+
+function labelReserve(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    factorIndices::AbstractVector{Int},
+    fontSize::Int
+)
+    if isempty(factorIndices)
+        return 0.0
+    end
+
+    return maximum(approximateTextWidth(factors[index].label, fontSize) for index in factorIndices) + 16
+end
+
+function minimumNodeGap(
+    nodeHeights::AbstractVector,
+    nodeIndices::AbstractVector{Int},
+    nodeGap::Int
+)
+    if isempty(nodeIndices)
+        return 0
+    end
+
+    return maximum(nodeHeights[index] for index in nodeIndices) + nodeGap
+end
+
+function verticalFactorLabelRotations(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    rawFactorX::AbstractVector,
+    unaryFactors::AbstractVector{Int},
+    multiFactors::AbstractVector{Int},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    showLabels::Bool,
+    fontSize::Int,
+    nodeGap::Int
+)
+    rotateLabels = fill(false, length(factors))
+
+    if !showLabels
+        return rotateLabels
+    end
+
+    if labelPlacement == :outside
+        return rotateLabels
+    end
+
+    if hasOverlappingVerticalLabels(factors, rawFactorX, unaryFactors, defaultSize, labelPlacement, fontSize, nodeGap)
+        rotateLabels[unaryFactors] .= true
+    end
+
+    if hasOverlappingVerticalLabels(factors, rawFactorX, multiFactors, defaultSize, labelPlacement, fontSize, nodeGap)
+        rotateLabels[multiFactors] .= true
+    end
+
+    return rotateLabels
+end
+
+function hasOverlappingVerticalLabels(
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    rawFactorX::AbstractVector,
+    factorIndices::AbstractVector{Int},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    fontSize::Int,
+    nodeGap::Int
+)
+    if length(factorIndices) <= 1
+        return false
+    end
+
+    sortedIndices = sort(collect(factorIndices); by = index -> rawFactorX[index])
+    previousIndex = first(sortedIndices)
+
+    for index in sortedIndices[2:end]
+        previousWidth = horizontalVerticalFactorLabelWidth(
+            factors[previousIndex],
+            defaultSize,
+            labelPlacement,
+            fontSize
+        )
+        currentWidth = horizontalVerticalFactorLabelWidth(
+            factors[index],
+            defaultSize,
+            labelPlacement,
+            fontSize
+        )
+        minimumDistance = previousWidth / 2 + currentWidth / 2 + nodeGap
+
+        if rawFactorX[index] - rawFactorX[previousIndex] < minimumDistance
+            return true
+        end
+
+        previousIndex = index
+    end
+
+    return false
+end
+
+function horizontalVerticalFactorLabelWidth(
+    factor::Union{GaussianFactor, DiscreteFactor},
+    defaultSize::Int,
+    labelPlacement::Symbol,
+    fontSize::Int
+)
+    nodeWidth = labelPlacement == :outside ? max(12, min(defaultSize, 18)) : max(defaultSize, 34)
+    labelWidth = approximateTextWidth(factor.label, fontSize)
+
+    return labelPlacement == :outside ? max(nodeWidth, labelWidth) : max(nodeWidth, labelWidth + 18)
+end
+
+function centeredColumns(
+    width::Real,
+    margin::Int,
+    leftLabelReserve::Real,
+    rightLabelReserve::Real,
+    maxFactorWidth::Real,
+    unaryFactorOffset::Int,
+    multiFactorOffset::Int
+)
+    leftNodeHalf = maxFactorWidth / 2
+    rightNodeHalf = maxFactorWidth / 2
+    graphWidth = leftLabelReserve + leftNodeHalf + unaryFactorOffset +
+        multiFactorOffset + rightNodeHalf + rightLabelReserve
+    graphLeft = (width - graphWidth) / 2
+
+    unaryFactorX = graphLeft + leftLabelReserve + leftNodeHalf
+    variableX = unaryFactorX + unaryFactorOffset
+    multiFactorX = variableX + multiFactorOffset
+
+    return variableX, unaryFactorX, multiFactorX
+end
+
+function centeredRows(
+    height::Real,
+    margin::Int,
+    topLabelReserve::Real,
+    bottomLabelReserve::Real,
+    maxFactorHeight::Real,
+    unaryFactorOffset::Int,
+    multiFactorOffset::Int
+)
+    topNodeHalf = maxFactorHeight / 2
+    bottomNodeHalf = maxFactorHeight / 2
+    graphHeight = topLabelReserve + topNodeHalf + unaryFactorOffset +
+        multiFactorOffset + bottomNodeHalf + bottomLabelReserve
+    graphTop = (height - graphHeight) / 2
+
+    unaryFactorY = graphTop + topLabelReserve + topNodeHalf
+    variableY = unaryFactorY + unaryFactorOffset
+    multiFactorY = variableY + multiFactorOffset
+
+    return variableY, unaryFactorY, multiFactorY
+end
+
+function spreadCloseRows(values::AbstractVector, minimumGap::Real)
+    if isempty(values)
+        return Float64[]
+    end
+
+    indexed = collect(enumerate(Float64.(values)))
+    sort!(indexed; by = pair -> pair[2])
+
+    spread = similar(Float64.(values))
+    previous = -Inf
+
+    for (index, value) in indexed
+        y = max(value, previous + minimumGap)
+        spread[index] = y
+        previous = y
+    end
+
+    centerShift = average(spread) - average(Float64.(values))
+
+    return spread .- centerShift
+end
+
+function average(values)
+    total = 0.0
+    count = 0
+
+    for value in values
+        total += value
+        count += 1
+    end
+
+    if count == 0
+        error("Cannot compute average of empty values.")
+    end
+
+    return total / count
+end
+
+function nodeRows(count::Int, rowCount::Int, margin::Int, nodeSpacing::Real)
+    if count == 0
+        return Float64[]
+    end
+
+    startOffset = (rowCount - count) * nodeSpacing / 2
+
+    return [margin + startOffset + (index - 1) * nodeSpacing for index in 1:count]
+end
+
+function fittedCanvasSizeAndShift(
+    extentMin::Real,
+    extentMax::Real,
+    canvasSize::Int,
+    canvasPadding::Int
+)
+    extent = extentMax - extentMin
+    fittedSize = ceil(Int, extent + 2 * canvasPadding)
+    finalSize = max(canvasSize, fittedSize)
+    shift = (finalSize - extent) / 2 - extentMin
+
+    return finalSize, shift
+end
+
+function fitVerticalCanvas!(
+    variableY::AbstractVector,
+    factorY::Union{AbstractVector, AbstractDict{Int}},
+    variableRadii::AbstractVector,
+    factorHeights::AbstractVector,
+    canvasHeight::Int,
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    yMin = Inf
+    yMax = -Inf
+    variableBottomPadding = labelPlacement == :outside && showVariableLabels ?
+        outsideLabelGap + fontSize : 0
+    factorLabelPadding = labelPlacement == :outside && showFactorLabels ?
+        outsideLabelGap + fontSize : 0
+
+    for index in eachindex(variableY)
+        yMin = min(yMin, variableY[index] - variableRadii[index])
+        yMax = max(yMax, variableY[index] + variableRadii[index] + variableBottomPadding)
+    end
+
+    for index in eachindex(factorHeights)
+        y = factorY[index]
+        halfHeight = factorHeights[index] / 2
+        yMin = min(yMin, y - halfHeight - factorLabelPadding)
+        yMax = max(yMax, y + halfHeight + factorLabelPadding)
+    end
+
+    if !isfinite(yMin)
+        return canvasHeight
+    end
+
+    finalHeight, shift = fittedCanvasSizeAndShift(yMin, yMax, canvasHeight, canvasPadding)
+
+    if !iszero(shift)
+        for index in eachindex(variableY)
+            variableY[index] += shift
+        end
+
+        for index in eachindex(factorHeights)
+            factorY[index] += shift
+        end
+    end
+
+    return finalHeight
+end
+
+function fitGeneralHorizontalCanvas!(
+    variableX::Real,
+    factorX::AbstractDict{Int},
+    variableRadii::AbstractVector,
+    factorWidths::AbstractVector,
+    canvasWidth::Int,
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    xMin = minimum(variableX - radius for radius in variableRadii)
+    xMax = maximum(variableX + radius for radius in variableRadii)
+
+    if labelPlacement == :outside && showVariableLabels
+        variableLabelWidth = maximum(
+            approximateTextWidth(variable.label, fontSize) for variable in variables
+        )
+        xMin = min(xMin, variableX - variableLabelWidth / 2)
+        xMax = max(xMax, variableX + variableLabelWidth / 2)
+    end
+
+    for index in eachindex(factorWidths)
+        labelWidth = labelPlacement == :outside && showFactorLabels ?
+            outsideLabelGap + approximateTextWidth(factors[index].label, fontSize) : 0.0
+        xMin = min(xMin, factorX[index] - factorWidths[index] / 2 - labelWidth)
+        xMax = max(xMax, factorX[index] + factorWidths[index] / 2 + labelWidth)
+    end
+
+    finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
+
+    if !iszero(shift)
+        variableX += shift
+
+        for index in eachindex(factorWidths)
+            factorX[index] += shift
+        end
+    end
+
+    return finalWidth, variableX
+end
+
+function fitVerticalGraphHorizontalCanvas!(
+    variableX::AbstractVector,
+    factorX::AbstractDict{Int},
+    variableRadii::AbstractVector,
+    factorWidths::AbstractVector,
+    canvasWidth::Int,
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    rotateFactorLabels::AbstractVector{Bool},
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    xMin = Inf
+    xMax = -Inf
+
+    for index in eachindex(variableX)
+        xMin = min(xMin, variableX[index] - variableRadii[index])
+        xMax = max(xMax, variableX[index] + variableRadii[index])
+
+        if labelPlacement == :outside && showVariableLabels
+            labelHalfWidth = approximateTextWidth(variables[index].label, fontSize) / 2
+            xMin = min(xMin, variableX[index] - labelHalfWidth)
+            xMax = max(xMax, variableX[index] + labelHalfWidth)
+        end
+    end
+
+    for index in eachindex(factorWidths)
+        xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
+        xMax = max(xMax, factorX[index] + factorWidths[index] / 2)
+
+        if labelPlacement == :outside && showFactorLabels && !rotateFactorLabels[index]
+            labelHalfWidth = approximateTextWidth(factors[index].label, fontSize) / 2
+            xMin = min(xMin, factorX[index] - labelHalfWidth)
+            xMax = max(xMax, factorX[index] + labelHalfWidth)
+        end
+    end
+
+    if !isfinite(xMin)
+        return canvasWidth
+    end
+
+    finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
+
+    if !iszero(shift)
+        for index in eachindex(variableX)
+            variableX[index] += shift
+        end
+
+        for index in eachindex(factorWidths)
+            factorX[index] += shift
+        end
+    end
+
+    return finalWidth
+end
+
+function fitVerticalGraphVerticalCanvas!(
+    variableY::Real,
+    factorY::AbstractDict{Int},
+    variableRadii::AbstractVector,
+    factorHeights::AbstractVector,
+    canvasHeight::Int,
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    rotateFactorLabels::AbstractVector{Bool},
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    yMin = minimum(variableY - radius for radius in variableRadii)
+    yMax = maximum(variableY + radius for radius in variableRadii)
+
+    if labelPlacement == :outside && showVariableLabels
+        labelY = variableY + maximum(variableRadii; init = 0) + outsideLabelGap + fontSize / 2
+        yMax = max(yMax, labelY + fontSize / 2)
+    end
+
+    for index in eachindex(factorHeights)
+        y = factorY[index]
+        halfHeight = factorHeights[index] / 2
+        yMin = min(yMin, y - halfHeight)
+        yMax = max(yMax, y + halfHeight)
+
+        if labelPlacement == :outside && showFactorLabels
+            labelHalfHeight = rotateFactorLabels[index] ?
+                approximateTextWidth(factors[index].label, fontSize) / 2 : fontSize / 2
+            labelY = y < variableY ?
+                y - halfHeight - outsideLabelGap - fontSize / 2 :
+                y + halfHeight + outsideLabelGap + fontSize / 2
+            yMin = min(yMin, labelY - labelHalfHeight)
+            yMax = max(yMax, labelY + labelHalfHeight)
+        end
+    end
+
+    finalHeight, shift = fittedCanvasSizeAndShift(yMin, yMax, canvasHeight, canvasPadding)
+
+    if !iszero(shift)
+        variableY += shift
+
+        for index in eachindex(factorHeights)
+            factorY[index] += shift
+        end
+    end
+
+    return finalHeight, variableY
+end
+
+function fitHorizontalCanvas(
+    variableX::AbstractVector,
+    factorX::AbstractVector,
+    variableRadii::AbstractVector,
+    factorWidths::AbstractVector,
+    canvasWidth::Int,
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    xMin = Inf
+    xMax = -Inf
+
+    for index in eachindex(variableX)
+        xMin = min(xMin, variableX[index] - variableRadii[index])
+        xMax = max(xMax, variableX[index] + variableRadii[index])
+
+        if labelPlacement == :outside && showVariableLabels
+            labelHalfWidth = approximateTextWidth(variables[index].label, fontSize) / 2
+            xMin = min(xMin, variableX[index] - labelHalfWidth)
+            xMax = max(xMax, variableX[index] + labelHalfWidth)
+        end
+    end
+
+    for index in eachindex(factorX)
+        labelPadding = labelPlacement == :outside && showFactorLabels ?
+            outsideLabelGap + approximateTextWidth(factors[index].label, fontSize) : 0.0
+        xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
+        xMax = max(xMax, factorX[index] + factorWidths[index] / 2 + labelPadding)
+    end
+
+    if !isfinite(xMin)
+        return canvasWidth
+    end
+
+    finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
+
+    if !iszero(shift)
+        for index in eachindex(variableX)
+            variableX[index] += shift
+        end
+
+        for index in eachindex(factorX)
+            factorX[index] += shift
+        end
+    end
+
+    return finalWidth
+end
+
+function fitSideLabelHorizontalCanvas!(
+    variableX::AbstractVector,
+    factorX::AbstractVector,
+    variableRadii::AbstractVector,
+    factorWidths::AbstractVector,
+    canvasWidth::Int,
+    variables::AbstractVector{<:Union{GaussianVariable, DiscreteVariable}},
+    factors::AbstractVector{<:Union{GaussianFactor, DiscreteFactor}},
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    showFactorLabels::Bool,
+    outsideLabelGap::Int,
+    fontSize::Int,
+    canvasPadding::Int
+)
+    xMin = Inf
+    xMax = -Inf
+
+    for index in eachindex(variableX)
+        xMin = min(xMin, variableX[index] - variableRadii[index])
+        xMax = max(xMax, variableX[index] + variableRadii[index])
+
+        if labelPlacement == :outside && showVariableLabels
+            labelPadding = outsideLabelGap + approximateTextWidth(variables[index].label, fontSize)
+            xMax = max(xMax, variableX[index] + variableRadii[index] + labelPadding)
+        end
+    end
+
+    for index in eachindex(factorX)
+        xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
+        xMax = max(xMax, factorX[index] + factorWidths[index] / 2)
+
+        if labelPlacement == :outside && showFactorLabels
+            labelPadding = outsideLabelGap + approximateTextWidth(factors[index].label, fontSize)
+            xMax = max(xMax, factorX[index] + factorWidths[index] / 2 + labelPadding)
+        end
+    end
+
+    if !isfinite(xMin)
+        return canvasWidth
+    end
+
+    finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
+
+    if !iszero(shift)
+        for index in eachindex(variableX)
+            variableX[index] += shift
+        end
+
+        for index in eachindex(factorX)
+            factorX[index] += shift
+        end
+    end
+
+    return finalWidth
+end
+
+function escapeXML(text::AbstractString)
+    escaped = replace(text, '&' => "&amp;")
+    escaped = replace(escaped, '<' => "&lt;")
+    escaped = replace(escaped, '>' => "&gt;")
+    escaped = replace(escaped, '"' => "&quot;")
+    escaped = replace(escaped, '\'' => "&apos;")
+
+    return escaped
+end
+
+function svgHeader(width::Int, height::Int, zoom::Real = 1.0)
+    displayWidth = ceil(Int, width * zoom)
+    displayHeight = ceil(Int, height * zoom)
+
+    return """
+<svg xmlns="http://www.w3.org/2000/svg" width="$displayWidth" height="$displayHeight" viewBox="0 0 $width $height">
+  <title>Factor graph</title>"""
+end
+
+function svgStyle(
+    fontSize::Int,
+    style::NamedTuple
+)
+    return """
+  <style>
+    .background { fill: $(style.backgroundFill); }
+    .edge {
+      fill: none;
+      stroke: $(style.edgeStroke);
+      stroke-width: $(style.edgeStrokeWidth);
+      stroke-opacity: $(style.edgeOpacity);
+    }
+    .variable {
+      fill: $(style.variableFill);
+      stroke: $(style.variableStroke);
+      stroke-width: $(style.variableStrokeWidth);
+    }
+    .factor {
+      fill: $(style.factorFill);
+      stroke: $(style.factorStroke);
+      stroke-width: $(style.factorStrokeWidth);
+    }
+    .edge-highlight { stroke-opacity: 1.0; }
+    .label {
+      fill: $(style.labelFill);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: $(fontSize)px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .label-start { text-anchor: start; }
+    .label-end { text-anchor: end; }
+  </style>"""
+end
+
+function startGraphFigureBuffer(
+    canvasWidth::Int,
+    canvasHeight::Int,
+    zoom::Real,
+    fontSize::Int,
+    style::NamedTuple
+)
+    buffer = IOBuffer()
+
+    println(buffer, svgHeader(canvasWidth, canvasHeight, zoom))
+    println(
+        buffer,
+        svgStyle(
+            fontSize,
+            style
+        )
+    )
+    println(
+        buffer,
+        """  <rect class="background" x="0" y="0" width="$canvasWidth" height="$canvasHeight"/>"""
+    )
+
+    return buffer
+end
+
+function svgLine(
+    x1::Real,
+    y1::Real,
+    x2::Real,
+    y2::Real,
+    className::AbstractString,
+    style::Union{Nothing, NamedTuple} = nothing
+)
+    return """  <line class="$className" x1="$x1" y1="$y1" x2="$x2" y2="$y2"$(svgStyleAttribute(style))/>"""
+end
+
+function svgPath(
+    x1::Real,
+    y1::Real,
+    x2::Real,
+    y2::Real,
+    className::AbstractString,
+    style::Union{Nothing, NamedTuple} = nothing
+)
+    dx = abs(x2 - x1)
+    direction = x2 >= x1 ? 1 : -1
+    c1x = x1 + direction * 0.45 * dx
+    c2x = x2 - direction * 0.45 * dx
+
+    return """  <path class="$className" d="M $x1 $y1 C $c1x $y1, $c2x $y2, $x2 $y2"$(svgStyleAttribute(style))/>"""
+end
+
+function svgEdge(
+    x1::Real,
+    y1::Real,
+    x2::Real,
+    y2::Real,
+    curvedEdges::Bool,
+    className::AbstractString,
+    style::Union{Nothing, NamedTuple} = nothing
+)
+    return curvedEdges ? svgPath(x1, y1, x2, y2, className, style) :
+        svgLine(x1, y1, x2, y2, className, style)
+end
+
+function svgStyleAttribute(style::Union{Nothing, NamedTuple})
+    if isnothing(style)
+        return ""
+    end
+
+    parts = String[]
+
+    if !isnothing(style.stroke)
+        push!(parts, "stroke: $(style.stroke)")
+    end
+
+    if !isnothing(style.fill)
+        push!(parts, "fill: $(style.fill)")
+    end
+
+    if !isnothing(style.strokeWidth)
+        push!(parts, "stroke-width: $(style.strokeWidth)")
+    end
+
+    return isempty(parts) ? "" : " style=\"$(join(parts, "; "))\""
+end
+
+function svgCircle(
+    x::Real,
+    y::Real,
+    radius::Int,
+    className::AbstractString,
+    style::Union{Nothing, NamedTuple} = nothing
+)
+    return """  <circle class="$className" cx="$x" cy="$y" r="$radius"$(svgStyleAttribute(style))/>"""
+end
+
+function svgRect(
+    x::Real,
+    y::Real,
+    width::Int,
+    height::Int,
+    labelPlacement::Symbol,
+    className::AbstractString,
+    style::Union{Nothing, NamedTuple} = nothing
+)
+    radius = labelPlacement == :inside ? 4 : 3
+
+    return """  <rect class="$className" x="$x" y="$y" width="$width" height="$height" rx="$radius"$(svgStyleAttribute(style))/>"""
+end
+
+function svgText(x::Real, y::Real, label::AbstractString)
+    return """  <text class="label" x="$x" y="$y">$label</text>"""
+end
+
+function svgTextRotated(x::Real, y::Real, label::AbstractString)
+    return """  <text class="label" x="$x" y="$y" transform="rotate(-90 $x $y)">$label</text>"""
+end
+
+function drawVariableLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    radius::Int,
+    label::AbstractString,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    fontSize::Int
+)
+    if labelPlacement == :inside
+        println(buffer, svgText(x, y, label))
+    else
+        println(buffer, svgText(x, y + radius + outsideLabelGap + fontSize / 2, label))
+    end
+
+    return nothing
+end
+
+function drawFactorLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    width::Int,
+    variableX::Real,
+    label::AbstractString,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    fontSize::Int
+)
+    if labelPlacement == :inside
+        println(buffer, svgText(x, y, label))
+    elseif x < variableX
+        labelX = x - width / 2 - outsideLabelGap
+        println(buffer, svgTextEnd(labelX, y, label))
+    else
+        labelX = x + width / 2 + outsideLabelGap
+        println(buffer, svgTextStart(labelX, y, label))
+    end
+
+    return nothing
+end
+
+function drawRotatedFactorLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    height::Int,
+    variableY::Real,
+    label::AbstractString,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    fontSize::Int
+)
+    if labelPlacement == :inside
+        println(buffer, svgTextRotated(x, y, label))
+    elseif y < variableY
+        labelY = y - height / 2 - outsideLabelGap - fontSize / 2
+        println(buffer, svgTextRotated(x, labelY, label))
+    else
+        labelY = y + height / 2 + outsideLabelGap + fontSize / 2
+        println(buffer, svgTextRotated(x, labelY, label))
+    end
+
+    return nothing
+end
+
+function drawAdaptiveVerticalFactorLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    height::Int,
+    variableY::Real,
+    label::AbstractString,
+    rotateLabel::Bool,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    fontSize::Int
+)
+    if rotateLabel
+        drawRotatedFactorLabel!(
+            buffer,
+            x,
+            y,
+            height,
+            variableY,
+            label,
+            labelPlacement,
+            outsideLabelGap,
+            fontSize
+        )
+
+        return nothing
+    end
+
+    if labelPlacement == :inside
+        println(buffer, svgText(x, y, label))
+    elseif y < variableY
+        labelY = y - height / 2 - outsideLabelGap - fontSize / 2
+        println(buffer, svgText(x, labelY, label))
+    else
+        labelY = y + height / 2 + outsideLabelGap + fontSize / 2
+        println(buffer, svgText(x, labelY, label))
+    end
+
+    return nothing
+end
+
+function drawTreeFactorLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    height::Int,
+    label::AbstractString,
+    labelPlacement::Symbol,
+    outsideLabelGap::Int,
+    fontSize::Int
+)
+    if labelPlacement == :inside
+        println(buffer, svgText(x, y, label))
+    else
+        labelY = y - height / 2 - outsideLabelGap - fontSize / 2
+        println(buffer, svgText(x, labelY, label))
+    end
+
+    return nothing
+end
+
+function drawSideLabel!(
+    buffer::IO,
+    x::Real,
+    y::Real,
+    label::AbstractString,
+    labelPlacement::Symbol,
+    side::Symbol
+)
+    if labelPlacement == :inside
+        println(buffer, svgText(x, y, label))
+    elseif side == :right
+        println(buffer, svgTextStart(x, y, label))
+    elseif side == :left
+        println(buffer, svgTextEnd(x, y, label))
+    else
+        error("Label side must be :left or :right.")
+    end
+
+    return nothing
+end
+
+function svgTextStart(x::Real, y::Real, label::AbstractString)
+    return """  <text class="label label-start" x="$x" y="$y">$label</text>"""
+end
+
+function svgTextEnd(x::Real, y::Real, label::AbstractString)
+    return """  <text class="label label-end" x="$x" y="$y">$label</text>"""
+end

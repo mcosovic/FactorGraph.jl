@@ -76,7 +76,7 @@ end
 """
     DiscreteVariable(
         id::VariableId, cardinality::Int;
-        label = string(id), states = 1:cardinality, probability = nothing
+        label = defaultNodeLabel(id), states = 1:cardinality, probability = nothing
     )
 
 Create a discrete variable node.
@@ -93,6 +93,9 @@ Create a discrete variable node.
 - `probability`: Optional initial probability vector.
 
 # Notes
+
+If `label` is omitted, the variable id is converted to a compact default label.
+For example, `:x_1` becomes `"x1"`. Explicit labels are kept unchanged.
 
 The state order defines the corresponding dimension order in connected factor tables.
 
@@ -121,7 +124,7 @@ struct DiscreteVariable
     function DiscreteVariable(
         id::VariableId,
         cardinality::Int;
-        label::String = string(id),
+        label::String = defaultNodeLabel(id),
         states = defaultStateRefs(cardinality),
         probability = nothing
     )
@@ -213,7 +216,7 @@ struct DiscreteFactor
         end
 
         if isempty(label) && id > 0
-            label = "f_$id"
+            label = defaultFactorLabel(id)
         end
 
         return new(
@@ -484,7 +487,7 @@ end
     )
     addVariable!(
         graph::DiscreteFactorGraph, id::VariableId, cardinality::Int;
-        label = string(id), states = 1:cardinality, probability = nothing
+        label = defaultNodeLabel(id), states = 1:cardinality, probability = nothing
     )
 
 Add a finite-state discrete variable to an existing discrete factor graph.
@@ -530,7 +533,7 @@ function addVariable!(
     graph::DiscreteFactorGraph,
     id::VariableId,
     cardinality::Int;
-    label::String = string(id),
+    label::String = defaultNodeLabel(id),
     states = defaultStateRefs(cardinality),
     probability = nothing
 )
@@ -578,6 +581,9 @@ The added [`DiscreteFactor`](@ref).
 This graph-only method changes topology and makes existing inference objects stale. For
 warm-start inference, use the method that also receives an inference object.
 
+If `label` is omitted, the DiscreteFactor is named `fN`, where `N` is the
+assigned DiscreteFactor id. Explicit labels are kept unchanged.
+
 # Example
 
 ```julia
@@ -590,7 +596,7 @@ addFactor!(graph, DiscreteFactor(:x1, [0.8, 0.2]; label = "f1"))
 """
 function addFactor!(graph::DiscreteFactorGraph, factorData::DiscreteFactor)
     factorId = length(graph.factors) + 1
-    factorLabel = isempty(factorData.label) ? "f_$factorId" : factorData.label
+    factorLabel = isempty(factorData.label) ? defaultFactorLabel(factorId) : factorData.label
 
     if hasFactorLabel(graph, factorLabel)
         error("Factor label $factorLabel is already defined.")
@@ -807,7 +813,7 @@ function assignFactorIds(factors::AbstractVector{DiscreteFactor})
     factorList = DiscreteFactor[]
 
     for (index, factorData) in pairs(factors)
-        factorLabel = isempty(factorData.label) ? "f_$index" : factorData.label
+        factorLabel = isempty(factorData.label) ? defaultFactorLabel(index) : factorData.label
 
         push!(
             factorList,

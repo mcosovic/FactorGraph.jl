@@ -69,18 +69,47 @@ nothing # hide
 
 ---
 
-## Running Belief Propagation
+## Factor Graph Construction
 
-Collect the factors, build the graph, and run Gaussian belief propagation:
+Collect the factors and build the factor graph:
 
 ```@example dc_state_estimation
 factors = [slack, P12, P31, P2]
 
 graph = factorGraph(variables, factors)
+
+nothing # hide
+```
+
+The graph can be rendered as an SVG factor graph figure:
+
+```@example dc_state_estimation
+saveGraphFigure("dcse.svg", graph)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="dcse.svg" alt="DC state estimation factor graph" style="width: 50%; height: auto;">
+</div>
+```
+
+---
+
+## Running Belief Propagation
+
+Run Gaussian belief propagation on the graph:
+
+```@example dc_state_estimation
 inference = canonical(graph)
 
 gbp!(graph, inference; iterations = 60)
 ```
+
+---
+
+## Results
 
 And print results:
 
@@ -93,11 +122,33 @@ printMarginal(graph, inference)
 ## Dynamic Measurement Update
 
 If a measurement changes, update the corresponding factor and continue Gaussian belief propagation
-from the current message state. For example, suppose the `P12` flow
-measurement changes:
+from the current message state. For example, suppose the `P12` flow measurement changes:
 
 ```@example dc_state_estimation
 updateFactor!(graph, "P12"; mean = 0.74)
+
+nothing # hide
+```
+
+The figure below shows the updated `P12` factor together with its incident edges:
+```@example dc_state_estimation
+saveGraphFigure(
+    "ddcse.svg",
+    graph;
+    highlight = [(factor = "P12", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 3)]
+)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <img src="ddcse.svg" alt="Dynamic DC state estimation factor graph" style="width: 50%; height: auto;">
+</div>
+```
+
+Gaussian belief propagation can then continue from the current message state:
+```@example dc_state_estimation
 gbp!(graph, inference; iterations = 20)
 
 printMarginal(graph, inference)

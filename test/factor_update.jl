@@ -133,7 +133,7 @@ end
         added = addFactor!(graph, :x1, 0.1, 1.0, 0.4)
 
         @test added.id == nextFactorId
-        @test added.label == "f_$nextFactorId"
+        @test added.label == "f$nextFactorId"
         @test factorIndex(graph, added.label) == nextFactorId
     end
 

@@ -65,7 +65,7 @@ end
 """
     GaussianVariable(
         id::VariableId, dimension::Int;
-        label = string(id), components = 1:dimension, mean = nothing, covariance = nothing
+        label = defaultNodeLabel(id), components = 1:dimension, mean = nothing, covariance = nothing
     )
 
 Create a GaussianVariable node.
@@ -83,6 +83,9 @@ Create a GaussianVariable node.
 - `covariance`: Optional initial covariance for Gaussian inference.
 
 # Notes
+
+If `label` is omitted, the variable id is converted to a compact default label.
+For example, `:x_1` becomes `"x1"`. Explicit labels are kept unchanged.
 
 If `mean` and `covariance` are provided, they define the GaussianVariable initial belief
 used by new inference objects. If they are omitted, [`moment`](@ref), [`canonical`](@ref),
@@ -109,7 +112,7 @@ struct GaussianVariable
     function GaussianVariable(
         id::VariableId,
         dimension::Int;
-        label::String = string(id),
+        label::String = defaultNodeLabel(id),
         components = defaultComponentRefs(dimension),
         mean = nothing,
         covariance = nothing
@@ -246,7 +249,7 @@ struct GaussianFactor
         end
 
         if isempty(label) && id > 0
-            label = "f_$id"
+            label = defaultFactorLabel(id)
         end
 
         covarianceMatrix = symmetricPart(asCovarianceMatrix(covariance))
@@ -557,7 +560,7 @@ end
     )
     addVariable!(
         graph::GaussianFactorGraph, id::VariableId, dimension::Int;
-        label = string(id), components = 1:dimension, mean = nothing, covariance = nothing
+        label = defaultNodeLabel(id), components = 1:dimension, mean = nothing, covariance = nothing
     )
 
 Add a continuous Gaussian variable to an existing Gaussian factor graph.
@@ -606,7 +609,7 @@ function addVariable!(
     graph::GaussianFactorGraph,
     id::VariableId,
     dimension::Int;
-    label::String = string(id),
+    label::String = defaultNodeLabel(id),
     components = defaultComponentRefs(dimension),
     mean = nothing,
     covariance = nothing
@@ -662,8 +665,9 @@ the next GaussianFactor id, inserted into `graph.factors`, and connected by new
 edges. Existing variables are not modified, but their adjacency lists receive
 the new edge ids.
 
-If `label` is omitted, the GaussianFactor is named `f_N`, where `N` is the assigned
-GaussianFactor id. GaussianFactor labels must remain unique.
+If `label` is omitted, the GaussianFactor is named `fN`, where `N` is the assigned
+GaussianFactor id. Explicit labels are kept unchanged. GaussianFactor labels
+must remain unique.
 
 Calling this graph-only method does not resize existing inference objects.
 Create a fresh [`moment`](@ref) or [`canonical`](@ref) inference object before
@@ -685,7 +689,7 @@ addFactor!(graph, :x1, :x2, [0.4, -0.2], [1.0 0.5; -0.4 1.2], [0.3, 0.25])
 """
 function addFactor!(graph::GaussianFactorGraph, factorData::GaussianFactor)
     factorId = length(graph.factors) + 1
-    factorLabel = isempty(factorData.label) ? "f_$factorId" : factorData.label
+    factorLabel = isempty(factorData.label) ? defaultFactorLabel(factorId) : factorData.label
 
     if hasFactorLabel(graph, factorLabel)
         error("Factor label $factorLabel is already defined.")
@@ -976,7 +980,7 @@ function assignFactorIds(factors::AbstractVector{GaussianFactor})
     factorList = GaussianFactor[]
 
     for (index, factorData) in pairs(factors)
-        factorLabel = isempty(factorData.label) ? "f_$index" : factorData.label
+        factorLabel = isempty(factorData.label) ? defaultFactorLabel(index) : factorData.label
 
         push!(
             factorList,

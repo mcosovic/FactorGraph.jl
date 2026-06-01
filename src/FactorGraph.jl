@@ -27,6 +27,7 @@ include("schedule/residual.jl")
 include("utility/diagnostics.jl")
 include("utility/wls.jl")
 include("utility/print.jl")
+include("utility/graphFigure.jl")
 
 export AbstractFactorGraph,
     GaussianFactorGraph,
@@ -156,4 +157,7 @@ export printModel,
     printMarginal,
     printEstimate,
     printWLS
+
+export graphFigure,
+    saveGraphFigure
 end
