@@ -158,7 +158,8 @@ adjacency lists used for message passing.
 
 For quick debugging, the graph structure can be rendered as a SVG with
 [`saveGraphFigure`](@ref). This is useful for checking that factor-table dimensions match
-the intended variable connections before running inference:
+the intended variable connections before running inference. The SVG includes hover tooltips
+by default; use `label = (tooltipDetail = :full,)` to inspect full discrete parameters:
 
 ```@example discrete_factor_graph
 saveGraphFigure("dfg.svg", graph)

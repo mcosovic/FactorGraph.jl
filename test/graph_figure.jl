@@ -18,7 +18,10 @@ function graphFigureTestGraph()
 end
 
 function graphFigureLineLengths(svg::AbstractString)
-    pattern = r"<line[^>]* x1=\"([^\"]+)\" y1=\"([^\"]+)\" x2=\"([^\"]+)\" y2=\"([^\"]+)\""
+    pattern = Regex(
+        "<line class=\"edge(?: edge-highlight)?\" " *
+        "x1=\"([^\"]+)\" y1=\"([^\"]+)\" x2=\"([^\"]+)\" y2=\"([^\"]+)\""
+    )
 
     return [
         hypot(
@@ -27,6 +30,26 @@ function graphFigureLineLengths(svg::AbstractString)
         )
         for match in eachmatch(pattern, svg)
     ]
+end
+
+function graphFigureGaussianTooltipGraph()
+    variables = [
+        GaussianVariable(:x1, 1; label = "x1", mean = [0.0], covariance = [1.0;;]),
+        GaussianVariable(
+            :x2,
+            2;
+            label = "x2",
+            components = [:a, :b],
+            mean = [2.0, -1.0],
+            covariance = [4.0 0.5; 0.5 2.0]
+        )
+    ]
+    factors = [
+        GaussianFactor(:x1, 0.0, 1.0, 0.5; label = "prior_x1", initialize = true),
+        GaussianFactor(:x1, :x2, [0.0], [1.0 -1.0 0.5], [1.2;;]; label = "link")
+    ]
+
+    return factorGraph(variables, factors)
 end
 
 @testset verbose = true "Graph figures" begin
@@ -113,6 +136,56 @@ end
         @test occursin("fill: #0f172a", svg)
     end
 
+    @testset "Tooltips" begin
+        svg = graphFigure(graph)
+
+        @test occursin("edge-hitbox", svg)
+        @test occursin("<title>Edge 1", svg)
+        @test occursin("Identity", svg)
+        @test occursin("table size: 2 x 2", svg)
+        @test !occursin("table: [0.9 0.1; 0.2 0.8]", svg)
+        @test !occursin("Factor link_1_2" * "\n\nIdentity" *
+            "\ntype: DiscreteFactor" *
+            "\nindex: 3" *
+            "\nid: 3" *
+            "\nvariables: x1, x2" *
+            "\ndegree: 2" *
+            "\n\nParameters" *
+            "\ntable size: 2 x 2" *
+            "\n\nOptions", svg)
+
+        fullSvg = graphFigure(graph; label = (tooltipDetail = :full,))
+        @test occursin("table: [0.9 0.1; 0.2 0.8]", fullSvg)
+        @test !occursin("Factor link_1_2" * "\n\nIdentity" *
+            "\ntype: DiscreteFactor" *
+            "\nindex: 3" *
+            "\nid: 3" *
+            "\nvariables: x1, x2" *
+            "\ndegree: 2" *
+            "\n\nParameters" *
+            "\ntable: [0.9 0.1; 0.2 0.8]" *
+            "\n\nOptions", fullSvg)
+
+        noTooltipSvg = graphFigure(graph; label = (showTooltips = false,))
+        @test !occursin("class=\"edge-hitbox\"", noTooltipSvg)
+        @test !occursin("<title>Edge", noTooltipSvg)
+        @test !occursin("<title>Variable", noTooltipSvg)
+        @test !occursin("<title>Factor prior", noTooltipSvg)
+
+        gaussianSvg = graphFigure(graphFigureGaussianTooltipGraph())
+        @test occursin("mean size: 2", gaussianSvg)
+        @test occursin("covariance size: 2 x 2", gaussianSvg)
+        @test occursin("component count: 2", gaussianSvg)
+
+        gaussianFullSvg = graphFigure(
+            graphFigureGaussianTooltipGraph();
+            label = (tooltipDetail = :full,)
+        )
+        @test occursin("covariance: [4.0 0.5; 0.5 2.0]", gaussianFullSvg)
+        @test occursin("component: 1", gaussianFullSvg)
+        @test occursin("components: [:a, :b]", gaussianFullSvg)
+    end
+
     @testset "Tree graph output" begin
         tree = treeFactorGraph(graph; root = :x1)
         svg = graphFigure(
@@ -151,6 +224,8 @@ end
         @test_throws ErrorException graphFigure(graph; layout = (columnSpacing = 0,))
         @test_throws ErrorException graphFigure(graph; node = (variableRadius = 0,))
         @test_throws ErrorException graphFigure(graph; label = (fontSize = 0,))
+        @test_throws ErrorException graphFigure(graph; label = (tooltipDetail = :basic,))
+        @test_throws ErrorException graphFigure(graph; label = (tooltipDetail = :data,))
         @test_throws ErrorException graphFigure(graph; canvas = (canvasPadding = 16,))
         @test_throws ErrorException graphFigure(graph; layout = (orientation = :diagonal,))
         @test_throws ErrorException graphFigure(graph; label = (labelPlacement = :inside,))

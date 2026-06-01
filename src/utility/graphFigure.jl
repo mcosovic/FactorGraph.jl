@@ -40,6 +40,8 @@ Label options control label placement, visibility, and font size:
   - `outsideGap`: Gap between a node and its outside label.
   - `showVariables`: Draw variable labels.
   - `showFactors`: Draw factor labels.
+  - `showTooltips`: Add SVG hover tooltips for variables, factors, and edges.
+  - `tooltipDetail`: Tooltip detail level: `:summary` or `:full`.
   - `fontSize`: Label font size in SVG user units.
 
 Style options control default graph colors and stroke widths:
@@ -155,6 +157,8 @@ function graphFigure(
             highlight = highlight,
             showVariableLabels = labelOptions.showVariables,
             showFactorLabels = labelOptions.showFactors,
+            showTooltips = labelOptions.showTooltips,
+            tooltipDetail = labelOptions.tooltipDetail,
             fontSize = labelOptions.fontSize
         )
     end
@@ -296,14 +300,40 @@ function graphFigure(
             edge,
             highlightState.edges
         )
-        println(buffer, svgEdge(x1, y1, x2, y2, layoutOptions.curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+        tooltip = labelOptions.showTooltips ?
+            graphFigureEdgeTooltip(graph, edge, labelOptions.tooltipDetail) : nothing
+        println(
+            buffer,
+            svgEdge(
+                x1,
+                y1,
+                x2,
+                y2,
+                layoutOptions.curvedEdges,
+                edgeClass,
+                get(highlightState.edgeStyles, edge.id, nothing),
+                tooltip
+            )
+        )
     end
 
     for (index, variable) in pairs(graph.variables)
         label = escapeXML(variable.label)
         y = variableY[index]
         className = index in highlightState.variables ? "variable variable-highlight" : "variable"
-        println(buffer, svgCircle(variableX, y, variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+        tooltip = labelOptions.showTooltips ?
+            graphFigureVariableTooltip(graph, index, labelOptions.tooltipDetail) : nothing
+        println(
+            buffer,
+            svgCircle(
+                variableX,
+                y,
+                variableRadii[index],
+                className,
+                get(highlightState.variableStyles, index, nothing),
+                tooltip
+            )
+        )
         if labelOptions.showVariables
             drawVariableLabel!(
                 buffer,
@@ -325,7 +355,21 @@ function graphFigure(
         y = factorY[index]
         x = factorX[index] - width / 2
         className = index in highlightState.factors ? "factor factor-highlight" : "factor"
-        println(buffer, svgRect(x, y - height / 2, width, height, labelOptions.placement, className, get(highlightState.factorStyles, index, nothing)))
+        tooltip = labelOptions.showTooltips ?
+            graphFigureFactorTooltip(graph, index, labelOptions.tooltipDetail) : nothing
+        println(
+            buffer,
+            svgRect(
+                x,
+                y - height / 2,
+                width,
+                height,
+                labelOptions.placement,
+                className,
+                get(highlightState.factorStyles, index, nothing),
+                tooltip
+            )
+        )
         if labelOptions.showFactors
             drawFactorLabel!(
                 buffer,
@@ -370,6 +414,8 @@ function verticalGraphFigure(
     highlight::AbstractVector,
     showVariableLabels::Bool,
     showFactorLabels::Bool,
+    showTooltips::Bool,
+    tooltipDetail::Symbol,
     fontSize::Int
 )
     columnCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
@@ -523,13 +569,37 @@ function verticalGraphFigure(
             edge,
             highlightState.edges
         )
-        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgEdge(
+                x1,
+                y1,
+                x2,
+                y2,
+                curvedEdges,
+                edgeClass,
+                get(highlightState.edgeStyles, edge.id, nothing),
+                tooltip
+            )
+        )
     end
 
     for (index, variable) in pairs(graph.variables)
         label = escapeXML(variable.label)
         className = index in highlightState.variables ? "variable variable-highlight" : "variable"
-        println(buffer, svgCircle(variableX[index], variableY, variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgCircle(
+                variableX[index],
+                variableY,
+                variableRadii[index],
+                className,
+                get(highlightState.variableStyles, index, nothing),
+                tooltip
+            )
+        )
 
         if showVariableLabels
             drawVariableLabel!(
@@ -559,7 +629,8 @@ function verticalGraphFigure(
                 factorHeights[index],
                 labelPlacement,
                 className,
-                get(highlightState.factorStyles, index, nothing)
+                get(highlightState.factorStyles, index, nothing),
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         )
 
@@ -619,6 +690,8 @@ function graphFigure(
         highlight = highlight,
         showVariableLabels = labelOptions.showVariables,
         showFactorLabels = labelOptions.showFactors,
+        showTooltips = labelOptions.showTooltips,
+        tooltipDetail = labelOptions.tooltipDetail,
         fontSize = labelOptions.fontSize
     )
 end
@@ -691,6 +764,8 @@ function treeGraphFigure(
     highlight::AbstractVector,
     showVariableLabels::Bool,
     showFactorLabels::Bool,
+    showTooltips::Bool,
+    tooltipDetail::Symbol,
     fontSize::Int
 )
     if !(orientation in (:horizontal, :vertical))
@@ -728,6 +803,8 @@ function treeGraphFigure(
             highlight = highlight,
             showVariableLabels = showVariableLabels,
             showFactorLabels = showFactorLabels,
+            showTooltips = showTooltips,
+            tooltipDetail = tooltipDetail,
             fontSize = fontSize
         )
     end
@@ -869,13 +946,37 @@ function treeGraphFigure(
             edge,
             highlightState.edges
         )
-        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgEdge(
+                x1,
+                y1,
+                x2,
+                y2,
+                curvedEdges,
+                edgeClass,
+                get(highlightState.edgeStyles, edge.id, nothing),
+                tooltip
+            )
+        )
     end
 
     for (index, variable) in pairs(graph.variables)
         label = escapeXML(variable.label)
         className = index in highlightState.variables ? "variable variable-highlight" : "variable"
-        println(buffer, svgCircle(variableX[index], variableY[index], variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgCircle(
+                variableX[index],
+                variableY[index],
+                variableRadii[index],
+                className,
+                get(highlightState.variableStyles, index, nothing),
+                tooltip
+            )
+        )
 
         if showVariableLabels
             drawVariableLabel!(
@@ -905,7 +1006,8 @@ function treeGraphFigure(
                 factorHeights[index],
                 labelPlacement,
                 className,
-                get(highlightState.factorStyles, index, nothing)
+                get(highlightState.factorStyles, index, nothing),
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         )
 
@@ -946,6 +1048,8 @@ function verticalTreeGraphFigure(
     highlight::AbstractVector,
     showVariableLabels::Bool,
     showFactorLabels::Bool,
+    showTooltips::Bool,
+    tooltipDetail::Symbol,
     fontSize::Int
 )
     if zoom <= 0
@@ -1093,13 +1197,37 @@ function verticalTreeGraphFigure(
             edge,
             highlightState.edges
         )
-        println(buffer, svgEdge(x1, y1, x2, y2, curvedEdges, edgeClass, get(highlightState.edgeStyles, edge.id, nothing)))
+        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgEdge(
+                x1,
+                y1,
+                x2,
+                y2,
+                curvedEdges,
+                edgeClass,
+                get(highlightState.edgeStyles, edge.id, nothing),
+                tooltip
+            )
+        )
     end
 
     for (index, variable) in pairs(graph.variables)
         label = escapeXML(variable.label)
         className = index in highlightState.variables ? "variable variable-highlight" : "variable"
-        println(buffer, svgCircle(variableX[index], variableY[index], variableRadii[index], className, get(highlightState.variableStyles, index, nothing)))
+        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        println(
+            buffer,
+            svgCircle(
+                variableX[index],
+                variableY[index],
+                variableRadii[index],
+                className,
+                get(highlightState.variableStyles, index, nothing),
+                tooltip
+            )
+        )
 
         if showVariableLabels
             drawSideLabel!(
@@ -1127,7 +1255,8 @@ function verticalTreeGraphFigure(
                 factorHeights[index],
                 labelPlacement,
                 className,
-                get(highlightState.factorStyles, index, nothing)
+                get(highlightState.factorStyles, index, nothing),
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         )
 
@@ -1300,6 +1429,8 @@ function graphFigureLabelOptions(label::NamedTuple)
         outsideGap = 6,
         showVariables = true,
         showFactors = true,
+        showTooltips = true,
+        tooltipDetail = :summary,
         fontSize = 14
     )
 
@@ -1323,7 +1454,258 @@ function graphFigureLabelOptions(label::NamedTuple)
         error("label.fontSize must be positive.")
     end
 
+    if !(options.tooltipDetail in (:summary, :full))
+        error("label.tooltipDetail must be :summary or :full.")
+    end
+
     return options
+end
+
+function graphFigureVariableTooltip(
+    graph::AbstractFactorGraph,
+    variableIndex::Int,
+    detail::Symbol
+)
+    variable = graph.variables[variableIndex]
+    identityLines = [
+        "type: $(nameof(typeof(variable)))",
+        "index: $variableIndex",
+        "id: $(graphFigureValueText(variable.id))",
+        graphFigureVariableSizeTooltip(variable),
+        "degree: $(length(graph.variableEdges[variableIndex]))"
+    ]
+    lines = graphFigureTooltipLines(
+        "Variable $(variable.label)",
+        identityLines,
+        graphFigureVariableDataTooltip(variable, detail),
+        detail
+    )
+
+    return escapeXML(join(lines, "\n"))
+end
+
+function graphFigureFactorTooltip(
+    graph::AbstractFactorGraph,
+    factorIndex::Int,
+    detail::Symbol
+)
+    factor = graph.factors[factorIndex]
+    variableLabels = [
+        graph.variables[edge.variableIndex].label for edge in graph.edges
+        if edge.factorIndex == factorIndex
+    ]
+    identityLines = [
+        "type: $(nameof(typeof(factor)))",
+        "index: $factorIndex",
+        "id: $(graphFigureValueText(factor.id))",
+        "variables: $(join(variableLabels, ", "))",
+        "degree: $(length(graph.factorEdges[factorIndex]))"
+    ]
+    lines = graphFigureTooltipLines(
+        "Factor $(factor.label)",
+        identityLines,
+        graphFigureFactorDataTooltip(factor, detail, length(graph.factorEdges[factorIndex]) == 1),
+        detail
+    )
+
+    return escapeXML(join(lines, "\n"))
+end
+
+function graphFigureEdgeTooltip(graph::AbstractFactorGraph, edge::Edge, detail::Symbol)
+    variable = graph.variables[edge.variableIndex]
+    factor = graph.factors[edge.factorIndex]
+    identityLines = [
+        "variable: $(variable.label)",
+        "factor: $(factor.label)",
+        "variable index: $(edge.variableIndex)",
+        "factor index: $(edge.factorIndex)"
+    ]
+    lines = graphFigureTooltipLines(
+        "Edge $(edge.id)",
+        identityLines,
+        Pair{String, Vector{String}}[],
+        detail
+    )
+
+    return escapeXML(join(lines, "\n"))
+end
+
+function graphFigureVariableSizeTooltip(variable::GaussianVariable)
+    return "dimension: $(variable.dimension)"
+end
+
+function graphFigureVariableSizeTooltip(variable::DiscreteVariable)
+    return "cardinality: $(variable.cardinality)"
+end
+
+function graphFigureVariableDataTooltip(variable::GaussianVariable, detail::Symbol)
+    if detail == :full
+        return graphFigureFullVariableDataTooltip(variable)
+    end
+
+    return [
+        "Initialization" => [
+            "mean size: $(graphFigureOptionalSizeText(variable.mean))",
+            "covariance size: $(graphFigureOptionalSizeText(variable.covariance))"
+        ],
+        "Components" => [
+            "component count: $(length(variable.components))"
+        ]
+    ]
+end
+
+function graphFigureVariableDataTooltip(variable::DiscreteVariable, detail::Symbol)
+    if detail == :full
+        return [
+            "Initialization" => [
+                "probability: $(graphFigureOptionalValueText(variable.probability))"
+            ],
+            "States" => [
+                "states: $(graphFigureReferenceVectorText(variable.states))"
+            ]
+        ]
+    end
+
+    return [
+        "Initialization" => [
+            "probability size: $(graphFigureOptionalSizeText(variable.probability))"
+        ],
+        "States" => [
+            "state count: $(length(variable.states))"
+        ]
+    ]
+end
+
+function graphFigureFullVariableDataTooltip(variable::GaussianVariable)
+    if variable.dimension == 1
+        return [
+            "Initialization" => [
+            "mean: $(graphFigureOptionalValueText(variable.mean))",
+                "variance: $(graphFigureScalarVarianceText(variable.covariance))"
+            ],
+            "Components" => [
+                "component: $(graphFigureValueText(only(variable.components)))"
+            ]
+        ]
+    end
+
+    return [
+        "Initialization" => [
+        "mean: $(graphFigureOptionalValueText(variable.mean))",
+            "covariance: $(graphFigureOptionalValueText(variable.covariance))"
+        ],
+        "Components" => [
+            "components: $(graphFigureReferenceVectorText(variable.components))"
+        ]
+    ]
+end
+
+function graphFigureFactorDataTooltip(factor::GaussianFactor, detail::Symbol, isUnary::Bool)
+    if detail == :full
+        sections = [
+            "Parameters" => [
+            "mean: $(graphFigureValueText(factor.mean))",
+            "coefficient: $(graphFigureValueText(factor.coefficient))",
+                "covariance: $(graphFigureValueText(factor.covariance))"
+            ]
+        ]
+
+        if isUnary
+            push!(sections, "Options" => ["initialize: $(factor.initialize)"])
+        end
+
+        return sections
+    end
+
+    sections = [
+        "Parameters" => [
+            "mean size: $(graphFigureSizeText(factor.mean))",
+            "coefficient size: $(graphFigureSizeText(factor.coefficient))",
+            "covariance size: $(graphFigureSizeText(factor.covariance))"
+        ]
+    ]
+
+    if isUnary
+        push!(sections, "Options" => ["initialize: $(factor.initialize)"])
+    end
+
+    return sections
+end
+
+function graphFigureFactorDataTooltip(factor::DiscreteFactor, detail::Symbol, isUnary::Bool)
+    if detail == :full
+        sections = [
+            "Parameters" => [
+                "table: $(graphFigureValueText(factor.table))"
+            ]
+        ]
+
+        if isUnary
+            push!(sections, "Options" => ["initialize: $(factor.initialize)"])
+        end
+
+        return sections
+    end
+
+    sections = [
+        "Parameters" => [
+            "table size: $(graphFigureSizeText(factor.table))"
+        ]
+    ]
+
+    if isUnary
+        push!(sections, "Options" => ["initialize: $(factor.initialize)"])
+    end
+
+    return sections
+end
+
+function graphFigureTooltipLines(
+    title::AbstractString,
+    identityLines::AbstractVector{String},
+    sections,
+    detail::Symbol
+)
+    lines = [title, "", "Identity"]
+    append!(lines, identityLines)
+
+    for section in sections
+        if !isempty(section.second)
+            push!(lines, "")
+            push!(lines, section.first)
+            append!(lines, section.second)
+        end
+    end
+
+    return lines
+end
+
+function graphFigureOptionalValueText(value)
+    return isnothing(value) ? "not set" : graphFigureValueText(value)
+end
+
+function graphFigureScalarVarianceText(matrix::Nothing)
+    return "not set"
+end
+
+function graphFigureScalarVarianceText(matrix::AbstractMatrix)
+    return graphFigureValueText(matrix[1, 1])
+end
+
+function graphFigureOptionalSizeText(value)
+    return isnothing(value) ? "not set" : graphFigureSizeText(value)
+end
+
+function graphFigureSizeText(array::AbstractArray)
+    return join(size(array), " x ")
+end
+
+function graphFigureReferenceVectorText(values::AbstractVector)
+    return "[$(join((graphFigureValueText(value) for value in values), ", "))]"
+end
+
+function graphFigureValueText(value)
+    return sprint(show, value)
 end
 
 function graphFigureStyle(style::NamedTuple)
@@ -2301,6 +2683,13 @@ function svgStyle(
       stroke-width: $(style.edgeStrokeWidth);
       stroke-opacity: $(style.edgeOpacity);
     }
+    .edge-hitbox {
+      fill: none;
+      stroke: #000000;
+      stroke-width: 14;
+      stroke-opacity: 0;
+      pointer-events: stroke;
+    }
     .variable {
       fill: $(style.variableFill);
       stroke: $(style.variableStroke);
@@ -2355,9 +2744,15 @@ function svgLine(
     x2::Real,
     y2::Real,
     className::AbstractString,
-    style::Union{Nothing, NamedTuple} = nothing
+    style::Union{Nothing, NamedTuple} = nothing,
+    tooltip::Union{Nothing, AbstractString} = nothing
 )
-    return """  <line class="$className" x1="$x1" y1="$y1" x2="$x2" y2="$y2"$(svgStyleAttribute(style))/>"""
+    attributes = string(
+        "class=\"$className\" x1=\"$x1\" y1=\"$y1\" x2=\"$x2\" y2=\"$y2\"",
+        svgStyleAttribute(style)
+    )
+
+    return svgShape("line", attributes, tooltip)
 end
 
 function svgPath(
@@ -2366,14 +2761,20 @@ function svgPath(
     x2::Real,
     y2::Real,
     className::AbstractString,
-    style::Union{Nothing, NamedTuple} = nothing
+    style::Union{Nothing, NamedTuple} = nothing,
+    tooltip::Union{Nothing, AbstractString} = nothing
 )
     dx = abs(x2 - x1)
     direction = x2 >= x1 ? 1 : -1
     c1x = x1 + direction * 0.45 * dx
     c2x = x2 - direction * 0.45 * dx
 
-    return """  <path class="$className" d="M $x1 $y1 C $c1x $y1, $c2x $y2, $x2 $y2"$(svgStyleAttribute(style))/>"""
+    attributes = string(
+        "class=\"$className\" d=\"M $x1 $y1 C $c1x $y1, $c2x $y2, $x2 $y2\"",
+        svgStyleAttribute(style)
+    )
+
+    return svgShape("path", attributes, tooltip)
 end
 
 function svgEdge(
@@ -2383,10 +2784,22 @@ function svgEdge(
     y2::Real,
     curvedEdges::Bool,
     className::AbstractString,
-    style::Union{Nothing, NamedTuple} = nothing
+    style::Union{Nothing, NamedTuple} = nothing,
+    tooltip::Union{Nothing, AbstractString} = nothing
 )
-    return curvedEdges ? svgPath(x1, y1, x2, y2, className, style) :
+    visibleEdge = curvedEdges ?
+        svgPath(x1, y1, x2, y2, className, style) :
         svgLine(x1, y1, x2, y2, className, style)
+
+    if isnothing(tooltip)
+        return visibleEdge
+    end
+
+    hitbox = curvedEdges ?
+        svgPath(x1, y1, x2, y2, "edge-hitbox", nothing, tooltip) :
+        svgLine(x1, y1, x2, y2, "edge-hitbox", nothing, tooltip)
+
+    return string(visibleEdge, "\n", hitbox)
 end
 
 function svgStyleAttribute(style::Union{Nothing, NamedTuple})
@@ -2411,14 +2824,35 @@ function svgStyleAttribute(style::Union{Nothing, NamedTuple})
     return isempty(parts) ? "" : " style=\"$(join(parts, "; "))\""
 end
 
+function svgShape(
+    name::AbstractString,
+    attributes::AbstractString,
+    tooltip::Union{Nothing, AbstractString}
+)
+    if isnothing(tooltip)
+        return """  <$name $attributes/>"""
+    end
+
+    return """
+  <$name $attributes>
+    <title>$tooltip</title>
+  </$name>"""
+end
+
 function svgCircle(
     x::Real,
     y::Real,
     radius::Int,
     className::AbstractString,
-    style::Union{Nothing, NamedTuple} = nothing
+    style::Union{Nothing, NamedTuple} = nothing,
+    tooltip::Union{Nothing, AbstractString} = nothing
 )
-    return """  <circle class="$className" cx="$x" cy="$y" r="$radius"$(svgStyleAttribute(style))/>"""
+    attributes = string(
+        "class=\"$className\" cx=\"$x\" cy=\"$y\" r=\"$radius\"",
+        svgStyleAttribute(style)
+    )
+
+    return svgShape("circle", attributes, tooltip)
 end
 
 function svgRect(
@@ -2428,11 +2862,17 @@ function svgRect(
     height::Int,
     labelPlacement::Symbol,
     className::AbstractString,
-    style::Union{Nothing, NamedTuple} = nothing
+    style::Union{Nothing, NamedTuple} = nothing,
+    tooltip::Union{Nothing, AbstractString} = nothing
 )
     radius = labelPlacement == :inside ? 4 : 3
 
-    return """  <rect class="$className" x="$x" y="$y" width="$width" height="$height" rx="$radius"$(svgStyleAttribute(style))/>"""
+    attributes = string(
+        "class=\"$className\" x=\"$x\" y=\"$y\" width=\"$width\" height=\"$height\" rx=\"$radius\"",
+        svgStyleAttribute(style)
+    )
+
+    return svgShape("rect", attributes, tooltip)
 end
 
 function svgText(x::Real, y::Real, label::AbstractString)
