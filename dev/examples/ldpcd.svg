@@ -8,6 +8,13 @@
     stroke-width: 1.6;
     stroke-opacity: 1.0;
   }
+  .edge-hitbox {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 14;
+    stroke-opacity: 0;
+    pointer-events: stroke;
+  }
   .variable {
     fill: #e0f2fe;
     stroke: #0369a1;
@@ -31,48 +38,399 @@
 </style>
   <rect class="background" x="0" y="0" width="510" height="497"/>
   <path class="edge" d="M 127.02 45.0 C 156.26999999999998 45.0, 162.76999999999998 45.0, 192.01999999999998 45.0"/>
+<path class="edge-hitbox" d="M 127.02 45.0 C 156.26999999999998 45.0, 162.76999999999998 45.0, 192.01999999999998 45.0">
+  <title>Edge 1
+
+Identity
+variable: x1
+factor: channel_x1
+variable index: 1
+factor index: 1</title>
+</path>
   <path class="edge" d="M 224.01999999999998 45.0 C 307.27 45.0, 325.77 142.33333333333331, 409.02 142.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 45.0 C 307.27 45.0, 325.77 142.33333333333331, 409.02 142.33333333333331">
+  <title>Edge 2
+
+Identity
+variable: x1
+factor: check_1
+variable index: 1
+factor index: 7</title>
+</path>
   <path class="edge" d="M 224.01999999999998 45.0 C 307.27 45.0, 325.77 250.3333333333333, 409.02 250.3333333333333"/>
+<path class="edge-hitbox" d="M 224.01999999999998 45.0 C 307.27 45.0, 325.77 250.3333333333333, 409.02 250.3333333333333">
+  <title>Edge 3
+
+Identity
+variable: x1
+factor: check_3
+variable index: 1
+factor index: 9</title>
+</path>
   <path class="edge" d="M 127.02 125.0 C 156.26999999999998 125.0, 162.76999999999998 125.0, 192.01999999999998 125.0"/>
+<path class="edge-hitbox" d="M 127.02 125.0 C 156.26999999999998 125.0, 162.76999999999998 125.0, 192.01999999999998 125.0">
+  <title>Edge 4
+
+Identity
+variable: x2
+factor: channel_x2
+variable index: 2
+factor index: 2</title>
+</path>
   <path class="edge" d="M 224.01999999999998 125.0 C 307.27 125.0, 325.77 142.33333333333331, 409.02 142.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 125.0 C 307.27 125.0, 325.77 142.33333333333331, 409.02 142.33333333333331">
+  <title>Edge 5
+
+Identity
+variable: x2
+factor: check_1
+variable index: 2
+factor index: 7</title>
+</path>
   <path class="edge" d="M 224.01999999999998 125.0 C 307.27 125.0, 325.77 222.33333333333331, 409.02 222.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 125.0 C 307.27 125.0, 325.77 222.33333333333331, 409.02 222.33333333333331">
+  <title>Edge 6
+
+Identity
+variable: x2
+factor: check_2
+variable index: 2
+factor index: 8</title>
+</path>
   <path class="edge" d="M 127.02 205.0 C 156.26999999999998 205.0, 162.76999999999998 205.0, 192.01999999999998 205.0"/>
+<path class="edge-hitbox" d="M 127.02 205.0 C 156.26999999999998 205.0, 162.76999999999998 205.0, 192.01999999999998 205.0">
+  <title>Edge 7
+
+Identity
+variable: x3
+factor: channel_x3
+variable index: 3
+factor index: 3</title>
+</path>
   <path class="edge" d="M 224.01999999999998 205.0 C 307.27 205.0, 325.77 222.33333333333331, 409.02 222.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 205.0 C 307.27 205.0, 325.77 222.33333333333331, 409.02 222.33333333333331">
+  <title>Edge 8
+
+Identity
+variable: x3
+factor: check_2
+variable index: 3
+factor index: 8</title>
+</path>
   <path class="edge" d="M 224.01999999999998 205.0 C 307.27 205.0, 325.77 250.3333333333333, 409.02 250.3333333333333"/>
+<path class="edge-hitbox" d="M 224.01999999999998 205.0 C 307.27 205.0, 325.77 250.3333333333333, 409.02 250.3333333333333">
+  <title>Edge 9
+
+Identity
+variable: x3
+factor: check_3
+variable index: 3
+factor index: 9</title>
+</path>
   <path class="edge" d="M 127.02 285.0 C 156.26999999999998 285.0, 162.76999999999998 285.0, 192.01999999999998 285.0"/>
+<path class="edge-hitbox" d="M 127.02 285.0 C 156.26999999999998 285.0, 162.76999999999998 285.0, 192.01999999999998 285.0">
+  <title>Edge 10
+
+Identity
+variable: x4
+factor: channel_x4
+variable index: 4
+factor index: 4</title>
+</path>
   <path class="edge" d="M 224.01999999999998 285.0 C 307.27 285.0, 325.77 142.33333333333331, 409.02 142.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 285.0 C 307.27 285.0, 325.77 142.33333333333331, 409.02 142.33333333333331">
+  <title>Edge 11
+
+Identity
+variable: x4
+factor: check_1
+variable index: 4
+factor index: 7</title>
+</path>
   <path class="edge" d="M 127.02 365.0 C 156.26999999999998 365.0, 162.76999999999998 365.0, 192.01999999999998 365.0"/>
+<path class="edge-hitbox" d="M 127.02 365.0 C 156.26999999999998 365.0, 162.76999999999998 365.0, 192.01999999999998 365.0">
+  <title>Edge 12
+
+Identity
+variable: x5
+factor: channel_x5
+variable index: 5
+factor index: 5</title>
+</path>
   <path class="edge" d="M 224.01999999999998 365.0 C 307.27 365.0, 325.77 222.33333333333331, 409.02 222.33333333333331"/>
+<path class="edge-hitbox" d="M 224.01999999999998 365.0 C 307.27 365.0, 325.77 222.33333333333331, 409.02 222.33333333333331">
+  <title>Edge 13
+
+Identity
+variable: x5
+factor: check_2
+variable index: 5
+factor index: 8</title>
+</path>
   <path class="edge" d="M 127.02 445.0 C 156.26999999999998 445.0, 162.76999999999998 445.0, 192.01999999999998 445.0"/>
+<path class="edge-hitbox" d="M 127.02 445.0 C 156.26999999999998 445.0, 162.76999999999998 445.0, 192.01999999999998 445.0">
+  <title>Edge 14
+
+Identity
+variable: x6
+factor: channel_x6
+variable index: 6
+factor index: 6</title>
+</path>
   <path class="edge" d="M 224.01999999999998 445.0 C 307.27 445.0, 325.77 250.3333333333333, 409.02 250.3333333333333"/>
-  <circle class="variable" cx="208.01999999999998" cy="45.0" r="16"/>
+<path class="edge-hitbox" d="M 224.01999999999998 445.0 C 307.27 445.0, 325.77 250.3333333333333, 409.02 250.3333333333333">
+  <title>Edge 15
+
+Identity
+variable: x6
+factor: check_3
+variable index: 6
+factor index: 9</title>
+</path>
+<circle class="variable" cx="208.01999999999998" cy="45.0" r="16">
+  <title>Variable x1
+
+Identity
+type: DiscreteVariable
+index: 1
+id: :x1
+cardinality: 2
+degree: 3
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="74.0">x1</text>
-  <circle class="variable" cx="208.01999999999998" cy="125.0" r="16"/>
+<circle class="variable" cx="208.01999999999998" cy="125.0" r="16">
+  <title>Variable x2
+
+Identity
+type: DiscreteVariable
+index: 2
+id: :x2
+cardinality: 2
+degree: 3
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="154.0">x2</text>
-  <circle class="variable" cx="208.01999999999998" cy="205.0" r="16"/>
+<circle class="variable" cx="208.01999999999998" cy="205.0" r="16">
+  <title>Variable x3
+
+Identity
+type: DiscreteVariable
+index: 3
+id: :x3
+cardinality: 2
+degree: 3
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="234.0">x3</text>
-  <circle class="variable" cx="208.01999999999998" cy="285.0" r="16"/>
+<circle class="variable" cx="208.01999999999998" cy="285.0" r="16">
+  <title>Variable x4
+
+Identity
+type: DiscreteVariable
+index: 4
+id: :x4
+cardinality: 2
+degree: 2
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="314.0">x4</text>
-  <circle class="variable" cx="208.01999999999998" cy="365.0" r="16"/>
+<circle class="variable" cx="208.01999999999998" cy="365.0" r="16">
+  <title>Variable x5
+
+Identity
+type: DiscreteVariable
+index: 5
+id: :x5
+cardinality: 2
+degree: 2
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="394.0">x5</text>
-  <circle class="variable" cx="208.01999999999998" cy="445.0" r="16"/>
+<circle class="variable" cx="208.01999999999998" cy="445.0" r="16">
+  <title>Variable x6
+
+Identity
+type: DiscreteVariable
+index: 6
+id: :x6
+cardinality: 2
+degree: 2
+
+Initialization
+probability size: not set
+
+States
+state count: 2</title>
+</circle>
   <text class="label" x="208.01999999999998" y="474.0">x6</text>
-  <rect class="factor" x="109.02" y="36.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="36.0" width="18" height="18" rx="3">
+  <title>Factor channel_x1
+
+Identity
+type: DiscreteFactor
+index: 1
+id: 1
+variables: x1
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="45.0">channel_x1</text>
-  <rect class="factor" x="109.02" y="116.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="116.0" width="18" height="18" rx="3">
+  <title>Factor channel_x2
+
+Identity
+type: DiscreteFactor
+index: 2
+id: 2
+variables: x2
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="125.0">channel_x2</text>
-  <rect class="factor" x="109.02" y="196.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="196.0" width="18" height="18" rx="3">
+  <title>Factor channel_x3
+
+Identity
+type: DiscreteFactor
+index: 3
+id: 3
+variables: x3
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="205.0">channel_x3</text>
-  <rect class="factor" x="109.02" y="276.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="276.0" width="18" height="18" rx="3">
+  <title>Factor channel_x4
+
+Identity
+type: DiscreteFactor
+index: 4
+id: 4
+variables: x4
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="285.0">channel_x4</text>
-  <rect class="factor" x="109.02" y="356.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="356.0" width="18" height="18" rx="3">
+  <title>Factor channel_x5
+
+Identity
+type: DiscreteFactor
+index: 5
+id: 5
+variables: x5
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="365.0">channel_x5</text>
-  <rect class="factor" x="109.02" y="436.0" width="18" height="18" rx="3"/>
+<rect class="factor" x="109.02" y="436.0" width="18" height="18" rx="3">
+  <title>Factor channel_x6
+
+Identity
+type: DiscreteFactor
+index: 6
+id: 6
+variables: x6
+degree: 1
+
+Parameters
+table size: 2
+
+Options
+initialize: true</title>
+</rect>
   <text class="label label-end" x="103.02" y="445.0">channel_x6</text>
-  <rect class="factor" x="409.02" y="133.33333333333331" width="18" height="18" rx="3"/>
+<rect class="factor" x="409.02" y="133.33333333333331" width="18" height="18" rx="3">
+  <title>Factor check_1
+
+Identity
+type: DiscreteFactor
+index: 7
+id: 7
+variables: x1, x2, x4
+degree: 3
+
+Parameters
+table size: 2 x 2 x 2</title>
+</rect>
   <text class="label label-start" x="433.02" y="142.33333333333331">check_1</text>
-  <rect class="factor" x="409.02" y="213.33333333333331" width="18" height="18" rx="3"/>
+<rect class="factor" x="409.02" y="213.33333333333331" width="18" height="18" rx="3">
+  <title>Factor check_2
+
+Identity
+type: DiscreteFactor
+index: 8
+id: 8
+variables: x2, x3, x5
+degree: 3
+
+Parameters
+table size: 2 x 2 x 2</title>
+</rect>
   <text class="label label-start" x="433.02" y="222.33333333333331">check_2</text>
-  <rect class="factor" x="409.02" y="241.3333333333333" width="18" height="18" rx="3"/>
+<rect class="factor" x="409.02" y="241.3333333333333" width="18" height="18" rx="3">
+  <title>Factor check_3
+
+Identity
+type: DiscreteFactor
+index: 9
+id: 9
+variables: x1, x3, x6
+degree: 3
+
+Parameters
+table size: 2 x 2 x 2</title>
+</rect>
   <text class="label label-start" x="433.02" y="250.3333333333333">check_3</text>
 </svg>
