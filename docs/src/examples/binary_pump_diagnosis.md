@@ -116,14 +116,14 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example binary_pump_diagnosis
-saveGraphFigure(joinpath(@OUTPUT, "bpd.svg"), graph)
+saveGraphFigure("bpd.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="bpd.svg" alt="Binary pump diagnosis factor graph" style="width: 65%; height: auto;">
+  <img src="../bpd.svg" alt="Binary pump diagnosis factor graph" style="width: 65%; height: auto;">
 </div>
 ```
 

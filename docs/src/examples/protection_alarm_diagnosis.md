@@ -95,14 +95,14 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example protection_alarm_diagnosis
-saveGraphFigure(joinpath(@OUTPUT, "pad.svg"), graph)
+saveGraphFigure("pad.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="pad.svg" alt="Protection alarm diagnosis factor graph" style="width: 60%; height: auto;">
+  <img src="../pad.svg" alt="Protection alarm diagnosis factor graph" style="width: 60%; height: auto;">
 </div>
 ```
 

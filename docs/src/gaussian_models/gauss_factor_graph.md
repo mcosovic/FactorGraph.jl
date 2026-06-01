@@ -211,14 +211,14 @@ For quick debugging, the graph structure can be rendered as a SVG with
 variables before running inference:
 
 ```@example general_gaussian_factor_graph
-saveGraphFigure(joinpath(@OUTPUT, "gfg.svg"), graph)
+saveGraphFigure("gfg.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="gfg.svg" alt="Gaussian factor graph" style="width: 45%; height: auto;">
+  <img src="../gfg.svg" alt="Gaussian factor graph" style="width: 45%; height: auto;">
 </div>
 ```
 

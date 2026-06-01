@@ -161,14 +161,14 @@ For quick debugging, the graph structure can be rendered as a SVG with
 the intended variable connections before running inference:
 
 ```@example discrete_factor_graph
-saveGraphFigure(joinpath(@OUTPUT, "dfg.svg"), graph)
+saveGraphFigure("dfg.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="dfg.svg" alt="Discrete factor graph" style="width: 40%; height: auto;">
+  <img src="../dfg.svg" alt="Discrete factor graph" style="width: 40%; height: auto;">
 </div>
 ```
 

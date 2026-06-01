@@ -96,14 +96,14 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example pmu_state_estimation
-saveGraphFigure(joinpath(@OUTPUT, "pmuse.svg"), graph)
+saveGraphFigure("pmuse.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="pmuse.svg" alt="PMU state estimation factor graph" style="width: 45%; height: auto;">
+  <img src="../pmuse.svg" alt="PMU state estimation factor graph" style="width: 45%; height: auto;">
 </div>
 ```
 
