@@ -7,7 +7,7 @@ makedocs(
     doctest = false,
     format = Documenter.HTML(
         assets = ["assets/style.css"],
-        prettyurls = get(ENV, "CI", nothing) == "true",
+        prettyurls = true,
         collapselevel = 1,
         repolink = "https://github.com/mcosovic/FactorGraph.jl",
     ),
