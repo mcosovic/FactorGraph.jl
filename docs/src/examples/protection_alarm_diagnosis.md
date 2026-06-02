@@ -103,11 +103,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="pad.svg"
+    data="../../pad.svg"
     type="image/svg+xml"
     aria-label="Protection alarm diagnosis factor graph"
     style="width: 60%; height: auto;">
-    <a href="pad.svg">Protection alarm diagnosis factor graph</a>
+    <a href="../../pad.svg">Protection alarm diagnosis factor graph</a>
   </object>
 </div>
 ```

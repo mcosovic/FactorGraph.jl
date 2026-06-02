@@ -92,11 +92,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="dcse.svg"
+    data="../../dcse.svg"
     type="image/svg+xml"
     aria-label="DC state estimation factor graph"
     style="width: 50%; height: auto;">
-    <a href="dcse.svg">DC state estimation factor graph</a>
+    <a href="../../dcse.svg">DC state estimation factor graph</a>
   </object>
 </div>
 ```
@@ -150,11 +150,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="ddcse.svg"
+    data="../../ddcse.svg"
     type="image/svg+xml"
     aria-label="Dynamic DC state estimation factor graph"
     style="width: 50%; height: auto;">
-    <a href="ddcse.svg">Dynamic DC state estimation factor graph</a>
+    <a href="../../ddcse.svg">Dynamic DC state estimation factor graph</a>
   </object>
 </div>
 ```

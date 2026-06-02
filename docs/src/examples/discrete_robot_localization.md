@@ -106,10 +106,10 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="drl.svg"
+    data="../../drl.svg"
     type="image/svg+xml"
     aria-label="Discrete robot localization factor graph">
-    <a href="drl.svg">Discrete robot localization factor graph</a>
+    <a href="../../drl.svg">Discrete robot localization factor graph</a>
   </object>
 </div>
 ```

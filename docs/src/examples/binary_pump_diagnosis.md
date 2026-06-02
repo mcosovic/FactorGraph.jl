@@ -124,11 +124,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="bpd.svg"
+    data="../../bpd.svg"
     type="image/svg+xml"
     aria-label="Binary pump diagnosis factor graph"
     style="width: 65%; height: auto;">
-    <a href="bpd.svg">Binary pump diagnosis factor graph</a>
+    <a href="../../bpd.svg">Binary pump diagnosis factor graph</a>
   </object>
 </div>
 ```

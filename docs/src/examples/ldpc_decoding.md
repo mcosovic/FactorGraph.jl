@@ -124,11 +124,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="ldpcd.svg"
+    data="../../ldpcd.svg"
     type="image/svg+xml"
     aria-label="LDPC decoding factor graph"
     style="width: 55%; height: auto;">
-    <a href="ldpcd.svg">LDPC decoding factor graph</a>
+    <a href="../../ldpcd.svg">LDPC decoding factor graph</a>
   </object>
 </div>
 ```

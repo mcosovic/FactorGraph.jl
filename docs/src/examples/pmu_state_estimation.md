@@ -104,11 +104,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="pmuse.svg"
+    data="../../pmuse.svg"
     type="image/svg+xml"
     aria-label="PMU state estimation factor graph"
     style="width: 45%; height: auto;">
-    <a href="pmuse.svg">PMU state estimation factor graph</a>
+    <a href="../../pmuse.svg">PMU state estimation factor graph</a>
   </object>
 </div>
 ```
