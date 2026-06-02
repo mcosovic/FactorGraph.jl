@@ -20,19 +20,26 @@
     stroke: #0369a1;
     stroke-width: 1.8;
   }
+  .variable-context { opacity: 0.38; }
   .factor {
     fill: #dc2626;
     stroke: #991b1b;
     stroke-width: 1.8;
   }
+  .factor-context { opacity: 0.42; }
   .edge-highlight { stroke-opacity: 1.0; }
   .edge-label {
     fill: #64748b;
     font-size: 12px;
-    paint-order: stroke;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .edge-label-background {
+    fill: #ffffff;
     stroke: #ffffff;
     stroke-linejoin: round;
-    stroke-width: 3px;
+    stroke-width: 4px;
+    font-size: 12px;
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -52,250 +59,371 @@
   <title>Edge 1
 
 Identity
-variable: x1
-factor: prior_x1
-variable index: 1
-factor index: 1</title>
+  variable: x1
+  factor: prior_x1
+  variable index: 1
+  factor index: 1</title>
 </path>
   <path class="edge" d="M 48.120000000000005 85.0 C 90.87 85.0, 100.37 125.0, 143.12 125.0"/>
 <path class="edge-hitbox" d="M 48.120000000000005 85.0 C 90.87 85.0, 100.37 125.0, 143.12 125.0">
   <title>Edge 2
 
 Identity
-variable: x1
-factor: motion12
-variable index: 1
-factor index: 2</title>
+  variable: x1
+  factor: motion12
+  variable index: 1
+  factor index: 2</title>
 </path>
   <path class="edge" d="M 161.12 125.0 C 203.87 125.0, 213.37 85.0, 256.12 85.0"/>
 <path class="edge-hitbox" d="M 161.12 125.0 C 203.87 125.0, 213.37 85.0, 256.12 85.0">
   <title>Edge 3
 
 Identity
-variable: x2
-factor: motion12
-variable index: 2
-factor index: 2</title>
+  variable: x2
+  factor: motion12
+  variable index: 2
+  factor index: 2</title>
 </path>
   <path class="edge" d="M 288.12 85.0 C 330.87 85.0, 340.37 85.0, 383.12 85.0"/>
 <path class="edge-hitbox" d="M 288.12 85.0 C 330.87 85.0, 340.37 85.0, 383.12 85.0">
   <title>Edge 4
 
 Identity
-variable: x2
-factor: motion23
-variable index: 2
-factor index: 3</title>
+  variable: x2
+  factor: motion23
+  variable index: 2
+  factor index: 3</title>
 </path>
   <path class="edge" d="M 401.12 85.0 C 443.87 85.0, 453.37 85.0, 496.12 85.0"/>
 <path class="edge-hitbox" d="M 401.12 85.0 C 443.87 85.0, 453.37 85.0, 496.12 85.0">
   <title>Edge 5
 
 Identity
-variable: x3
-factor: motion23
-variable index: 3
-factor index: 3</title>
+  variable: x3
+  factor: motion23
+  variable index: 3
+  factor index: 3</title>
 </path>
   <path class="edge" d="M 528.12 85.0 C 570.87 85.0, 580.37 45.0, 623.12 45.0"/>
 <path class="edge-hitbox" d="M 528.12 85.0 C 570.87 85.0, 580.37 45.0, 623.12 45.0">
   <title>Edge 6
 
 Identity
-variable: x3
-factor: motion34
-variable index: 3
-factor index: 4</title>
+  variable: x3
+  factor: motion34
+  variable index: 3
+  factor index: 4</title>
 </path>
   <path class="edge" d="M 528.12 85.0 C 570.87 85.0, 580.37 125.0, 623.12 125.0"/>
 <path class="edge-hitbox" d="M 528.12 85.0 C 570.87 85.0, 580.37 125.0, 623.12 125.0">
   <title>Edge 7
 
 Identity
-variable: x3
-factor: beacon3
-variable index: 3
-factor index: 5</title>
+  variable: x3
+  factor: beacon3
+  variable index: 3
+  factor index: 5</title>
 </path>
   <path class="edge" d="M 641.12 45.0 C 683.87 45.0, 693.37 85.0, 736.12 85.0"/>
 <path class="edge-hitbox" d="M 641.12 45.0 C 683.87 45.0, 693.37 85.0, 736.12 85.0">
   <title>Edge 8
 
 Identity
-variable: x4
-factor: motion34
-variable index: 4
-factor index: 4</title>
+  variable: x4
+  factor: motion34
+  variable index: 4
+  factor index: 4</title>
 </path>
   <path class="edge" d="M 768.12 85.0 C 810.87 85.0, 820.37 85.0, 863.12 85.0"/>
 <path class="edge-hitbox" d="M 768.12 85.0 C 810.87 85.0, 820.37 85.0, 863.12 85.0">
   <title>Edge 9
 
 Identity
-variable: x4
-factor: beacon4
-variable index: 4
-factor index: 6</title>
+  variable: x4
+  factor: beacon4
+  variable index: 4
+  factor index: 6</title>
 </path>
 <circle class="variable" cx="32.120000000000005" cy="85.0" r="16">
   <title>Variable x1
 
 Identity
-type: DiscreteVariable
-index: 1
-id: :x1
-cardinality: 3
-degree: 2
+  type: DiscreteVariable
+  index: 1
+  id: :x1
+  cardinality: 3
+  degree: 2
 
 Initialization
-probability size: not set
+  probability size: not set
 
 States
-state count: 3</title>
+  state count: 3</title>
 </circle>
-  <text class="label" x="32.120000000000005" y="114.0">x1</text>
+  <text class="label" x="32.120000000000005" y="114.0"><title>Variable x1
+
+Identity
+  type: DiscreteVariable
+  index: 1
+  id: :x1
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x1</text>
 <circle class="variable" cx="272.12" cy="85.0" r="16">
   <title>Variable x2
 
 Identity
-type: DiscreteVariable
-index: 2
-id: :x2
-cardinality: 3
-degree: 2
+  type: DiscreteVariable
+  index: 2
+  id: :x2
+  cardinality: 3
+  degree: 2
 
 Initialization
-probability size: not set
+  probability size: not set
 
 States
-state count: 3</title>
+  state count: 3</title>
 </circle>
-  <text class="label" x="272.12" y="114.0">x2</text>
+  <text class="label" x="272.12" y="114.0"><title>Variable x2
+
+Identity
+  type: DiscreteVariable
+  index: 2
+  id: :x2
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x2</text>
 <circle class="variable" cx="512.12" cy="85.0" r="16">
   <title>Variable x3
 
 Identity
-type: DiscreteVariable
-index: 3
-id: :x3
-cardinality: 3
-degree: 3
+  type: DiscreteVariable
+  index: 3
+  id: :x3
+  cardinality: 3
+  degree: 3
 
 Initialization
-probability size: not set
+  probability size: not set
 
 States
-state count: 3</title>
+  state count: 3</title>
 </circle>
-  <text class="label" x="512.12" y="114.0">x3</text>
+  <text class="label" x="512.12" y="114.0"><title>Variable x3
+
+Identity
+  type: DiscreteVariable
+  index: 3
+  id: :x3
+  cardinality: 3
+  degree: 3
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x3</text>
 <circle class="variable" cx="752.12" cy="85.0" r="16">
   <title>Variable x4
 
 Identity
-type: DiscreteVariable
-index: 4
-id: :x4
-cardinality: 3
-degree: 2
+  type: DiscreteVariable
+  index: 4
+  id: :x4
+  cardinality: 3
+  degree: 2
 
 Initialization
-probability size: not set
+  probability size: not set
 
 States
-state count: 3</title>
+  state count: 3</title>
 </circle>
-  <text class="label" x="752.12" y="114.0">x4</text>
+  <text class="label" x="752.12" y="114.0"><title>Variable x4
+
+Identity
+  type: DiscreteVariable
+  index: 4
+  id: :x4
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x4</text>
 <rect class="factor" x="143.12" y="36.0" width="18" height="18" rx="3">
   <title>Factor prior_x1
 
 Identity
-type: DiscreteFactor
-index: 1
-id: 1
-variables: x1
-degree: 1
+  type: DiscreteFactor
+  index: 1
+  id: 1
+  variables: x1
+  degree: 1
 
-Parameters
-table size: 3
+Table
+  size: 3
 
 Options
-initialize: true</title>
+  initialize: true</title>
 </rect>
-  <text class="label" x="152.12" y="23.0">prior_x1</text>
+  <text class="label" x="152.12" y="23.0"><title>Factor prior_x1
+
+Identity
+  type: DiscreteFactor
+  index: 1
+  id: 1
+  variables: x1
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: true</title>prior_x1</text>
 <rect class="factor" x="143.12" y="116.0" width="18" height="18" rx="3">
   <title>Factor motion12
 
 Identity
-type: DiscreteFactor
-index: 2
-id: 2
-variables: x1, x2
-degree: 2
+  type: DiscreteFactor
+  index: 2
+  id: 2
+  variables: x1, x2
+  degree: 2
 
-Parameters
-table size: 3 x 3</title>
+Table
+  size: 3 x 3</title>
 </rect>
-  <text class="label" x="152.12" y="103.0">motion12</text>
+  <text class="label" x="152.12" y="103.0"><title>Factor motion12
+
+Identity
+  type: DiscreteFactor
+  index: 2
+  id: 2
+  variables: x1, x2
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion12</text>
 <rect class="factor" x="383.12" y="76.0" width="18" height="18" rx="3">
   <title>Factor motion23
 
 Identity
-type: DiscreteFactor
-index: 3
-id: 3
-variables: x2, x3
-degree: 2
+  type: DiscreteFactor
+  index: 3
+  id: 3
+  variables: x2, x3
+  degree: 2
 
-Parameters
-table size: 3 x 3</title>
+Table
+  size: 3 x 3</title>
 </rect>
-  <text class="label" x="392.12" y="63.0">motion23</text>
+  <text class="label" x="392.12" y="63.0"><title>Factor motion23
+
+Identity
+  type: DiscreteFactor
+  index: 3
+  id: 3
+  variables: x2, x3
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion23</text>
 <rect class="factor" x="623.12" y="36.0" width="18" height="18" rx="3">
   <title>Factor motion34
 
 Identity
-type: DiscreteFactor
-index: 4
-id: 4
-variables: x3, x4
-degree: 2
+  type: DiscreteFactor
+  index: 4
+  id: 4
+  variables: x3, x4
+  degree: 2
 
-Parameters
-table size: 3 x 3</title>
+Table
+  size: 3 x 3</title>
 </rect>
-  <text class="label" x="632.12" y="23.0">motion34</text>
+  <text class="label" x="632.12" y="23.0"><title>Factor motion34
+
+Identity
+  type: DiscreteFactor
+  index: 4
+  id: 4
+  variables: x3, x4
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion34</text>
 <rect class="factor" x="623.12" y="116.0" width="18" height="18" rx="3">
   <title>Factor beacon3
 
 Identity
-type: DiscreteFactor
-index: 5
-id: 5
-variables: x3
-degree: 1
+  type: DiscreteFactor
+  index: 5
+  id: 5
+  variables: x3
+  degree: 1
 
-Parameters
-table size: 3
+Table
+  size: 3
 
 Options
-initialize: false</title>
+  initialize: false</title>
 </rect>
-  <text class="label" x="632.12" y="103.0">beacon3</text>
+  <text class="label" x="632.12" y="103.0"><title>Factor beacon3
+
+Identity
+  type: DiscreteFactor
+  index: 5
+  id: 5
+  variables: x3
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>beacon3</text>
 <rect class="factor" x="863.12" y="76.0" width="18" height="18" rx="3">
   <title>Factor beacon4
 
 Identity
-type: DiscreteFactor
-index: 6
-id: 6
-variables: x4
-degree: 1
+  type: DiscreteFactor
+  index: 6
+  id: 6
+  variables: x4
+  degree: 1
 
-Parameters
-table size: 3
+Table
+  size: 3
 
 Options
-initialize: false</title>
+  initialize: false</title>
 </rect>
-  <text class="label" x="872.12" y="63.0">beacon4</text>
+  <text class="label" x="872.12" y="63.0"><title>Factor beacon4
+
+Identity
+  type: DiscreteFactor
+  index: 6
+  id: 6
+  variables: x4
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>beacon4</text>
 </svg>

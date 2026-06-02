@@ -20,19 +20,26 @@
     stroke: #0369a1;
     stroke-width: 1.8;
   }
+  .variable-context { opacity: 0.38; }
   .factor {
     fill: #dc2626;
     stroke: #991b1b;
     stroke-width: 1.8;
   }
+  .factor-context { opacity: 0.42; }
   .edge-highlight { stroke-opacity: 1.0; }
   .edge-label {
     fill: #64748b;
     font-size: 12px;
-    paint-order: stroke;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .edge-label-background {
+    fill: #ffffff;
     stroke: #ffffff;
     stroke-linejoin: round;
-    stroke-width: 3px;
+    stroke-width: 4px;
+    font-size: 12px;
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -52,237 +59,359 @@
   <title>Edge 1
 
 Identity
-variable: x1
-factor: f1
-variable index: 1
-factor index: 1</title>
+  variable: x1
+  factor: f1
+  variable index: 1
+  factor index: 1</title>
 </path>
   <path class="edge" d="M 48.31999999999999 85.0 C 91.07 85.0, 100.57 125.0, 143.32 125.0"/>
 <path class="edge-hitbox" d="M 48.31999999999999 85.0 C 91.07 85.0, 100.57 125.0, 143.32 125.0">
   <title>Edge 2
 
 Identity
-variable: x1
-factor: f2
-variable index: 1
-factor index: 2</title>
+  variable: x1
+  factor: f2
+  variable index: 1
+  factor index: 2</title>
 </path>
   <path class="edge" d="M 161.32 125.0 C 204.07 125.0, 213.57 85.0, 256.32 85.0"/>
 <path class="edge-hitbox" d="M 161.32 125.0 C 204.07 125.0, 213.57 85.0, 256.32 85.0">
   <title>Edge 3
 
 Identity
-variable: x2
-factor: f2
-variable index: 2
-factor index: 2</title>
+  variable: x2
+  factor: f2
+  variable index: 2
+  factor index: 2</title>
 </path>
   <path class="edge" d="M 288.32 85.0 C 331.07 85.0, 340.57 85.0, 383.32 85.0"/>
 <path class="edge-hitbox" d="M 288.32 85.0 C 331.07 85.0, 340.57 85.0, 383.32 85.0">
   <title>Edge 4
 
 Identity
-variable: x2
-factor: f3
-variable index: 2
-factor index: 3</title>
+  variable: x2
+  factor: f3
+  variable index: 2
+  factor index: 3</title>
 </path>
   <path class="edge" d="M 401.32 85.0 C 444.07 85.0, 453.56999999999994 85.0, 496.31999999999994 85.0"/>
 <path class="edge-hitbox" d="M 401.32 85.0 C 444.07 85.0, 453.56999999999994 85.0, 496.31999999999994 85.0">
   <title>Edge 5
 
 Identity
-variable: x3
-factor: f3
-variable index: 3
-factor index: 3</title>
+  variable: x3
+  factor: f3
+  variable index: 3
+  factor index: 3</title>
 </path>
   <path class="edge" d="M 528.3199999999999 85.0 C 571.0699999999999 85.0, 580.5699999999999 85.0, 623.3199999999999 85.0"/>
 <path class="edge-hitbox" d="M 528.3199999999999 85.0 C 571.0699999999999 85.0, 580.5699999999999 85.0, 623.3199999999999 85.0">
   <title>Edge 6
 
 Identity
-variable: x3
-factor: f4
-variable index: 3
-factor index: 4</title>
+  variable: x3
+  factor: f4
+  variable index: 3
+  factor index: 4</title>
 </path>
   <path class="edge" d="M 641.3199999999999 85.0 C 684.0699999999999 85.0, 693.5699999999999 85.0, 736.3199999999999 85.0"/>
 <path class="edge-hitbox" d="M 641.3199999999999 85.0 C 684.0699999999999 85.0, 693.5699999999999 85.0, 736.3199999999999 85.0">
   <title>Edge 7
 
 Identity
-variable: x4
-factor: f4
-variable index: 4
-factor index: 4</title>
+  variable: x4
+  factor: f4
+  variable index: 4
+  factor index: 4</title>
 </path>
   <path class="edge" d="M 768.3199999999999 85.0 C 811.0699999999999 85.0, 820.5699999999999 85.0, 863.3199999999999 85.0"/>
 <path class="edge-hitbox" d="M 768.3199999999999 85.0 C 811.0699999999999 85.0, 820.5699999999999 85.0, 863.3199999999999 85.0">
   <title>Edge 8
 
 Identity
-variable: x4
-factor: f5
-variable index: 4
-factor index: 5</title>
+  variable: x4
+  factor: f5
+  variable index: 4
+  factor index: 5</title>
 </path>
 <circle class="variable" cx="32.31999999999999" cy="85.0" r="16">
   <title>Variable x1
 
 Identity
-type: GaussianVariable
-index: 1
-id: :x1
-dimension: 1
-degree: 2
+  type: GaussianVariable
+  index: 1
+  id: :x1
+  dimension: 1
+  degree: 2
 
 Initialization
-mean size: not set
-covariance size: not set
+  mean size: not set
+  covariance size: not set
 
 Components
-component count: 1</title>
+  component count: 1</title>
 </circle>
-  <text class="label" x="32.31999999999999" y="114.0">x1</text>
+  <text class="label" x="32.31999999999999" y="114.0"><title>Variable x1
+
+Identity
+  type: GaussianVariable
+  index: 1
+  id: :x1
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean size: not set
+  covariance size: not set
+
+Components
+  component count: 1</title>x1</text>
 <circle class="variable" cx="272.32" cy="85.0" r="16">
   <title>Variable x2
 
 Identity
-type: GaussianVariable
-index: 2
-id: :x2
-dimension: 1
-degree: 2
+  type: GaussianVariable
+  index: 2
+  id: :x2
+  dimension: 1
+  degree: 2
 
 Initialization
-mean size: not set
-covariance size: not set
+  mean size: not set
+  covariance size: not set
 
 Components
-component count: 1</title>
+  component count: 1</title>
 </circle>
-  <text class="label" x="272.32" y="114.0">x2</text>
+  <text class="label" x="272.32" y="114.0"><title>Variable x2
+
+Identity
+  type: GaussianVariable
+  index: 2
+  id: :x2
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean size: not set
+  covariance size: not set
+
+Components
+  component count: 1</title>x2</text>
 <circle class="variable" cx="512.3199999999999" cy="85.0" r="16">
   <title>Variable x3
 
 Identity
-type: GaussianVariable
-index: 3
-id: :x3
-dimension: 1
-degree: 2
+  type: GaussianVariable
+  index: 3
+  id: :x3
+  dimension: 1
+  degree: 2
 
 Initialization
-mean size: not set
-covariance size: not set
+  mean size: not set
+  covariance size: not set
 
 Components
-component count: 1</title>
+  component count: 1</title>
 </circle>
-  <text class="label" x="512.3199999999999" y="114.0">x3</text>
+  <text class="label" x="512.3199999999999" y="114.0"><title>Variable x3
+
+Identity
+  type: GaussianVariable
+  index: 3
+  id: :x3
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean size: not set
+  covariance size: not set
+
+Components
+  component count: 1</title>x3</text>
 <circle class="variable" cx="752.3199999999999" cy="85.0" r="16">
   <title>Variable x4
 
 Identity
-type: GaussianVariable
-index: 4
-id: :x4
-dimension: 1
-degree: 2
+  type: GaussianVariable
+  index: 4
+  id: :x4
+  dimension: 1
+  degree: 2
 
 Initialization
-mean size: not set
-covariance size: not set
+  mean size: not set
+  covariance size: not set
 
 Components
-component count: 1</title>
+  component count: 1</title>
 </circle>
-  <text class="label" x="752.3199999999999" y="114.0">x4</text>
+  <text class="label" x="752.3199999999999" y="114.0"><title>Variable x4
+
+Identity
+  type: GaussianVariable
+  index: 4
+  id: :x4
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean size: not set
+  covariance size: not set
+
+Components
+  component count: 1</title>x4</text>
 <rect class="factor" x="143.32" y="36.0" width="18" height="18" rx="3">
   <title>Factor f1
 
 Identity
-type: GaussianFactor
-index: 1
-id: 1
-variables: x1
-degree: 1
+  type: GaussianFactor
+  index: 1
+  id: 1
+  variables: x1
+  degree: 1
 
 Parameters
-mean size: 1
-coefficient size: 1 x 1
-covariance size: 1 x 1
+  mean size: 1
+  coefficient size: 1 x 1
+  covariance size: 1 x 1
 
 Options
-initialize: false</title>
+  initialize: false</title>
 </rect>
-  <text class="label" x="152.32" y="23.0">f1</text>
+  <text class="label" x="152.32" y="23.0"><title>Factor f1
+
+Identity
+  type: GaussianFactor
+  index: 1
+  id: 1
+  variables: x1
+  degree: 1
+
+Parameters
+  mean size: 1
+  coefficient size: 1 x 1
+  covariance size: 1 x 1
+
+Options
+  initialize: false</title>f1</text>
 <rect class="factor" x="143.32" y="116.0" width="18" height="18" rx="3">
   <title>Factor f2
 
 Identity
-type: GaussianFactor
-index: 2
-id: 2
-variables: x1, x2
-degree: 2
+  type: GaussianFactor
+  index: 2
+  id: 2
+  variables: x1, x2
+  degree: 2
 
 Parameters
-mean size: 1
-coefficient size: 1 x 2
-covariance size: 1 x 1</title>
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>
 </rect>
-  <text class="label" x="152.32" y="103.0">f2</text>
+  <text class="label" x="152.32" y="103.0"><title>Factor f2
+
+Identity
+  type: GaussianFactor
+  index: 2
+  id: 2
+  variables: x1, x2
+  degree: 2
+
+Parameters
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>f2</text>
 <rect class="factor" x="383.32" y="76.0" width="18" height="18" rx="3">
   <title>Factor f3
 
 Identity
-type: GaussianFactor
-index: 3
-id: 3
-variables: x2, x3
-degree: 2
+  type: GaussianFactor
+  index: 3
+  id: 3
+  variables: x2, x3
+  degree: 2
 
 Parameters
-mean size: 1
-coefficient size: 1 x 2
-covariance size: 1 x 1</title>
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>
 </rect>
-  <text class="label" x="392.32" y="63.0">f3</text>
+  <text class="label" x="392.32" y="63.0"><title>Factor f3
+
+Identity
+  type: GaussianFactor
+  index: 3
+  id: 3
+  variables: x2, x3
+  degree: 2
+
+Parameters
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>f3</text>
 <rect class="factor" x="623.3199999999999" y="76.0" width="18" height="18" rx="3">
   <title>Factor f4
 
 Identity
-type: GaussianFactor
-index: 4
-id: 4
-variables: x3, x4
-degree: 2
+  type: GaussianFactor
+  index: 4
+  id: 4
+  variables: x3, x4
+  degree: 2
 
 Parameters
-mean size: 1
-coefficient size: 1 x 2
-covariance size: 1 x 1</title>
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>
 </rect>
-  <text class="label" x="632.3199999999999" y="63.0">f4</text>
+  <text class="label" x="632.3199999999999" y="63.0"><title>Factor f4
+
+Identity
+  type: GaussianFactor
+  index: 4
+  id: 4
+  variables: x3, x4
+  degree: 2
+
+Parameters
+  mean size: 1
+  coefficient size: 1 x 2
+  covariance size: 1 x 1</title>f4</text>
 <rect class="factor" x="863.3199999999999" y="76.0" width="18" height="18" rx="3">
   <title>Factor f5
 
 Identity
-type: GaussianFactor
-index: 5
-id: 5
-variables: x4
-degree: 1
+  type: GaussianFactor
+  index: 5
+  id: 5
+  variables: x4
+  degree: 1
 
 Parameters
-mean size: 1
-coefficient size: 1 x 1
-covariance size: 1 x 1
+  mean size: 1
+  coefficient size: 1 x 1
+  covariance size: 1 x 1
 
 Options
-initialize: false</title>
+  initialize: false</title>
 </rect>
-  <text class="label" x="872.3199999999999" y="63.0">f5</text>
+  <text class="label" x="872.3199999999999" y="63.0"><title>Factor f5
+
+Identity
+  type: GaussianFactor
+  index: 5
+  id: 5
+  variables: x4
+  degree: 1
+
+Parameters
+  mean size: 1
+  coefficient size: 1 x 1
+  covariance size: 1 x 1
+
+Options
+  initialize: false</title>f5</text>
 </svg>
