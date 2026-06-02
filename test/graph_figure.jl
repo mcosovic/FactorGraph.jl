@@ -186,6 +186,17 @@ end
         @test occursin("components: [:a, :b]", gaussianFullSvg)
     end
 
+    @testset "Edge ids" begin
+        svg = graphFigure(graph; label = (showEdgeIds = true,))
+
+        @test occursin("class=\"edge-label\"", svg)
+        @test occursin(">e1</text>", svg)
+        @test occursin(">e6</text>", svg)
+
+        hiddenSvg = graphFigure(graph)
+        @test !occursin("class=\"edge-label\"", hiddenSvg)
+    end
+
     @testset "Tree graph output" begin
         tree = treeFactorGraph(graph; root = :x1)
         svg = graphFigure(

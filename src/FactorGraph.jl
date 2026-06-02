@@ -27,7 +27,12 @@ include("schedule/residual.jl")
 include("utility/diagnostics.jl")
 include("utility/wls.jl")
 include("utility/print.jl")
-include("utility/graphFigure.jl")
+
+# Visualization
+include("visualization/figure.jl")
+include("visualization/options.jl")
+include("visualization/layout.jl")
+include("visualization/svg.jl")
 
 export AbstractFactorGraph,
     GaussianFactorGraph,

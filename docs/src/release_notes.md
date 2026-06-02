@@ -8,6 +8,7 @@
 
 - Added optional SVG hover tooltips to `graphFigure` output for variables,
   factors, and edges, with configurable summary and full detail levels.
+- Added optional edge id labels to `graphFigure` output.
 - Documented graph figure tooltip controls in the Gaussian and discrete factor
   graph guides.
 
