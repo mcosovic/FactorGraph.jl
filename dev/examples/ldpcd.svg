@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="510" height="497" viewBox="0 0 510 497">
-  <title>Factor graph</title>
+<title>Factor graph</title>
 <style>
   .background { fill: #ffffff; }
   .edge {
@@ -26,6 +26,16 @@
     stroke-width: 1.8;
   }
   .edge-highlight { stroke-opacity: 1.0; }
+  .edge-label {
+    fill: #64748b;
+    font-size: 12px;
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-linejoin: round;
+    stroke-width: 3px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
   .label {
     fill: #111827;
     font-family: Helvetica, Arial, sans-serif;
