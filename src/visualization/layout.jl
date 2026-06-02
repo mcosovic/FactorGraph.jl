@@ -132,10 +132,6 @@ function verticalFactorLabelRotations(
         return rotateLabels
     end
 
-    if labelPlacement == :outside
-        return rotateLabels
-    end
-
     if hasOverlappingVerticalLabels(
         factors,
         rawFactorX,
@@ -334,6 +330,9 @@ function fitVerticalCanvas!(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableY),
+    factorIndices = eachindex(factorHeights)
 )
     yMin = Inf
     yMax = -Inf
@@ -342,12 +341,12 @@ function fitVerticalCanvas!(
     factorLabelPadding = labelPlacement == :outside && showFactorLabels ?
         outsideLabelGap + fontSize : 0
 
-    for index in eachindex(variableY)
+    for index in variableIndices
         yMin = min(yMin, variableY[index] - variableRadii[index])
         yMax = max(yMax, variableY[index] + variableRadii[index] + variableBottomPadding)
     end
 
-    for index in eachindex(factorHeights)
+    for index in factorIndices
         y = factorY[index]
         halfHeight = factorHeights[index] / 2
         yMin = min(yMin, y - halfHeight - factorLabelPadding)
@@ -361,11 +360,11 @@ function fitVerticalCanvas!(
     finalHeight, shift = fittedCanvasSizeAndShift(yMin, yMax, canvasHeight, canvasPadding)
 
     if !iszero(shift)
-        for index in eachindex(variableY)
+        for index in variableIndices
             variableY[index] += shift
         end
 
-        for index in eachindex(factorHeights)
+        for index in factorIndices
             factorY[index] += shift
         end
     end
@@ -387,19 +386,22 @@ function fitGeneralHorizontalCanvas!(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableRadii),
+    factorIndices = eachindex(factorWidths)
 )
-    xMin = minimum(variableX - radius for radius in variableRadii)
-    xMax = maximum(variableX + radius for radius in variableRadii)
+    xMin = minimum(variableX - variableRadii[index] for index in variableIndices)
+    xMax = maximum(variableX + variableRadii[index] for index in variableIndices)
 
     if labelPlacement == :outside && showVariableLabels
         variableLabelWidth = maximum(
-            approximateTextWidth(variable.label, fontSize) for variable in variables
+            approximateTextWidth(variables[index].label, fontSize) for index in variableIndices
         )
         xMin = min(xMin, variableX - variableLabelWidth / 2)
         xMax = max(xMax, variableX + variableLabelWidth / 2)
     end
 
-    for index in eachindex(factorWidths)
+    for index in factorIndices
         labelWidth = labelPlacement == :outside && showFactorLabels ?
             outsideLabelGap + approximateTextWidth(factors[index].label, fontSize) : 0.0
         xMin = min(xMin, factorX[index] - factorWidths[index] / 2 - labelWidth)
@@ -411,7 +413,7 @@ function fitGeneralHorizontalCanvas!(
     if !iszero(shift)
         variableX += shift
 
-        for index in eachindex(factorWidths)
+        for index in factorIndices
             factorX[index] += shift
         end
     end
@@ -434,22 +436,24 @@ function fitVerticalGraphHorizontalCanvas!(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableX),
+    factorIndices = eachindex(factorWidths)
 )
     xMin = Inf
     xMax = -Inf
 
-    for index in eachindex(variableX)
+    for index in variableIndices
         xMin = min(xMin, variableX[index] - variableRadii[index])
         xMax = max(xMax, variableX[index] + variableRadii[index])
 
         if labelPlacement == :outside && showVariableLabels
-            labelHalfWidth = approximateTextWidth(variables[index].label, fontSize) / 2
-            xMin = min(xMin, variableX[index] - labelHalfWidth)
-            xMax = max(xMax, variableX[index] + labelHalfWidth)
+            labelPadding = outsideLabelGap + approximateTextWidth(variables[index].label, fontSize)
+            xMax = max(xMax, variableX[index] + variableRadii[index] + labelPadding)
         end
     end
 
-    for index in eachindex(factorWidths)
+    for index in factorIndices
         xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
         xMax = max(xMax, factorX[index] + factorWidths[index] / 2)
 
@@ -467,11 +471,11 @@ function fitVerticalGraphHorizontalCanvas!(
     finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
 
     if !iszero(shift)
-        for index in eachindex(variableX)
+        for index in variableIndices
             variableX[index] += shift
         end
 
-        for index in eachindex(factorWidths)
+        for index in factorIndices
             factorX[index] += shift
         end
     end
@@ -494,29 +498,42 @@ function fitVerticalGraphVerticalCanvas!(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableRadii),
+    factorIndices = eachindex(factorHeights)
 )
-    yMin = minimum(variableY - radius for radius in variableRadii)
-    yMax = maximum(variableY + radius for radius in variableRadii)
+    yMin = minimum(variableY - variableRadii[index] for index in variableIndices)
+    yMax = maximum(variableY + variableRadii[index] for index in variableIndices)
 
     if labelPlacement == :outside && showVariableLabels
-        labelY = variableY + maximum(variableRadii; init = 0) + outsideLabelGap + fontSize / 2
+        labelY = variableY + maximum(
+            variableRadii[index] for index in variableIndices; init = 0
+        ) + outsideLabelGap + fontSize / 2
         yMax = max(yMax, labelY + fontSize / 2)
     end
 
-    for index in eachindex(factorHeights)
+    for index in factorIndices
         y = factorY[index]
         halfHeight = factorHeights[index] / 2
         yMin = min(yMin, y - halfHeight)
         yMax = max(yMax, y + halfHeight)
 
         if labelPlacement == :outside && showFactorLabels
-            labelHalfHeight = rotateFactorLabels[index] ?
-                approximateTextWidth(factors[index].label, fontSize) / 2 : fontSize / 2
-            labelY = y < variableY ?
-                y - halfHeight - outsideLabelGap - fontSize / 2 :
-                y + halfHeight + outsideLabelGap + fontSize / 2
-            yMin = min(yMin, labelY - labelHalfHeight)
-            yMax = max(yMax, labelY + labelHalfHeight)
+            if rotateFactorLabels[index]
+                labelHeight = approximateTextWidth(factors[index].label, fontSize)
+                labelY = y < variableY ?
+                    y - halfHeight - outsideLabelGap :
+                    y + halfHeight + outsideLabelGap
+                yMin = min(yMin, y < variableY ? labelY - labelHeight : labelY)
+                yMax = max(yMax, y < variableY ? labelY : labelY + labelHeight)
+            else
+                labelHalfHeight = fontSize / 2
+                labelY = y < variableY ?
+                    y - halfHeight - outsideLabelGap - labelHalfHeight :
+                    y + halfHeight + outsideLabelGap + labelHalfHeight
+                yMin = min(yMin, labelY - labelHalfHeight)
+                yMax = max(yMax, labelY + labelHalfHeight)
+            end
         end
     end
 
@@ -525,7 +542,7 @@ function fitVerticalGraphVerticalCanvas!(
     if !iszero(shift)
         variableY += shift
 
-        for index in eachindex(factorHeights)
+        for index in factorIndices
             factorY[index] += shift
         end
     end
@@ -547,11 +564,14 @@ function fitHorizontalCanvas(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableX),
+    factorIndices = eachindex(factorX)
 )
     xMin = Inf
     xMax = -Inf
 
-    for index in eachindex(variableX)
+    for index in variableIndices
         xMin = min(xMin, variableX[index] - variableRadii[index])
         xMax = max(xMax, variableX[index] + variableRadii[index])
 
@@ -562,7 +582,7 @@ function fitHorizontalCanvas(
         end
     end
 
-    for index in eachindex(factorX)
+    for index in factorIndices
         labelPadding = labelPlacement == :outside && showFactorLabels ?
             outsideLabelGap + approximateTextWidth(factors[index].label, fontSize) : 0.0
         xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
@@ -576,11 +596,11 @@ function fitHorizontalCanvas(
     finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
 
     if !iszero(shift)
-        for index in eachindex(variableX)
+        for index in variableIndices
             variableX[index] += shift
         end
 
-        for index in eachindex(factorX)
+        for index in factorIndices
             factorX[index] += shift
         end
     end
@@ -602,11 +622,14 @@ function fitSideLabelHorizontalCanvas!(
     outsideLabelGap::Int,
     fontSize::Int,
     canvasPadding::Int
+    ;
+    variableIndices = eachindex(variableX),
+    factorIndices = eachindex(factorX)
 )
     xMin = Inf
     xMax = -Inf
 
-    for index in eachindex(variableX)
+    for index in variableIndices
         xMin = min(xMin, variableX[index] - variableRadii[index])
         xMax = max(xMax, variableX[index] + variableRadii[index])
 
@@ -616,7 +639,7 @@ function fitSideLabelHorizontalCanvas!(
         end
     end
 
-    for index in eachindex(factorX)
+    for index in factorIndices
         xMin = min(xMin, factorX[index] - factorWidths[index] / 2)
         xMax = max(xMax, factorX[index] + factorWidths[index] / 2)
 
@@ -633,11 +656,11 @@ function fitSideLabelHorizontalCanvas!(
     finalWidth, shift = fittedCanvasSizeAndShift(xMin, xMax, canvasWidth, canvasPadding)
 
     if !iszero(shift)
-        for index in eachindex(variableX)
+        for index in variableIndices
             variableX[index] += shift
         end
 
-        for index in eachindex(factorX)
+        for index in factorIndices
             factorX[index] += shift
         end
     end

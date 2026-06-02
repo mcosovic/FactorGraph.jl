@@ -45,6 +45,13 @@ Label options control label placement, visibility, and font size:
   - `tooltipDetail`: Tooltip detail level: `:summary` or `:full`.
   - `fontSize`: Label font size in SVG user units.
 
+View options control which part of a general factor graph is drawn:
+- `view = NamedTuple()`: Override view options. Supported keys are:
+  - `variables`: Variable ids or labels used as the focus.
+  - `factors`: Factor ids or labels used as the focus.
+  - `depth`: Positive number of factor-neighborhood expansions from focused
+    variables and factors.
+
 Style options control default graph colors and stroke widths:
 - `style = NamedTuple()`: Override default SVG styles. Supported keys are:
   - `backgroundFill`: SVG background fill color.
@@ -118,6 +125,7 @@ function graphFigure(
     layout::NamedTuple = NamedTuple(),
     node::NamedTuple = NamedTuple(),
     label::NamedTuple = NamedTuple(),
+    view::NamedTuple = NamedTuple(),
     style::NamedTuple = NamedTuple(),
     highlight::AbstractVector = NamedTuple[],
 )
@@ -125,11 +133,12 @@ function graphFigure(
     layoutOptions = graphFigureLayoutOptions(layout)
     nodeOptions = graphFigureNodeOptions(node)
     labelOptions = graphFigureLabelOptions(label)
+    viewOptions = graphFigureViewOptions(graph, view)
     graphStyle = graphFigureStyle(style)
 
-    variableCount = length(graph.variables)
-    unaryFactors = [index for index in eachindex(graph.factors) if isUnaryFactor(graph, index)]
-    multiFactors = [index for index in eachindex(graph.factors) if !isUnaryFactor(graph, index)]
+    variableCount = length(viewOptions.variables)
+    unaryFactors = [index for index in viewOptions.factors if isUnaryFactor(graph, index)]
+    multiFactors = [index for index in viewOptions.factors if !isUnaryFactor(graph, index)]
     margin = 48
     nodeGap = 10
 
@@ -161,7 +170,8 @@ function graphFigure(
             showTooltips = labelOptions.showTooltips,
             showEdgeIds = labelOptions.showEdgeIds,
             tooltipDetail = labelOptions.tooltipDetail,
-            fontSize = labelOptions.fontSize
+            fontSize = labelOptions.fontSize,
+            view = viewOptions
         )
     end
 
@@ -214,17 +224,21 @@ function graphFigure(
         layoutOptions.unaryFactorOffset,
         layoutOptions.multiFactorOffset
     )
-    variableY = nodeRows(variableCount, rowCount, margin, layoutNodeSpacing)
+    variableY = fill(0.0, length(graph.variables))
+    orderedVariableY = nodeRows(variableCount, rowCount, margin, layoutNodeSpacing)
+    for (position, variableIndex) in pairs(viewOptions.variables)
+        variableY[variableIndex] = orderedVariableY[position]
+    end
     factorY = Dict{Int, Float64}()
     factorX = Dict{Int, Float64}()
 
-    rawFactorY = [
-        average(
-            variableY[edge.variableIndex] for edge in graph.edges
+    rawFactorY = fill(0.0, length(graph.factors))
+    for factorIndex in viewOptions.factors
+        rawFactorY[factorIndex] = average(
+            variableY[edge.variableIndex] for edge in viewOptions.edges
             if edge.factorIndex == factorIndex
         )
-        for factorIndex in eachindex(graph.factors)
-    ]
+    end
     unaryFactorY = spreadCloseRows(
         rawFactorY[unaryFactors],
         minimumNodeGap(factorHeights, unaryFactors, nodeGap)
@@ -257,7 +271,9 @@ function graphFigure(
         labelOptions.showFactors,
         labelOptions.outsideGap,
         labelOptions.fontSize,
-        canvasOptions.padding
+        canvasOptions.padding;
+        variableIndices = viewOptions.variables,
+        factorIndices = viewOptions.factors
     )
     canvasHeight = fitVerticalCanvas!(
         variableY,
@@ -270,7 +286,9 @@ function graphFigure(
         labelOptions.showFactors,
         labelOptions.outsideGap,
         labelOptions.fontSize,
-        canvasOptions.padding
+        canvasOptions.padding;
+        variableIndices = viewOptions.variables,
+        factorIndices = viewOptions.factors
     )
 
     highlightState = graphFigureHighlightState(
@@ -286,7 +304,33 @@ function graphFigure(
         graphStyle
     )
 
-    for edge in graph.edges
+    occupiedEdgeLabels = NamedTuple[]
+    edgeLabelBackgrounds = String[]
+    edgeLabelTexts = String[]
+    edgeGeometries = NamedTuple[]
+
+    for edge in viewOptions.edges
+        currentFactorX = factorX[edge.factorIndex]
+
+        if currentFactorX < variableX
+            x1 = currentFactorX + factorWidths[edge.factorIndex] / 2
+            y1 = factorY[edge.factorIndex]
+            x2 = variableX - variableRadii[edge.variableIndex]
+            y2 = variableY[edge.variableIndex]
+        else
+            x1 = variableX + variableRadii[edge.variableIndex]
+            y1 = variableY[edge.variableIndex]
+            x2 = currentFactorX - factorWidths[edge.factorIndex] / 2
+            y2 = factorY[edge.factorIndex]
+        end
+
+        push!(
+            edgeGeometries,
+            edgeGeometry(edge.id, x1, y1, x2, y2, layoutOptions.curvedEdges, :horizontal)
+        )
+    end
+
+    for edge in viewOptions.edges
         currentFactorX = factorX[edge.factorIndex]
 
         if currentFactorX < variableX
@@ -321,14 +365,34 @@ function graphFigure(
             )
         )
         if labelOptions.showEdgeIds
-            println(buffer, svgEdgeIdLabel(edge.id, x1, y1, x2, y2))
+            labelParts = svgEdgeIdLabelParts(
+                edge.id,
+                x1,
+                y1,
+                x2,
+                y2,
+                occupiedEdgeLabels,
+                layoutOptions.curvedEdges,
+                :horizontal,
+                edgeGeometries,
+                tooltip
+            )
+            push!(edgeLabelBackgrounds, labelParts.background)
+            push!(edgeLabelTexts, labelParts.text)
         end
     end
 
-    for (index, variable) in pairs(graph.variables)
+    drawEdgeIdLabels!(buffer, edgeLabelBackgrounds, edgeLabelTexts)
+
+    for index in viewOptions.variables
+        variable = graph.variables[index]
         label = escapeXML(variable.label)
         y = variableY[index]
-        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        className = variableClassName(
+            index,
+            highlightState.variables,
+            viewOptions.focusVariableSet
+        )
         tooltip = labelOptions.showTooltips ?
             graphFigureVariableTooltip(graph, index, labelOptions.tooltipDetail) : nothing
         println(
@@ -351,18 +415,20 @@ function graphFigure(
                 label,
                 labelOptions.placement,
                 labelOptions.outsideGap,
-                labelOptions.fontSize
+                labelOptions.fontSize,
+                tooltip
             )
         end
     end
 
-    for (index, factor) in pairs(graph.factors)
+    for index in viewOptions.factors
+        factor = graph.factors[index]
         label = escapeXML(factor.label)
         width = factorWidths[index]
         height = factorHeights[index]
         y = factorY[index]
         x = factorX[index] - width / 2
-        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        className = factorClassName(index, highlightState.factors, viewOptions.focusFactorSet)
         tooltip = labelOptions.showTooltips ?
             graphFigureFactorTooltip(graph, index, labelOptions.tooltipDetail) : nothing
         println(
@@ -388,7 +454,8 @@ function graphFigure(
                 label,
                 labelOptions.placement,
                 labelOptions.outsideGap,
-                labelOptions.fontSize
+                labelOptions.fontSize,
+                tooltip
             )
         end
     end
@@ -425,15 +492,10 @@ function verticalGraphFigure(
     showTooltips::Bool,
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
-    fontSize::Int
+    fontSize::Int,
+    view::NamedTuple
 )
     columnCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
-    defaultLayoutWidth = 2 * margin + (columnCount - 1) * columnSpacing
-    layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
-    minCanvasWidth = isnothing(width) ? 0 : width
-    layoutColumnSpacing = columnCount <= 1 ?
-        columnSpacing : (layoutWidth - 2 * margin) / (columnCount - 1)
-
     variableRadii = nodeRadii(
         graph.variables,
         variableRadius,
@@ -441,14 +503,34 @@ function verticalGraphFigure(
         showVariableLabels,
         fontSize
     )
-    rawVariableX = nodeRows(variableCount, columnCount, margin, layoutColumnSpacing)
-    rawFactorX = [
-        average(
-            rawVariableX[edge.variableIndex] for edge in graph.edges
+    columnSpacing = verticalGraphColumnSpacing(
+        graph,
+        view.variables,
+        variableRadii,
+        columnSpacing,
+        outsideLabelGap,
+        labelPlacement,
+        showVariableLabels,
+        fontSize
+    )
+    defaultLayoutWidth = 2 * margin + (columnCount - 1) * columnSpacing
+    layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
+    minCanvasWidth = isnothing(width) ? 0 : width
+    layoutColumnSpacing = columnCount <= 1 ?
+        columnSpacing : (layoutWidth - 2 * margin) / (columnCount - 1)
+
+    rawVariableX = fill(0.0, length(graph.variables))
+    orderedVariableX = nodeRows(variableCount, columnCount, margin, layoutColumnSpacing)
+    for (position, variableIndex) in pairs(view.variables)
+        rawVariableX[variableIndex] = orderedVariableX[position]
+    end
+    rawFactorX = fill(0.0, length(graph.factors))
+    for factorIndex in view.factors
+        rawFactorX[factorIndex] = average(
+            rawVariableX[edge.variableIndex] for edge in view.edges
             if edge.factorIndex == factorIndex
         )
-        for factorIndex in eachindex(graph.factors)
-    ]
+    end
     rotateFactorLabels = verticalFactorLabelRotations(
         graph.factors,
         rawFactorX,
@@ -532,7 +614,9 @@ function verticalGraphFigure(
         rotateFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
     canvasHeight, variableY = fitVerticalGraphVerticalCanvas!(
         variableY,
@@ -548,7 +632,9 @@ function verticalGraphFigure(
         showFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
 
     highlightState = graphFigureHighlightState(
@@ -564,7 +650,31 @@ function verticalGraphFigure(
         style
     )
 
-    for edge in graph.edges
+    occupiedEdgeLabels = NamedTuple[]
+    edgeLabelBackgrounds = String[]
+    edgeLabelTexts = String[]
+    edgeGeometries = NamedTuple[]
+
+    for edge in view.edges
+        if factorY[edge.factorIndex] < variableY
+            x1 = factorX[edge.factorIndex]
+            y1 = factorY[edge.factorIndex] + factorHeights[edge.factorIndex] / 2
+            x2 = variableX[edge.variableIndex]
+            y2 = variableY - variableRadii[edge.variableIndex]
+        else
+            x1 = variableX[edge.variableIndex]
+            y1 = variableY + variableRadii[edge.variableIndex]
+            x2 = factorX[edge.factorIndex]
+            y2 = factorY[edge.factorIndex] - factorHeights[edge.factorIndex] / 2
+        end
+
+        push!(
+            edgeGeometries,
+            edgeGeometry(edge.id, x1, y1, x2, y2, curvedEdges, :vertical)
+        )
+    end
+
+    for edge in view.edges
         if factorY[edge.factorIndex] < variableY
             x1 = factorX[edge.factorIndex]
             y1 = factorY[edge.factorIndex] + factorHeights[edge.factorIndex] / 2
@@ -592,17 +702,34 @@ function verticalGraphFigure(
                 curvedEdges,
                 edgeClass,
                 get(highlightState.edgeStyles, edge.id, nothing),
-                tooltip
+                tooltip,
+                :vertical
             )
         )
         if showEdgeIds
-            println(buffer, svgEdgeIdLabel(edge.id, x1, y1, x2, y2))
+            labelParts = svgEdgeIdLabelParts(
+                edge.id,
+                x1,
+                y1,
+                x2,
+                y2,
+                occupiedEdgeLabels,
+                curvedEdges,
+                :vertical,
+                edgeGeometries,
+                tooltip
+            )
+            push!(edgeLabelBackgrounds, labelParts.background)
+            push!(edgeLabelTexts, labelParts.text)
         end
     end
 
-    for (index, variable) in pairs(graph.variables)
+    drawEdgeIdLabels!(buffer, edgeLabelBackgrounds, edgeLabelTexts)
+
+    for index in view.variables
+        variable = graph.variables[index]
         label = escapeXML(variable.label)
-        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        className = variableClassName(index, highlightState.variables, view.focusVariableSet)
         tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
         println(
             buffer,
@@ -617,22 +744,22 @@ function verticalGraphFigure(
         )
 
         if showVariableLabels
-            drawVariableLabel!(
+            drawSideLabel!(
                 buffer,
-                variableX[index],
+                variableX[index] + variableRadii[index] + outsideLabelGap,
                 variableY,
-                variableRadii[index],
                 label,
                 labelPlacement,
-                outsideLabelGap,
-                fontSize
+                :right,
+                tooltip
             )
         end
     end
 
-    for (index, factor) in pairs(graph.factors)
+    for index in view.factors
+        factor = graph.factors[index]
         label = escapeXML(factor.label)
-        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        className = factorClassName(index, highlightState.factors, view.focusFactorSet)
         x = factorX[index] - factorWidths[index] / 2
         y = factorY[index] - factorHeights[index] / 2
         println(
@@ -660,7 +787,8 @@ function verticalGraphFigure(
                 rotateFactorLabels[index],
                 labelPlacement,
                 outsideLabelGap,
-                fontSize
+                fontSize,
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         end
     end
@@ -676,6 +804,7 @@ function graphFigure(
     layout::NamedTuple = NamedTuple(),
     node::NamedTuple = NamedTuple(),
     label::NamedTuple = NamedTuple(),
+    view::NamedTuple = NamedTuple(),
     style::NamedTuple = NamedTuple(),
     highlight::AbstractVector = NamedTuple[]
 )
@@ -684,6 +813,7 @@ function graphFigure(
     layoutOptions = graphFigureLayoutOptions(layout)
     nodeOptions = graphFigureNodeOptions(node)
     labelOptions = graphFigureLabelOptions(label)
+    viewOptions = graphFigureViewOptions(tree.graph, view)
     graphStyle = graphFigureStyle(style)
 
     return treeGraphFigure(
@@ -708,7 +838,8 @@ function graphFigure(
         showTooltips = labelOptions.showTooltips,
         showEdgeIds = labelOptions.showEdgeIds,
         tooltipDetail = labelOptions.tooltipDetail,
-        fontSize = labelOptions.fontSize
+        fontSize = labelOptions.fontSize,
+        view = viewOptions
     )
 end
 
@@ -783,7 +914,8 @@ function treeGraphFigure(
     showTooltips::Bool,
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
-    fontSize::Int
+    fontSize::Int,
+    view::NamedTuple
 )
     if !(orientation in (:horizontal, :vertical))
         error("orientation must be :horizontal or :vertical.")
@@ -823,7 +955,8 @@ function treeGraphFigure(
             showTooltips = showTooltips,
             showEdgeIds = showEdgeIds,
             tooltipDetail = tooltipDetail,
-            fontSize = fontSize
+            fontSize = fontSize,
+            view = view
         )
     end
 
@@ -834,9 +967,10 @@ function treeGraphFigure(
     end
 
     variableDepths, factorDepths = treeNodeDepths(tree)
-    maxDepth = maximum(vcat(variableDepths, factorDepths))
+    maxDepth = maximum(vcat(variableDepths[view.variables], factorDepths[view.factors]))
     depthCounts = [
-        count(==(depth), variableDepths) + count(==(depth), factorDepths)
+        count(index -> variableDepths[index] == depth, view.variables) +
+            count(index -> factorDepths[index] == depth, view.factors)
         for depth in 1:maxDepth
     ]
     maxDepthCount = maximum(depthCounts; init = 1)
@@ -879,13 +1013,13 @@ function treeGraphFigure(
     for depth in 1:maxDepth
         nodes = Tuple{Symbol, Int}[]
 
-        for index in eachindex(graph.variables)
+        for index in view.variables
             if variableDepths[index] == depth
                 push!(nodes, (:variable, index))
             end
         end
 
-        for index in eachindex(graph.factors)
+        for index in view.factors
             if factorDepths[index] == depth
                 push!(nodes, (:factor, index))
             end
@@ -913,7 +1047,9 @@ function treeGraphFigure(
         showFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
     canvasWidth = fitSideLabelHorizontalCanvas!(
         variableX,
@@ -928,7 +1064,9 @@ function treeGraphFigure(
         showFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
 
     highlightState = graphFigureHighlightState(
@@ -944,7 +1082,34 @@ function treeGraphFigure(
         style
     )
 
-    for edge in graph.edges
+    occupiedEdgeLabels = NamedTuple[]
+    edgeLabelBackgrounds = String[]
+    edgeLabelTexts = String[]
+    edgeGeometries = NamedTuple[]
+
+    for edge in view.edges
+        factorLeft = factorX[edge.factorIndex] - factorWidths[edge.factorIndex] / 2
+        factorRight = factorX[edge.factorIndex] + factorWidths[edge.factorIndex] / 2
+
+        if variableX[edge.variableIndex] <= factorX[edge.factorIndex]
+            x1 = variableX[edge.variableIndex] + variableRadii[edge.variableIndex]
+            y1 = variableY[edge.variableIndex]
+            x2 = factorLeft
+            y2 = factorY[edge.factorIndex]
+        else
+            x1 = factorRight
+            y1 = factorY[edge.factorIndex]
+            x2 = variableX[edge.variableIndex] - variableRadii[edge.variableIndex]
+            y2 = variableY[edge.variableIndex]
+        end
+
+        push!(
+            edgeGeometries,
+            edgeGeometry(edge.id, x1, y1, x2, y2, curvedEdges, :horizontal)
+        )
+    end
+
+    for edge in view.edges
         factorLeft = factorX[edge.factorIndex] - factorWidths[edge.factorIndex] / 2
         factorRight = factorX[edge.factorIndex] + factorWidths[edge.factorIndex] / 2
 
@@ -979,13 +1144,29 @@ function treeGraphFigure(
             )
         )
         if showEdgeIds
-            println(buffer, svgEdgeIdLabel(edge.id, x1, y1, x2, y2))
+            labelParts = svgEdgeIdLabelParts(
+                edge.id,
+                x1,
+                y1,
+                x2,
+                y2,
+                occupiedEdgeLabels,
+                curvedEdges,
+                :horizontal,
+                edgeGeometries,
+                tooltip
+            )
+            push!(edgeLabelBackgrounds, labelParts.background)
+            push!(edgeLabelTexts, labelParts.text)
         end
     end
 
-    for (index, variable) in pairs(graph.variables)
+    drawEdgeIdLabels!(buffer, edgeLabelBackgrounds, edgeLabelTexts)
+
+    for index in view.variables
+        variable = graph.variables[index]
         label = escapeXML(variable.label)
-        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        className = variableClassName(index, highlightState.variables, view.focusVariableSet)
         tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
         println(
             buffer,
@@ -1008,14 +1189,16 @@ function treeGraphFigure(
                 label,
                 labelPlacement,
                 outsideLabelGap,
-                fontSize
+                fontSize,
+                tooltip
             )
         end
     end
 
-    for (index, factor) in pairs(graph.factors)
+    for index in view.factors
+        factor = graph.factors[index]
         label = escapeXML(factor.label)
-        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        className = factorClassName(index, highlightState.factors, view.focusFactorSet)
         x = factorX[index] - factorWidths[index] / 2
         y = factorY[index] - factorHeights[index] / 2
         println(
@@ -1041,7 +1224,8 @@ function treeGraphFigure(
                 label,
                 labelPlacement,
                 outsideLabelGap,
-                fontSize
+                fontSize,
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         end
     end
@@ -1072,7 +1256,8 @@ function verticalTreeGraphFigure(
     showTooltips::Bool,
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
-    fontSize::Int
+    fontSize::Int,
+    view::NamedTuple
 )
     if zoom <= 0
         error("zoom must be positive.")
@@ -1084,9 +1269,10 @@ function verticalTreeGraphFigure(
 
     graph = tree.graph
     variableDepths, factorDepths = treeNodeDepths(tree)
-    maxDepth = maximum(vcat(variableDepths, factorDepths))
+    maxDepth = maximum(vcat(variableDepths[view.variables], factorDepths[view.factors]))
     depthCounts = [
-        count(==(depth), variableDepths) + count(==(depth), factorDepths)
+        count(index -> variableDepths[index] == depth, view.variables) +
+            count(index -> factorDepths[index] == depth, view.factors)
         for depth in 1:maxDepth
     ]
     maxDepthCount = maximum(depthCounts; init = 1)
@@ -1125,13 +1311,13 @@ function verticalTreeGraphFigure(
     for depth in 1:maxDepth
         nodes = Tuple{Symbol, Int}[]
 
-        for index in eachindex(graph.variables)
+        for index in view.variables
             if variableDepths[index] == depth
                 push!(nodes, (:variable, index))
             end
         end
 
-        for index in eachindex(graph.factors)
+        for index in view.factors
             if factorDepths[index] == depth
                 push!(nodes, (:factor, index))
             end
@@ -1173,7 +1359,9 @@ function verticalTreeGraphFigure(
         showFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
     canvasHeight = fitVerticalCanvas!(
         variableY,
@@ -1186,7 +1374,9 @@ function verticalTreeGraphFigure(
         showFactorLabels,
         outsideLabelGap,
         fontSize,
-        canvasPadding
+        canvasPadding;
+        variableIndices = view.variables,
+        factorIndices = view.factors
     )
 
     highlightState = graphFigureHighlightState(
@@ -1202,7 +1392,31 @@ function verticalTreeGraphFigure(
         style
     )
 
-    for edge in graph.edges
+    occupiedEdgeLabels = NamedTuple[]
+    edgeLabelBackgrounds = String[]
+    edgeLabelTexts = String[]
+    edgeGeometries = NamedTuple[]
+
+    for edge in view.edges
+        if variableY[edge.variableIndex] <= factorY[edge.factorIndex]
+            x1 = variableX[edge.variableIndex]
+            y1 = variableY[edge.variableIndex] + variableRadii[edge.variableIndex]
+            x2 = factorX[edge.factorIndex]
+            y2 = factorY[edge.factorIndex] - factorHeights[edge.factorIndex] / 2
+        else
+            x1 = factorX[edge.factorIndex]
+            y1 = factorY[edge.factorIndex] + factorHeights[edge.factorIndex] / 2
+            x2 = variableX[edge.variableIndex]
+            y2 = variableY[edge.variableIndex] - variableRadii[edge.variableIndex]
+        end
+
+        push!(
+            edgeGeometries,
+            edgeGeometry(edge.id, x1, y1, x2, y2, curvedEdges, :vertical)
+        )
+    end
+
+    for edge in view.edges
         if variableY[edge.variableIndex] <= factorY[edge.factorIndex]
             x1 = variableX[edge.variableIndex]
             y1 = variableY[edge.variableIndex] + variableRadii[edge.variableIndex]
@@ -1230,17 +1444,34 @@ function verticalTreeGraphFigure(
                 curvedEdges,
                 edgeClass,
                 get(highlightState.edgeStyles, edge.id, nothing),
-                tooltip
+                tooltip,
+                :vertical
             )
         )
         if showEdgeIds
-            println(buffer, svgEdgeIdLabel(edge.id, x1, y1, x2, y2))
+            labelParts = svgEdgeIdLabelParts(
+                edge.id,
+                x1,
+                y1,
+                x2,
+                y2,
+                occupiedEdgeLabels,
+                curvedEdges,
+                :vertical,
+                edgeGeometries,
+                tooltip
+            )
+            push!(edgeLabelBackgrounds, labelParts.background)
+            push!(edgeLabelTexts, labelParts.text)
         end
     end
 
-    for (index, variable) in pairs(graph.variables)
+    drawEdgeIdLabels!(buffer, edgeLabelBackgrounds, edgeLabelTexts)
+
+    for index in view.variables
+        variable = graph.variables[index]
         label = escapeXML(variable.label)
-        className = index in highlightState.variables ? "variable variable-highlight" : "variable"
+        className = variableClassName(index, highlightState.variables, view.focusVariableSet)
         tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
         println(
             buffer,
@@ -1261,14 +1492,16 @@ function verticalTreeGraphFigure(
                 variableY[index],
                 label,
                 labelPlacement,
-                :right
+                :right,
+                tooltip
             )
         end
     end
 
-    for (index, factor) in pairs(graph.factors)
+    for index in view.factors
+        factor = graph.factors[index]
         label = escapeXML(factor.label)
-        className = index in highlightState.factors ? "factor factor-highlight" : "factor"
+        className = factorClassName(index, highlightState.factors, view.focusFactorSet)
         x = factorX[index] - factorWidths[index] / 2
         y = factorY[index] - factorHeights[index] / 2
         println(
@@ -1292,7 +1525,8 @@ function verticalTreeGraphFigure(
                 factorY[index],
                 label,
                 labelPlacement,
-                :right
+                :right,
+                showTooltips ? graphFigureFactorTooltip(graph, index, tooltipDetail) : nothing
             )
         end
     end
@@ -1319,6 +1553,30 @@ function treeNodeDepths(tree::TreeFactorGraph)
     end
 
     return variableDepths, factorDepths
+end
+
+function verticalGraphColumnSpacing(
+    graph::AbstractFactorGraph,
+    variableIndices::AbstractVector{Int},
+    variableRadii::AbstractVector,
+    columnSpacing::Int,
+    outsideLabelGap::Int,
+    labelPlacement::Symbol,
+    showVariableLabels::Bool,
+    fontSize::Int
+)
+    if labelPlacement == :inside || !showVariableLabels
+        return columnSpacing
+    end
+
+    maxWidth = 0.0
+
+    for index in variableIndices
+        labelWidth = approximateTextWidth(graph.variables[index].label, fontSize)
+        maxWidth = max(maxWidth, 2 * variableRadii[index] + labelWidth)
+    end
+
+    return max(columnSpacing, ceil(Int, maxWidth + 2 * outsideLabelGap))
 end
 
 function treeLevelSpacing(
@@ -1368,6 +1626,182 @@ function edgeClassName(
     return highlighted ? "edge edge-highlight" : "edge"
 end
 
+function variableClassName(
+    variableIndex::Int,
+    highlightedVariables::Set{Int},
+    focusVariables::Set{Int}
+)
+    if variableIndex in highlightedVariables
+        return "variable variable-highlight"
+    elseif variableIndex in focusVariables
+        return "variable"
+    end
+
+    return "variable variable-context"
+end
+
+function factorClassName(
+    factorIndexValue::Int,
+    highlightedFactors::Set{Int},
+    focusFactors::Set{Int}
+)
+    if factorIndexValue in highlightedFactors
+        return "factor factor-highlight"
+    elseif factorIndexValue in focusFactors
+        return "factor"
+    end
+
+    return "factor factor-context"
+end
+
+function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
+    defaultView = (
+        variables = nothing,
+        factors = nothing,
+        depth = 1
+    )
+
+    for key in propertynames(view)
+        if !(key in propertynames(defaultView))
+            error("Unknown graph figure view key $key.")
+        end
+    end
+
+    options = merge(defaultView, view)
+
+    if !(options.depth isa Integer) || options.depth < 1
+        error("view.depth must be a positive integer.")
+    end
+
+    if isnothing(options.variables) && isnothing(options.factors)
+        variableIndices = collect(eachindex(graph.variables))
+        factorIndices = collect(eachindex(graph.factors))
+        visibleEdges = graph.edges
+
+        return (
+            variables = variableIndices,
+            focusVariableSet = Set(variableIndices),
+            variableSet = Set(variableIndices),
+            factors = factorIndices,
+            focusFactorSet = Set(factorIndices),
+            factorSet = Set(factorIndices),
+            edges = visibleEdges,
+            depth = options.depth
+        )
+    end
+
+    variableIndices = isnothing(options.variables) ? Int[] : [
+        graphFigureVariableIndex(graph, variable) for variable in options.variables
+    ]
+    factorIndices = isnothing(options.factors) ? Int[] : [
+        graphFigureFactorIndex(graph, factor) for factor in options.factors
+    ]
+
+    if isempty(variableIndices) && isempty(factorIndices)
+        error("view.variables or view.factors must contain at least one node.")
+    end
+
+    if length(unique(variableIndices)) != length(variableIndices)
+        error("view.variables must not contain duplicate variables.")
+    end
+
+    if length(unique(factorIndices)) != length(factorIndices)
+        error("view.factors must not contain duplicate factors.")
+    end
+
+    startVariableSet = Set(variableIndices)
+    startFactorSet = Set(factorIndices)
+    variableSet = Set(variableIndices)
+    factorSet = Set(factorIndices)
+    variableDepths = Dict(index => 0 for index in variableIndices)
+    factorDepths = Dict(index => 0 for index in factorIndices)
+    frontierVariables = Set(variableIndices)
+    frontierFactors = Set(factorIndices)
+
+    for depth in 1:options.depth
+        nextFactors = Set{Int}()
+        nextVariables = Set{Int}()
+
+        for edge in graph.edges
+            if edge.variableIndex in frontierVariables && !(edge.factorIndex in factorSet)
+                push!(nextFactors, edge.factorIndex)
+                factorDepths[edge.factorIndex] = depth
+            end
+
+            if edge.factorIndex in frontierFactors && !(edge.variableIndex in variableSet)
+                push!(nextVariables, edge.variableIndex)
+                variableDepths[edge.variableIndex] = depth
+            end
+        end
+
+        union!(factorSet, nextFactors)
+        union!(variableSet, nextVariables)
+
+        expandedVariables = Set{Int}()
+        expandedFactors = Set{Int}()
+
+        for edge in graph.edges
+            if edge.factorIndex in nextFactors && !(edge.variableIndex in variableSet)
+                push!(expandedVariables, edge.variableIndex)
+                variableDepths[edge.variableIndex] = depth
+            end
+
+            if edge.variableIndex in nextVariables && !(edge.factorIndex in factorSet)
+                push!(expandedFactors, edge.factorIndex)
+                factorDepths[edge.factorIndex] = depth
+            end
+        end
+
+        union!(variableSet, expandedVariables)
+        union!(factorSet, expandedFactors)
+        frontierVariables = union(nextVariables, expandedVariables)
+        frontierFactors = union(nextFactors, expandedFactors)
+
+        if isempty(frontierVariables) && isempty(frontierFactors)
+            break
+        end
+    end
+
+    expandedVariables = [
+        index for index in eachindex(graph.variables)
+        if index in variableSet && !(index in startVariableSet)
+    ]
+    sort!(expandedVariables; by = index -> (variableDepths[index], index))
+    variableIndices = vcat(variableIndices, expandedVariables)
+    expandedFactors = [
+        index for index in eachindex(graph.factors)
+        if index in factorSet && !(index in startFactorSet)
+    ]
+    sort!(expandedFactors; by = index -> (factorDepths[index], index))
+    factorIndices = vcat(factorIndices, expandedFactors)
+    visibleEdges = [
+        edge for edge in graph.edges
+        if edge.variableIndex in variableSet && edge.factorIndex in factorSet
+    ]
+    focusVariableSet = copy(startVariableSet)
+    focusFactorSet = copy(startFactorSet)
+
+    for edge in visibleEdges
+        if edge.variableIndex in startVariableSet
+            push!(focusFactorSet, edge.factorIndex)
+        end
+
+        if edge.factorIndex in startFactorSet
+            push!(focusVariableSet, edge.variableIndex)
+        end
+    end
+
+    return (
+        variables = variableIndices,
+        focusVariableSet = focusVariableSet,
+        variableSet = variableSet,
+        factors = factorIndices,
+        focusFactorSet = focusFactorSet,
+        factorSet = factorSet,
+        edges = visibleEdges,
+        depth = options.depth
+    )
+end
 
 function graphFigureVariableTooltip(
     graph::AbstractFactorGraph,
@@ -1412,7 +1846,7 @@ function graphFigureFactorTooltip(
     lines = graphFigureTooltipLines(
         "Factor $(factor.label)",
         identityLines,
-        graphFigureFactorDataTooltip(factor, detail, length(graph.factorEdges[factorIndex]) == 1),
+        graphFigureFactorDataTooltip(graph, factorIndex, detail),
         detail
     )
 
@@ -1466,7 +1900,7 @@ function graphFigureVariableDataTooltip(variable::DiscreteVariable, detail::Symb
     if detail == :full
         return [
             "Initialization" => [
-                "probability: $(graphFigureOptionalValueText(variable.probability))"
+                graphFigureOptionalFieldText("probability", variable.probability)
             ],
             "States" => [
                 "states: $(graphFigureReferenceVectorText(variable.states))"
@@ -1488,7 +1922,7 @@ function graphFigureFullVariableDataTooltip(variable::GaussianVariable)
     if variable.dimension == 1
         return [
             "Initialization" => [
-                "mean: $(graphFigureOptionalValueText(variable.mean))",
+                graphFigureOptionalFieldText("mean", variable.mean),
                 "variance: $(graphFigureScalarVarianceText(variable.covariance))"
             ],
             "Components" => [
@@ -1499,8 +1933,8 @@ function graphFigureFullVariableDataTooltip(variable::GaussianVariable)
 
     return [
         "Initialization" => [
-            "mean: $(graphFigureOptionalValueText(variable.mean))",
-            "covariance: $(graphFigureOptionalValueText(variable.covariance))"
+            graphFigureOptionalFieldText("mean", variable.mean),
+            graphFigureOptionalFieldText("covariance", variable.covariance)
         ],
         "Components" => [
             "components: $(graphFigureReferenceVectorText(variable.components))"
@@ -1508,13 +1942,27 @@ function graphFigureFullVariableDataTooltip(variable::GaussianVariable)
     ]
 end
 
-function graphFigureFactorDataTooltip(factor::GaussianFactor, detail::Symbol, isUnary::Bool)
+function graphFigureFactorDataTooltip(graph::AbstractFactorGraph, factorIndex::Int, detail::Symbol)
+    return graphFigureFactorDataTooltip(
+        graph,
+        graph.factors[factorIndex],
+        detail,
+        length(graph.factorEdges[factorIndex]) == 1
+    )
+end
+
+function graphFigureFactorDataTooltip(
+    graph::AbstractFactorGraph,
+    factor::GaussianFactor,
+    detail::Symbol,
+    isUnary::Bool
+)
     if detail == :full
         sections = [
             "Parameters" => [
-                "mean: $(graphFigureValueText(factor.mean))",
-                "coefficient: $(graphFigureValueText(factor.coefficient))",
-                "covariance: $(graphFigureValueText(factor.covariance))"
+                graphFigureFieldText("mean", factor.mean),
+                graphFigureFieldText("coefficient", factor.coefficient),
+                graphFigureFieldText("covariance", factor.covariance)
             ]
         ]
 
@@ -1540,12 +1988,15 @@ function graphFigureFactorDataTooltip(factor::GaussianFactor, detail::Symbol, is
     return sections
 end
 
-function graphFigureFactorDataTooltip(factor::DiscreteFactor, detail::Symbol, isUnary::Bool)
+function graphFigureFactorDataTooltip(
+    graph::AbstractFactorGraph,
+    factor::DiscreteFactor,
+    detail::Symbol,
+    isUnary::Bool
+)
     if detail == :full
         sections = [
-            "Parameters" => [
-                "table: $(graphFigureValueText(factor.table))"
-            ]
+            "Table" => graphFigureDiscreteTableTooltipLines(graph, factor)
         ]
 
         if isUnary
@@ -1556,9 +2007,7 @@ function graphFigureFactorDataTooltip(factor::DiscreteFactor, detail::Symbol, is
     end
 
     sections = [
-        "Parameters" => [
-            "table size: $(graphFigureSizeText(factor.table))"
-        ]
+        "Table" => ["size: $(graphFigureSizeText(factor.table))"]
     ]
 
     if isUnary
@@ -1575,21 +2024,88 @@ function graphFigureTooltipLines(
     detail::Symbol
 )
     lines = [title, "", "Identity"]
-    append!(lines, identityLines)
+    append!(lines, graphFigureIndentedTooltipLines(identityLines))
 
     for section in sections
         if !isempty(section.second)
             push!(lines, "")
             push!(lines, section.first)
-            append!(lines, section.second)
+            append!(lines, graphFigureIndentedTooltipLines(section.second))
         end
     end
 
     return lines
 end
 
-function graphFigureOptionalValueText(value)
-    return isnothing(value) ? "not set" : graphFigureValueText(value)
+function graphFigureIndentedTooltipLines(sectionLines::AbstractVector{String})
+    lines = String[]
+
+    for line in sectionLines
+        for part in split(line, "\n"; keepempty = true)
+            push!(lines, isempty(part) ? "" : "  $part")
+        end
+    end
+
+    return lines
+end
+
+function graphFigureOptionalFieldText(name::AbstractString, value)
+    return isnothing(value) ? "$name: not set" : graphFigureFieldText(name, value)
+end
+
+function graphFigureFieldText(name::AbstractString, value)
+    if value isa AbstractArray
+        return "$name:\n$(graphFigureArrayText(value))"
+    end
+
+    return "$name: $(graphFigureValueText(value))"
+end
+
+function graphFigureDiscreteTableTooltipLines(graph::AbstractFactorGraph, factor::DiscreteFactor)
+    variableLabels = [
+        graph.variables[variableIndex(graph.referenceIndex, variableRef)].label
+        for variableRef in factor.variables
+    ]
+    lines = ["size: $(graphFigureSizeText(factor.table))"]
+
+    if ndims(factor.table) == 3 && length(factor.variables) >= 3
+        sliceVariable = graph.variables[variableIndex(graph.referenceIndex, factor.variables[3])]
+        rowLabel = variableLabels[1]
+        columnLabel = variableLabels[2]
+
+        push!(lines, "axes: $(join(variableLabels, " x "))")
+        append!(
+            lines,
+            split(
+                graphFigureThreeDimensionalArrayText(
+                    factor.table,
+                    sliceVariable,
+                    rowLabel,
+                    columnLabel;
+                    includeSize = false
+                ),
+                "\n"
+            )
+        )
+
+        return lines
+    end
+
+    axisLines = graphFigureDiscreteTableAxisLines(factor.table, variableLabels)
+    append!(lines, axisLines)
+    append!(lines, split(graphFigureArrayText(factor.table), "\n"))
+
+    return lines
+end
+
+function graphFigureDiscreteTableAxisLines(array::AbstractArray, variableLabels::AbstractVector)
+    if ndims(array) == 1 && length(variableLabels) >= 1
+        return ["axis: $(variableLabels[1])"]
+    elseif ndims(array) == 2 && length(variableLabels) >= 2
+        return ["rows: $(variableLabels[1]), columns: $(variableLabels[2])"]
+    end
+
+    return String[]
 end
 
 function graphFigureScalarVarianceText(matrix::Nothing)
@@ -1614,6 +2130,99 @@ end
 
 function graphFigureValueText(value)
     return sprint(show, value)
+end
+
+function graphFigureArrayText(array::AbstractVector)
+    if isempty(array)
+        return "  []"
+    end
+
+    return "  [$(join((graphFigureValueText(value) for value in array), ", "))]"
+end
+
+function graphFigureArrayText(array::AbstractMatrix)
+    return graphFigureMatrixText(array, 2)
+end
+
+function graphFigureArrayText(array::AbstractArray)
+    if ndims(array) == 0
+        return "  $(graphFigureValueText(only(array)))"
+    elseif ndims(array) == 1
+        return graphFigureArrayText(vec(array))
+    elseif ndims(array) == 2
+        return graphFigureMatrixText(array, 2)
+    elseif ndims(array) == 3
+        return graphFigureThreeDimensionalArrayText(array)
+    end
+
+    return "  size: $(graphFigureSizeText(array))\n  $(graphFigureValueText(array))"
+end
+
+function graphFigureThreeDimensionalArrayText(array::AbstractArray)
+    lines = ["  size: $(graphFigureSizeText(array))"]
+
+    for index in axes(array, 3)
+        push!(lines, "")
+        push!(lines, "  slice 3 = $index")
+        append!(lines, split(graphFigureMatrixText(@view(array[:, :, index]), 4), "\n"))
+    end
+
+    return join(lines, "\n")
+end
+
+function graphFigureThreeDimensionalArrayText(
+    array::AbstractArray,
+    sliceVariable::DiscreteVariable,
+    rowLabel::AbstractString,
+    columnLabel::AbstractString;
+    includeSize::Bool = true
+)
+    lines = includeSize ? ["  size: $(graphFigureSizeText(array))"] : String[]
+    labelIndent = includeSize ? "  " : ""
+    matrixIndent = includeSize ? 4 : 2
+
+    for index in axes(array, 3)
+        push!(lines, "")
+        push!(
+            lines,
+            "$(labelIndent)slice $(sliceVariable.label) = " *
+                graphFigureValueText(sliceVariable.states[index])
+        )
+        push!(lines, "$(labelIndent)rows: $rowLabel, columns: $columnLabel")
+        append!(lines, split(graphFigureMatrixText(@view(array[:, :, index]), matrixIndent), "\n"))
+    end
+
+    return join(lines, "\n")
+end
+
+function graphFigureMatrixText(matrix::AbstractMatrix, indent::Int)
+    spaces = repeat(" ", indent)
+
+    if isempty(matrix)
+        return "$(spaces)[]"
+    end
+
+    cellText = [
+        graphFigureValueText(matrix[row, column])
+        for row in axes(matrix, 1), column in axes(matrix, 2)
+    ]
+    widths = [
+        maximum(length(cellText[row, column]) for row in axes(cellText, 1))
+        for column in axes(cellText, 2)
+    ]
+    lines = String[]
+
+    for row in axes(cellText, 1)
+        cells = [
+            lpad(cellText[row, column], widths[column])
+            for column in axes(cellText, 2)
+        ]
+        leftBracket = row == first(axes(cellText, 1)) ? "[" : " "
+        rightBracket = row == last(axes(cellText, 1)) ? "]" : ""
+        push!(lines, "$spaces$leftBracket$(join(cells, "  "))$rightBracket")
+    end
+
+    return join(lines, "\n")
 end
 
 function graphFigureHighlightState(

@@ -141,30 +141,59 @@ end
 
         @test occursin("edge-hitbox", svg)
         @test occursin("<title>Edge 1", svg)
+        @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Variable x1", svg)
+        @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Factor prior", svg)
         @test occursin("Identity", svg)
-        @test occursin("table size: 2 x 2", svg)
+        @test occursin("Table\n  size: 2 x 2", svg)
         @test !occursin("table: [0.9 0.1; 0.2 0.8]", svg)
         @test !occursin("Factor link_1_2" * "\n\nIdentity" *
-            "\ntype: DiscreteFactor" *
-            "\nindex: 3" *
-            "\nid: 3" *
-            "\nvariables: x1, x2" *
-            "\ndegree: 2" *
-            "\n\nParameters" *
-            "\ntable size: 2 x 2" *
+            "\n  type: DiscreteFactor" *
+            "\n  index: 3" *
+            "\n  id: 3" *
+            "\n  variables: x1, x2" *
+            "\n  degree: 2" *
+            "\n\nTable" *
+            "\n  size: 2 x 2" *
             "\n\nOptions", svg)
 
         fullSvg = graphFigure(graph; label = (tooltipDetail = :full,))
-        @test occursin("table: [0.9 0.1; 0.2 0.8]", fullSvg)
+        @test occursin("Table\n  size: 2\n  axis: x1", fullSvg)
+        @test occursin(
+            "Table\n  size: 2 x 2\n  rows: x1, columns: x2" *
+            "\n    [0.9  0.1\n     0.2  0.8]",
+            fullSvg
+        )
         @test !occursin("Factor link_1_2" * "\n\nIdentity" *
-            "\ntype: DiscreteFactor" *
-            "\nindex: 3" *
-            "\nid: 3" *
-            "\nvariables: x1, x2" *
-            "\ndegree: 2" *
-            "\n\nParameters" *
-            "\ntable: [0.9 0.1; 0.2 0.8]" *
+            "\n  type: DiscreteFactor" *
+            "\n  index: 3" *
+            "\n  id: 3" *
+            "\n  variables: x1, x2" *
+            "\n  degree: 2" *
+            "\n\nTable" *
+            "\n  size: 2 x 2" *
+            "\n  rows: x1, columns: x2" *
+            "\n    [0.9  0.1\n     0.2  0.8]" *
             "\n\nOptions", fullSvg)
+
+        table3d = cat(
+            [0.9 0.1 0.2; 0.1 0.9 0.8],
+            [0.7 0.4 0.3; 0.3 0.6 0.7];
+            dims = 3
+        )
+        graph3d = factorGraph(
+            [
+                DiscreteVariable(:x1, 2; label = "x1", states = [:off, :on]),
+                DiscreteVariable(:x2, 3; label = "x2", states = [:low, :mid, :high]),
+                DiscreteVariable(:x3, 2; label = "x3", states = [:closed, :open])
+            ],
+            [DiscreteFactor(:x1, :x2, :x3, table3d; label = "table3d")]
+        )
+        full3dSvg = graphFigure(graph3d; label = (tooltipDetail = :full,))
+        @test occursin("Table\n  size: 2 x 3 x 2\n  axes: x1 x x2 x x3", full3dSvg)
+        @test occursin("  rows: x1, columns: x2", full3dSvg)
+        @test occursin("  slice x3 = :closed", full3dSvg)
+        @test occursin("  slice x3 = :open", full3dSvg)
+        @test !occursin("slice 3 =", full3dSvg)
 
         noTooltipSvg = graphFigure(graph; label = (showTooltips = false,))
         @test !occursin("class=\"edge-hitbox\"", noTooltipSvg)
@@ -181,7 +210,7 @@ end
             graphFigureGaussianTooltipGraph();
             label = (tooltipDetail = :full,)
         )
-        @test occursin("covariance: [4.0 0.5; 0.5 2.0]", gaussianFullSvg)
+        @test occursin("covariance:\n    [4.0  0.5\n     0.5  2.0]", gaussianFullSvg)
         @test occursin("component: 1", gaussianFullSvg)
         @test occursin("components: [:a, :b]", gaussianFullSvg)
     end
@@ -190,11 +219,39 @@ end
         svg = graphFigure(graph; label = (showEdgeIds = true,))
 
         @test occursin("class=\"edge-label\"", svg)
+        @test occursin(r"<text class=\"edge-label\"[^>]*><title>Edge 1", svg)
+        @test occursin(r"<text class=\"edge-label\"[^>]*><title>Edge 6", svg)
         @test occursin(">e1</text>", svg)
         @test occursin(">e6</text>", svg)
 
         hiddenSvg = graphFigure(graph)
         @test !occursin("class=\"edge-label\"", hiddenSvg)
+
+        noTooltipSvg = graphFigure(graph; label = (showEdgeIds = true, showTooltips = false))
+        @test occursin("class=\"edge-label\"", noTooltipSvg)
+        @test !occursin(r"<text class=\"edge-label\"[^>]*><title>Edge", noTooltipSvg)
+    end
+
+    @testset "Focused view" begin
+        svg = graphFigure(graph; view = (variables = [:x1, :x2],))
+
+        @test occursin(">x1<", svg)
+        @test occursin(">x2<", svg)
+        @test occursin(">x3<", svg)
+        @test occursin(">link_1_2<", svg)
+        @test occursin(">link_2_3<", svg)
+
+        @test_throws ErrorException graphFigure(
+            graph;
+            view = (variables = [:x1, :x2], depth = 0)
+        )
+
+        verticalSvg = graphFigure(
+            graph;
+            layout = (orientation = :vertical,),
+            view = (variables = [:x1, :x2],)
+        )
+        @test occursin(">x3<", verticalSvg)
     end
 
     @testset "Tree graph output" begin
@@ -202,11 +259,27 @@ end
         svg = graphFigure(
             tree;
             layout = (orientation = :vertical,),
-            label = (placement = :outside,)
+            label = (placement = :outside, showEdgeIds = true)
         )
 
         @test startswith(svg, "<svg")
         @test occursin("label-start", svg)
+        @test occursin("edge-hitbox", svg)
+        @test occursin("<title>Edge 1", svg)
+        @test occursin("Identity", svg)
+        @test occursin("Table\n  size: 2 x 2", svg)
+        @test occursin("class=\"edge-label\"", svg)
+        @test occursin(r"<text class=\"edge-label\"[^>]*><title>Edge 1", svg)
+        @test occursin(">e1</text>", svg)
+
+        noTooltipSvg = graphFigure(tree; label = (showTooltips = false,))
+        @test !occursin("<title>Edge", noTooltipSvg)
+        @test !occursin("class=\"edge-hitbox\"", noTooltipSvg)
+
+        viewSvg = graphFigure(tree; view = (variables = [:x1], depth = 1))
+        @test occursin("variable-context", viewSvg)
+        @test occursin("<title>Variable x1", viewSvg)
+        @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Variable x1", viewSvg)
     end
 
     @testset "File output" begin

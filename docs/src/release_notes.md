@@ -2,13 +2,14 @@
 
 ---
 
-## Version 0.2.3 - Unreleased
+## Version 0.2.3 - 2026-06-02
 
 #### Added
 
 - Added optional SVG hover tooltips to `graphFigure` output for variables,
   factors, and edges, with configurable summary and full detail levels.
-- Added optional edge id labels to `graphFigure` output.
+- Added depth-limited graph figure views for drawing selected variables and
+  factors with nearby factors and variables.
 - Documented graph figure tooltip controls in the Gaussian and discrete factor
   graph guides.
 
