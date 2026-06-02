@@ -13,6 +13,11 @@
 - Documented graph figure tooltip controls in the Gaussian and discrete factor
   graph guides.
 
+#### Changed
+
+- Embedded generated graph SVGs with `object` so SVG hover tooltips remain
+  available in generated documentation pages.
+
 ---
 
 ## Version 0.2.2 - 2026-06-01

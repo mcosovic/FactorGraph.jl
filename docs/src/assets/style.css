@@ -48,7 +48,8 @@ html.theme--catppuccin-mocha .graph-figure {
   border-color: #585b70;
 }
 
-.graph-figure img {
+.graph-figure img,
+.graph-figure object {
   display: inline-block;
   max-width: 100%;
 }

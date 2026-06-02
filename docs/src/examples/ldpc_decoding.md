@@ -116,14 +116,20 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example ldpc_decoding
-saveGraphFigure("ldpcd.svg", graph)
+saveGraphFigure("../ldpcd.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="../ldpcd.svg" alt="LDPC decoding factor graph" style="width: 55%; height: auto;">
+  <object
+    data="../ldpcd.svg"
+    type="image/svg+xml"
+    aria-label="LDPC decoding factor graph"
+    style="width: 55%; height: auto;">
+    <a href="../ldpcd.svg">LDPC decoding factor graph</a>
+  </object>
 </div>
 ```
 

@@ -94,14 +94,19 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example robot_localization
-saveGraphFigure("rl.svg", graph; layout = (columnSpacing = 120,))
+saveGraphFigure("../rl.svg", graph; layout = (columnSpacing = 120,))
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="../rl.svg" alt="Robot localization factor graph">
+  <object
+    data="../rl.svg"
+    type="image/svg+xml"
+    aria-label="Robot localization factor graph">
+    <a href="../rl.svg">Robot localization factor graph</a>
+  </object>
 </div>
 ```
 

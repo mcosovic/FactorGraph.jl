@@ -84,14 +84,20 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example dc_state_estimation
-saveGraphFigure("dcse.svg", graph)
+saveGraphFigure("../dcse.svg", graph)
 
 nothing # hide
 ```
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="../dcse.svg" alt="DC state estimation factor graph" style="width: 50%; height: auto;">
+  <object
+    data="../dcse.svg"
+    type="image/svg+xml"
+    aria-label="DC state estimation factor graph"
+    style="width: 50%; height: auto;">
+    <a href="../dcse.svg">DC state estimation factor graph</a>
+  </object>
 </div>
 ```
 
@@ -133,7 +139,7 @@ nothing # hide
 The figure below shows the updated `P12` factor together with its incident edges:
 ```@example dc_state_estimation
 saveGraphFigure(
-    "ddcse.svg",
+    "../ddcse.svg",
     graph;
     highlight = [(factor = "P12", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 3)]
 )
@@ -143,7 +149,13 @@ nothing # hide
 
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
-  <img src="../ddcse.svg" alt="Dynamic DC state estimation factor graph" style="width: 50%; height: auto;">
+  <object
+    data="../ddcse.svg"
+    type="image/svg+xml"
+    aria-label="Dynamic DC state estimation factor graph"
+    style="width: 50%; height: auto;">
+    <a href="../ddcse.svg">Dynamic DC state estimation factor graph</a>
+  </object>
 </div>
 ```
 
