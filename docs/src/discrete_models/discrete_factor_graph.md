@@ -169,11 +169,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../dfg.svg"
+    data="dfg.svg"
     type="image/svg+xml"
     aria-label="Discrete factor graph"
     style="width: 40%; height: auto;">
-    <a href="../dfg.svg">Discrete factor graph</a>
+    <a href="dfg.svg">Discrete factor graph</a>
   </object>
 </div>
 ```

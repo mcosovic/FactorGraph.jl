@@ -219,11 +219,11 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gfg.svg"
+    data="gfg.svg"
     type="image/svg+xml"
     aria-label="Gaussian factor graph"
     style="width: 45%; height: auto;">
-    <a href="../gfg.svg">Gaussian factor graph</a>
+    <a href="gfg.svg">Gaussian factor graph</a>
   </object>
 </div>
 ```
