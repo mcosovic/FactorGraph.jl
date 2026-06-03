@@ -237,13 +237,23 @@ end
 
         @test occursin(">x1<", svg)
         @test occursin(">x2<", svg)
-        @test occursin(">x3<", svg)
+        @test !occursin(">x3<", svg)
         @test occursin(">link_1_2<", svg)
         @test occursin(">link_2_3<", svg)
 
+        seedSvg = graphFigure(graph; view = (variables = [:x1], hops = 0))
+        @test occursin(">x1<", seedSvg)
+        @test !occursin(">link_1_2<", seedSvg)
+
+        twoHopSvg = graphFigure(graph; view = (variables = [:x1, :x2], hops = 2))
+        @test occursin(">x3<", twoHopSvg)
+
+        allHopSvg = graphFigure(graph; view = (variables = [:x1], hops = :all))
+        @test occursin(">x3<", allHopSvg)
+
         @test_throws ErrorException graphFigure(
             graph;
-            view = (variables = [:x1, :x2], depth = 0)
+            view = (variables = [:x1, :x2], hops = -1)
         )
 
         verticalSvg = graphFigure(
@@ -251,7 +261,7 @@ end
             layout = (orientation = :vertical,),
             view = (variables = [:x1, :x2],)
         )
-        @test occursin(">x3<", verticalSvg)
+        @test !occursin(">x3<", verticalSvg)
     end
 
     @testset "Tree graph output" begin
@@ -276,7 +286,7 @@ end
         @test !occursin("<title>Edge", noTooltipSvg)
         @test !occursin("class=\"edge-hitbox\"", noTooltipSvg)
 
-        viewSvg = graphFigure(tree; view = (variables = [:x1], depth = 1))
+        viewSvg = graphFigure(tree; view = (variables = [:x1], hops = 2))
         @test occursin("variable-context", viewSvg)
         @test occursin("<title>Variable x1", viewSvg)
         @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Variable x1", viewSvg)

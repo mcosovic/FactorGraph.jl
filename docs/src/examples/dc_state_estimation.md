@@ -84,7 +84,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example dc_state_estimation
-saveGraphFigure("../dcse.svg", graph)
+saveGraphFigure("../dcse.svg", graph; label = (showEdgeIds = true, tooltipDetail = :full))
 
 nothing # hide
 ```

@@ -24,9 +24,9 @@ Layout options control graph orientation, spacing, and edge geometry:
   - `rowSpacing`: Vertical spacing between node rows.
   - `columnSpacing`: Horizontal spacing between node columns.
   - `unaryFactorOffset`: Distance between unary factors and variables in the
-    general factor graph layout.
+    general factor graph layout. Ignored for `TreeFactorGraph` layouts.
   - `multiFactorOffset`: Distance between variables and multi-variable factors
-    in the general factor graph layout.
+    in the general factor graph layout. Ignored for `TreeFactorGraph` layouts.
   - `curvedEdges`: Draw edges as cubic curves instead of straight lines.
 
 Node options control the size of variable and factor nodes:
@@ -45,12 +45,12 @@ Label options control label placement, visibility, and font size:
   - `tooltipDetail`: Tooltip detail level: `:summary` or `:full`.
   - `fontSize`: Label font size in SVG user units.
 
-View options control which part of a general factor graph is drawn:
+View options control which part of a factor graph or tree view is drawn:
 - `view = NamedTuple()`: Override view options. Supported keys are:
   - `variables`: Variable ids or labels used as the focus.
   - `factors`: Factor ids or labels used as the focus.
-  - `depth`: Positive number of factor-neighborhood expansions from focused
-    variables and factors.
+  - `hops`: Nonnegative number of bipartite graph hops from focused variables
+    and factors, or `:all` to expand through the connected component.
 
 Style options control default graph colors and stroke widths:
 - `style = NamedTuple()`: Override default SVG styles. Supported keys are:
@@ -1658,7 +1658,7 @@ function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
     defaultView = (
         variables = nothing,
         factors = nothing,
-        depth = 1
+        hops = 1
     )
 
     for key in propertynames(view)
@@ -1669,8 +1669,8 @@ function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
 
     options = merge(defaultView, view)
 
-    if !(options.depth isa Integer) || options.depth < 1
-        error("view.depth must be a positive integer.")
+    if !((options.hops isa Integer && options.hops >= 0) || options.hops == :all)
+        error("view.hops must be a nonnegative integer or :all.")
     end
 
     if isnothing(options.variables) && isnothing(options.factors)
@@ -1686,7 +1686,7 @@ function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
             focusFactorSet = Set(factorIndices),
             factorSet = Set(factorIndices),
             edges = visibleEdges,
-            depth = options.depth
+            hops = options.hops
         )
     end
 
@@ -1717,45 +1717,30 @@ function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
     factorDepths = Dict(index => 0 for index in factorIndices)
     frontierVariables = Set(variableIndices)
     frontierFactors = Set(factorIndices)
+    hopLimit = options.hops == :all ?
+        length(graph.variables) + length(graph.factors) :
+        options.hops
 
-    for depth in 1:options.depth
+    for hop in 1:hopLimit
         nextFactors = Set{Int}()
         nextVariables = Set{Int}()
 
         for edge in graph.edges
             if edge.variableIndex in frontierVariables && !(edge.factorIndex in factorSet)
                 push!(nextFactors, edge.factorIndex)
-                factorDepths[edge.factorIndex] = depth
+                factorDepths[edge.factorIndex] = hop
             end
 
             if edge.factorIndex in frontierFactors && !(edge.variableIndex in variableSet)
                 push!(nextVariables, edge.variableIndex)
-                variableDepths[edge.variableIndex] = depth
+                variableDepths[edge.variableIndex] = hop
             end
         end
 
         union!(factorSet, nextFactors)
         union!(variableSet, nextVariables)
-
-        expandedVariables = Set{Int}()
-        expandedFactors = Set{Int}()
-
-        for edge in graph.edges
-            if edge.factorIndex in nextFactors && !(edge.variableIndex in variableSet)
-                push!(expandedVariables, edge.variableIndex)
-                variableDepths[edge.variableIndex] = depth
-            end
-
-            if edge.variableIndex in nextVariables && !(edge.factorIndex in factorSet)
-                push!(expandedFactors, edge.factorIndex)
-                factorDepths[edge.factorIndex] = depth
-            end
-        end
-
-        union!(variableSet, expandedVariables)
-        union!(factorSet, expandedFactors)
-        frontierVariables = union(nextVariables, expandedVariables)
-        frontierFactors = union(nextFactors, expandedFactors)
+        frontierVariables = nextVariables
+        frontierFactors = nextFactors
 
         if isempty(frontierVariables) && isempty(frontierFactors)
             break
@@ -1799,7 +1784,7 @@ function graphFigureViewOptions(graph::AbstractFactorGraph, view::NamedTuple)
         focusFactorSet = focusFactorSet,
         factorSet = factorSet,
         edges = visibleEdges,
-        depth = options.depth
+        hops = options.hops
     )
 end
 
@@ -1839,7 +1824,6 @@ function graphFigureFactorTooltip(
     identityLines = [
         "type: $(nameof(typeof(factor)))",
         "index: $factorIndex",
-        "id: $(graphFigureValueText(factor.id))",
         "variables: $(join(variableLabels, ", "))",
         "degree: $(length(graph.factorEdges[factorIndex]))"
     ]

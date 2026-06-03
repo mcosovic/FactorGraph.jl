@@ -98,7 +98,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example discrete_robot_localization
-saveGraphFigure("../drl.svg", graph; layout = (columnSpacing = 120,))
+saveGraphFigure("../drl.svg", graph; layout = (columnSpacing = 120, rowSpacing = 90))
 
 nothing # hide
 ```

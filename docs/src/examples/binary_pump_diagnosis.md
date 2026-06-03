@@ -116,7 +116,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example binary_pump_diagnosis
-saveGraphFigure("../bpd.svg", graph)
+saveGraphFigure("../bpd.svg", graph; label = (showEdgeIds = true, tooltipDetail = :full))
 
 nothing # hide
 ```

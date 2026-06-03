@@ -2,6 +2,21 @@
 
 ---
 
+## Version 0.2.4 - Unreleased
+
+#### Changed
+
+- Removed the redundant factor node `id` line from `graphFigure` tooltips.
+- Replaced graph figure view `depth` with `hops`, using true bipartite graph
+  hop expansion from selected variables and factors.
+
+#### Documentation
+
+- Clarified that `unaryFactorOffset` and `multiFactorOffset` apply only to
+  general `graphFigure` layouts, not `TreeFactorGraph` layouts.
+
+---
+
 ## Version 0.2.3 - 2026-06-02
 
 #### Added

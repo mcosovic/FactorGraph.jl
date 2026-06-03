@@ -96,7 +96,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example pmu_state_estimation
-saveGraphFigure("../pmuse.svg", graph)
+saveGraphFigure("../pmuse.svg", graph; label = (showEdgeIds = true, tooltipDetail = :full))
 
 nothing # hide
 ```
