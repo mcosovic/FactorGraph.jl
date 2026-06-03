@@ -6,7 +6,7 @@
 
 #### Changed
 
-- Removed the redundant factor node `id` line from `graphFigure` tooltips.
+- Removed the redundant factor node `ID` line from `graphFigure` tooltips.
 - Replaced graph figure view `depth` with `hops`, using true bipartite graph
   hop expansion from selected variables and factors.
 - Replaced separate unary and multi-factor graph spacing layout options with

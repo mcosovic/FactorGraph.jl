@@ -1247,7 +1247,7 @@ Return the current marginal mean for one variable.
 
 - `graph`: Gaussian factor graph or tree view.
 - `inference`: Matching moment or canonical inference object.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 
@@ -1293,7 +1293,7 @@ Return the current marginal covariance for one variable.
 
 - `graph`: Gaussian factor graph or tree view.
 - `inference`: Matching moment or canonical inference object.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 

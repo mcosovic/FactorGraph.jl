@@ -1,15 +1,13 @@
 # Graph Visualization
 
-This example shows common ways to customize [`graphFigure`](@ref) and
-[`saveGraphFigure`](@ref). The same visualization API works for Gaussian
+This example walks through common ways to customize [`graphFigure`](@ref) and
+[`saveGraphFigure`](@ref). The same visualization options work for Gaussian
 factor graphs, discrete factor graphs, and tree views.
-
-The examples below intentionally use a small graph so the effect of each option
-is easy to see.
 
 ## Base Graph
 
-Start with a small Gaussian factor graph:
+Start with a small Gaussian factor graph that has three variables, two pairwise
+factors, and two unary factors:
 
 ```@example graph_visualization
 using FactorGraph
@@ -32,16 +30,13 @@ graph = factorGraph(variables, factors)
 nothing # hide
 ```
 
-The graph has three variable nodes and four factor nodes. The factor labels are
-kept short (`f1`, `f2`, ...) so label placement and edge id labels remain easy
-to inspect in the generated SVGs.
-
 ---
 
 ## Default Figure
 
 The default figure draws variable labels, factor labels, SVG hover tooltips,
-and curved edges. This is usually enough for a quick model check:
+and curved edges. This is a compact way to check the graph structure while
+building a model:
 
 ```@example graph_visualization
 saveGraphFigure("../gv_default.svg", graph)
@@ -61,17 +56,17 @@ nothing # hide
 </div>
 ```
 
-Hover over a node or edge in the rendered SVG to inspect its tooltip. Tooltips
-show identity metadata by default and can be expanded with `tooltipDetail =
-:full`.
+Hover over a node or edge in the rendered SVG to inspect its tooltip. Summary
+tooltips show identity metadata, while `tooltipDetail = :full` includes more
+node or edge details.
 
 ---
 
 ## Layout And Labels
 
 Layout options control orientation, spacing, and edge geometry. Label options
-control node labels, edge ids, tooltip detail, and font size. This example
-switches to a vertical layout, draws straight edges, and enables edge id labels:
+control node labels, edge IDs, tooltip detail, and font size. The next figure
+uses a vertical layout, straight edges, outside labels, and visible edge IDs:
 
 ```@example graph_visualization
 saveGraphFigure(
@@ -100,24 +95,25 @@ nothing # hide
   <object
     data="../../gv_vertical.svg"
     type="image/svg+xml"
-    aria-label="Vertical graph figure with edge ids"
+    aria-label="Vertical graph figure with edge IDs"
     style="width: 34%; height: auto;">
-    <a href="../../gv_vertical.svg">Vertical graph figure with edge ids</a>
+    <a href="../../gv_vertical.svg">Vertical graph figure with edge IDs</a>
   </object>
 </div>
 ```
 
 Spacing options may be scalars for uniform gaps, or tuples/vectors for per-gap
-spacing. In the default horizontal layout, `columnSpacing = (90, 210)` separates
-unary factors from variables, then variables from multi-variable factors. In
-vertical layout, the same idea applies through `rowSpacing`.
+spacing. In the default horizontal layout, `columnSpacing = (90, 210)` first
+sets the gap from unary factors to variables, then the gap from variables to
+multi-variable factors. In vertical layout, the same idea applies through
+`rowSpacing`.
 
 ---
 
 ## Focused Views
 
-Use `view.variables` and `view.factors` to choose focus nodes. The `hops`
-keyword expands through the bipartite graph by edge count. With `hops = 2`,
+Use `view` to draw a focused part of the graph. The `hops` keyword expands from
+the selected variables or factors through the bipartite graph. With `hops = 2`,
 the figure includes `x1`, its neighboring factors, and the variables connected
 to those factors:
 
@@ -144,18 +140,17 @@ nothing # hide
 </div>
 ```
 
-`hops = 0` draws only the selected seed nodes, while `hops = :all` expands
-through the connected component. Focused nodes are drawn normally and expanded
-context nodes are drawn with the context style.
+Here, `hops = 0` draws only the selected seed nodes, while `hops = :all` expands
+through the connected component. Focus nodes keep the normal style, and expanded
+context nodes use the context style.
 
 ---
 
 ## Style And Highlights
 
 Style options set the default colors and stroke widths. Highlight entries can
-select variables, factors, edges, or a variable-factor edge pair. Highlights
-are useful when a figure is meant to explain one local relationship in a larger
-model:
+select variables, factors, edges, or a variable-factor edge pair. This is useful
+when a figure needs to call attention to one relationship inside a larger model:
 
 ```@example graph_visualization
 saveGraphFigure(
@@ -196,16 +191,16 @@ nothing # hide
 </div>
 ```
 
-Variable and factor highlights can also highlight incident edges. Edge-specific
-highlights can be selected either by edge id or by a `(variable, factor)` pair.
+Variable and factor highlights can include their incident edges. Edge-specific
+highlights can be selected either by edge ID or by a `(variable, factor)` pair.
 
 ---
 
 ## Tree Views
 
-Tree figures use graph depth for placement. The same label, style, highlight,
-and view options are available. Here the graph is converted to a tree view and
-drawn horizontally from root variable `x1`:
+Tree figures place nodes by graph depth. The same label, style, highlight, and
+view options are available. Here the graph is converted to a tree view and drawn
+horizontally from root variable `x1`:
 
 ```@example graph_visualization
 tree = treeFactorGraph(graph; root = :x1)
@@ -213,7 +208,7 @@ tree = treeFactorGraph(graph; root = :x1)
 saveGraphFigure(
     "../gv_tree.svg",
     tree;
-    layout = (orientation = :horizontal, rowSpacing = 70, columnSpacing = (95, 120, 145)),
+    layout = (orientation = :horizontal, rowSpacing = 70, columnSpacing = (105, 120, 145)),
     view = (variables = [:x1], hops = :all),
     label = (showEdgeIds = true, tooltipDetail = :full),
     highlight = [(variable = :x1, stroke = "#16a34a", fill = "#dcfce7", strokeWidth = 4)]
@@ -235,28 +230,36 @@ nothing # hide
 ```
 
 In horizontal tree layout, `columnSpacing` separates depth levels and
-`rowSpacing` separates nodes within the same level. The interpretation is
-reversed for vertical tree orientation. Tuple or vector spacing sets level gaps
-one by one; the last value is reused when the graph has more gaps.
+`rowSpacing` separates nodes within the same level. Vertical tree layout swaps
+that interpretation. Tuple or vector spacing sets the gaps one by one; the last
+value is reused when the graph has more gaps.
 
 ---
 
 ## Full Option Sketch
 
-This compact call shows every option group in one place. It is meant as a
-reference pattern rather than a recommended visual style:
+This final call collects the option groups in one place. Treat it as a reference
+pattern rather than as a recommended visual style:
 
 ```julia
 graphFigure(
     graph;
-    canvas = (width = 700, height = nothing, padding = 24, zoom = 1.0),
+    canvas = (
+        width = 700,
+        height = nothing,
+        padding = 24,
+        zoom = 1.0
+    ),
     layout = (
         orientation = :horizontal,
         rowSpacing = 90,
         columnSpacing = (90, 210),
         curvedEdges = true
     ),
-    node = (variableRadius = 24, factorSize = 22),
+    node = (
+        variableRadius = 24,
+        factorSize = 22
+    ),
     label = (
         placement = :outside,
         outsideGap = 6,
@@ -267,7 +270,11 @@ graphFigure(
         tooltipDetail = :summary,
         fontSize = 14
     ),
-    view = (variables = [:x1], factors = nothing, hops = :all),
+    view = (
+        variables = [:x1],
+        factors = nothing,
+        hops = :all
+    ),
     style = (
         backgroundFill = "#ffffff",
         variableFill = "#e0f2fe",

@@ -21,8 +21,8 @@ Print variables, factors, and edge connectivity as tables.
 
 # Notes
 
-The output shows each variable with connected factor labels and edge ids, each
-factor with connected variable labels and edge ids, and finally the edge list.
+The output shows each variable with connected factor labels and edge IDs, each
+factor with connected variable labels and edge IDs, and finally the edge list.
 This function is intended for interactive inspection.
 
 # Example
@@ -311,7 +311,7 @@ Print messages using exactly one keyword filter:
 
 # Keywords
 
-- `variable`: Variable id or label for variable-to-factor messages.
+- `variable`: Variable ID or label for variable-to-factor messages.
 - `factor`: Factor index or label for factor-to-variable messages.
 
 # Notes
@@ -502,7 +502,7 @@ Print variable marginals. If `variable` is omitted, all variable marginals are p
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 
 # Notes
 
@@ -633,7 +633,7 @@ Print min-sum MAP estimates. If `variable` is omitted, all variable estimates ar
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 
 # Example
 

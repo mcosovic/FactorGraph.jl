@@ -5,7 +5,7 @@ Mutable schedule state for residual belief propagation.
 
 # Fields
 
-- `edgeIds`: Candidate edge ids.
+- `edgeIds`: Candidate edge IDs.
 - `directions`: Candidate directions; `true` is factor-to-variable.
 - `residuals`: Current candidate residual values.
 - `updateFraction`: Fraction used when `updateCount` is omitted.

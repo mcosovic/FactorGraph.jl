@@ -17,7 +17,7 @@ Accepted variable identifiers: `Int` or `Symbol`.
 
 # Notes
 
-Use an id when you want a compact programmatic reference to a variable, for example
+Use an ID when you want a compact programmatic reference to a variable, for example
 `:x1` or `1`.
 """
 const VariableId = Union{Int, Symbol}
@@ -29,9 +29,9 @@ Accepted variable references: `Int`, `Symbol`, or `String`.
 
 # Notes
 
-Symbols and integer ids reference variable ids; strings reference variable labels. Most
+Symbols and integer IDs reference variable IDs; strings reference variable labels. Most
 public functions accept either form, so both `:x1` and `"x1"` can refer to the same
-variable when its id is `:x1` and its label is `"x1"`.
+variable when its ID is `:x1` and its label is `"x1"`.
 """
 const VariableRef = Union{Int, Symbol, String}
 
@@ -151,7 +151,7 @@ function validateVariables(variables::AbstractVector)
     labels = [variable.label for variable in variables]
 
     if length(unique(ids)) != length(ids)
-        error("$(variableKind(variables)) ids must be unique.")
+        error("$(variableKind(variables)) IDs must be unique.")
     end
 
     if length(unique(labels)) != length(labels)
@@ -174,7 +174,7 @@ function buildRefIndex(variables::AbstractVector)
 
     for (index, variable) in pairs(variables)
         if haskey(referenceIndex, variable.id)
-            error("Duplicate $(variableKind(variables)) id $(variable.id).")
+            error("Duplicate $(variableKind(variables)) ID $(variable.id).")
         end
 
         if haskey(referenceIndex, variable.label)
@@ -241,7 +241,7 @@ end
 """
     edgeIndex(graph::AbstractFactorGraph; variable::VariableRef, factor::FactorRef)
 
-Return the edge id connecting `variable` and `factor`.
+Return the edge ID connecting `variable` and `factor`.
 
 # Arguments
 
@@ -249,12 +249,12 @@ Return the edge id connecting `variable` and `factor`.
 
 # Keywords
 
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `factor`: Factor index or label.
 
 # Returns
 
-The one-based edge id.
+The one-based edge ID.
 
 # Notes
 
@@ -296,7 +296,7 @@ end
 """
     edgeIndices(graph::AbstractFactorGraph; variable = nothing, factor = nothing)
 
-Return edge ids connected to a variable, a factor, or their specific pair.
+Return edge IDs connected to a variable, a factor, or their specific pair.
 
 # Arguments
 
@@ -304,12 +304,12 @@ Return edge ids connected to a variable, a factor, or their specific pair.
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 - `factor`: Optional factor index or label.
 
 # Returns
 
-A vector of edge ids.
+A vector of edge IDs.
 
 # Notes
 
@@ -405,7 +405,7 @@ end
 
 function addVariableNode!(graph::AbstractFactorGraph, variable)
     if hasVariableId(graph, variable.id)
-        error("Variable id $(variable.id) is already defined.")
+        error("Variable ID $(variable.id) is already defined.")
     end
 
     if hasVariableLabel(graph, variable.label)

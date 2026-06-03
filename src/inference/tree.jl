@@ -700,21 +700,21 @@ Perform one forward tree message update.
 - `tree`: Tree factor graph.
 - `inference`: Matching inference object.
 - `schedule`: Optional forward/backward schedule.
-- `edgeId`: Explicit edge id to update.
+- `edgeId`: Explicit edge ID to update.
 
 # Keywords
 
-- `variable`: Variable id or label for selected-edge update.
+- `variable`: Variable ID or label for selected-edge update.
 - `factor`: Factor index or label for selected-edge update.
 
 # Returns
 
-The updated edge id, or `nothing` when the scheduled pass is complete.
+The updated edge ID, or `nothing` when the scheduled pass is complete.
 
 # Notes
 
 Without an explicit edge, the next edge in the forward schedule is updated and
-the step cursor is advanced. Returns the updated edge id, or `nothing` when the
+the step cursor is advanced. Returns the updated edge ID, or `nothing` when the
 forward pass is complete.
 
 The edge order is determined by [`treeFactorGraph`](@ref). A forward pass sends
@@ -723,7 +723,7 @@ messages from leaves toward the selected root.
 When `schedule` is omitted, the tree's default step cursor is advanced. Use
 [`reset!`](@ref) on the tree before reusing that cursor.
 
-Passing an edge id, or selecting an edge by `variable` and `factor`, updates
+Passing an edge ID, or selecting an edge by `variable` and `factor`, updates
 only that selected forward message and does not advance any cursor.
 
 # Example
@@ -856,21 +856,21 @@ Perform one backward tree message update.
 - `tree`: Tree factor graph.
 - `inference`: Matching inference object.
 - `schedule`: Optional forward/backward schedule.
-- `edgeId`: Explicit edge id to update.
+- `edgeId`: Explicit edge ID to update.
 
 # Keywords
 
-- `variable`: Variable id or label for selected-edge update.
+- `variable`: Variable ID or label for selected-edge update.
 - `factor`: Factor index or label for selected-edge update.
 
 # Returns
 
-The updated edge id, or `nothing` when the scheduled pass is complete.
+The updated edge ID, or `nothing` when the scheduled pass is complete.
 
 # Notes
 
 Without an explicit edge, the next edge in the backward schedule is updated and
-the step cursor is advanced. Returns the updated edge id, or `nothing` when the
+the step cursor is advanced. Returns the updated edge ID, or `nothing` when the
 backward pass is complete.
 
 A backward pass sends messages from the selected root toward the leaves.
@@ -878,7 +878,7 @@ A backward pass sends messages from the selected root toward the leaves.
 When `schedule` is omitted, the tree's default step cursor is advanced. Use
 [`reset!`](@ref) on the tree before reusing that cursor.
 
-Passing an edge id, or selecting an edge by `variable` and `factor`, updates
+Passing an edge ID, or selecting an edge by `variable` and `factor`, updates
 only that selected backward message and does not advance any cursor.
 
 # Example

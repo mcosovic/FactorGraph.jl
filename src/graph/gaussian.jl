@@ -72,7 +72,7 @@ Create a GaussianVariable node.
 
 # Arguments
 
-- `id`: Symbolic or integer identifier used in factors.
+- `id`: Symbolic or integer ID used in factors.
 - `dimension`: State dimension of the variable.
 
 # Keywords
@@ -84,7 +84,7 @@ Create a GaussianVariable node.
 
 # Notes
 
-If `label` is omitted, the variable id is converted to a compact default label.
+If `label` is omitted, the variable ID is converted to a compact default label.
 For example, `:x_1` becomes `"x1"`. Explicit labels are kept unchanged.
 
 If `mean` and `covariance` are provided, they define the GaussianVariable initial belief
@@ -241,7 +241,7 @@ struct GaussianFactor
         initialize::Bool = false
     )
         if id < 0
-            error("GaussianFactor id must be nonnegative.")
+            error("GaussianFactor ID must be nonnegative.")
         end
 
         if isempty(variables)
@@ -322,10 +322,10 @@ Construct a Gaussian factor graph from variables and factors, or construct an em
 
 - `variables`: Gaussian variable nodes in internal order.
 - `factors`: Gaussian factor nodes in internal order.
-- `referenceIndex`: Lookup from variable ids and labels to internal indices.
+- `referenceIndex`: Lookup from variable IDs and labels to internal indices.
 - `edges`: Factor-variable edges.
-- `factorEdges`: Edge ids adjacent to each factor.
-- `variableEdges`: Edge ids adjacent to each variable.
+- `factorEdges`: Edge IDs adjacent to each factor.
+- `variableEdges`: Edge IDs adjacent to each variable.
 - `topologyVersion`: Counter used to detect stale inference states.
 
 # Notes
@@ -364,7 +364,7 @@ Resolve a Gaussian component reference to its one-based index within a variable.
 # Arguments
 
 - `graph`: Gaussian factor graph used to resolve `variable`.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `component`: Component reference.
 
 # Returns
@@ -400,7 +400,7 @@ Return the component reference stored at a one-based index.
 # Arguments
 
 - `graph`: Gaussian factor graph used to resolve `variable`.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `index`: One-based component index.
 
 # Returns
@@ -436,7 +436,7 @@ Resolve a variable reference to its internal one-based variable index.
 # Arguments
 
 - `graph`: Gaussian or discrete factor graph.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 
@@ -469,7 +469,7 @@ graphs this is the variable cardinality.
 # Arguments
 
 - `graph`: Gaussian or discrete factor graph.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 
@@ -569,7 +569,7 @@ Add a continuous Gaussian variable to an existing Gaussian factor graph.
 
 - `graph`: Gaussian factor graph to mutate.
 - `variable`: Gaussian variable node to add.
-- `id`: Variable id.
+- `id`: Variable ID.
 - `dimension`: Dimension of the continuous state vector.
 
 # Keywords
@@ -590,7 +590,7 @@ Calling this graph-only method changes the graph topology and makes existing
 inference objects for this graph stale. For warm-start inference, use the
 method that also receives an inference object.
 
-GaussianVariable ids and labels must remain unique.
+GaussianVariable IDs and labels must remain unique.
 
 # Example
 
@@ -661,12 +661,12 @@ The added [`GaussianFactor`](@ref).
 # Notes
 
 The new GaussianFactor is validated against the graph's existing variables, assigned
-the next GaussianFactor id, inserted into `graph.factors`, and connected by new
+the next GaussianFactor ID, inserted into `graph.factors`, and connected by new
 edges. Existing variables are not modified, but their adjacency lists receive
-the new edge ids.
+the new edge IDs.
 
 If `label` is omitted, the GaussianFactor is named `fN`, where `N` is the assigned
-GaussianFactor id. Explicit labels are kept unchanged. GaussianFactor labels
+GaussianFactor ID. Explicit labels are kept unchanged. GaussianFactor labels
 must remain unique.
 
 Calling this graph-only method does not resize existing inference objects.
@@ -813,7 +813,7 @@ The updated [`GaussianFactor`](@ref).
 Use `mean` for the observed or target value stored in the GaussianFactor. Use
 `coefficient` to replace the GaussianFactor coefficient matrix.
 
-The update keeps the existing connected variables, id, and label. If
+The update keeps the existing connected variables, ID, and label. If
 `initialize` is omitted, the existing initialization flag is kept. The updated
 mean length, coefficient matrix size, and covariance matrix size must match the
 old GaussianFactor. Dimensions, positive definiteness, and initializing unary GaussianFactor
@@ -1227,7 +1227,7 @@ Return the coefficient submatrix in `GaussianFactor` corresponding to one variab
 # Keywords
 
 - `factor`: Factor index or label.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 
@@ -1334,7 +1334,7 @@ Create a tree-oriented factor graph view rooted at `root`.
 
 # Keywords
 
-- `root`: Optional root variable id or label. If omitted, the first variable is used.
+- `root`: Optional root variable ID or label. If omitted, the first variable is used.
 
 # Returns
 

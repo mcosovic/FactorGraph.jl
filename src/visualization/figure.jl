@@ -39,14 +39,14 @@ Label options control label placement, visibility, and font size:
   - `showVariables`: Draw variable labels.
   - `showFactors`: Draw factor labels.
   - `showTooltips`: Add SVG hover tooltips for variables, factors, and edges.
-  - `showEdgeIds`: Draw edge id labels next to edges.
+  - `showEdgeIds`: Draw edge ID labels next to edges.
   - `tooltipDetail`: Tooltip detail level: `:summary` or `:full`.
   - `fontSize`: Label font size in SVG user units.
 
 View options control which part of a factor graph or tree view is drawn:
 - `view = NamedTuple()`: Override view options. Supported keys are:
-  - `variables`: Variable ids or labels used as the focus.
-  - `factors`: Factor ids or labels used as the focus.
+  - `variables`: Variable IDs or labels used as the focus.
+  - `factors`: Factor IDs or labels used as the focus.
   - `hops`: Nonnegative number of bipartite graph hops from focused variables
     and factors, or `:all` to expand through the connected component.
 
@@ -68,7 +68,7 @@ Highlight options control highlighted variables, factors, and edges:
 - `highlight = NamedTuple[]`: Highlight entries. Supported entry selectors are:
   - `(variable = x1, ...)`: Highlight a variable node.
   - `(factor = f1, ...)`: Highlight a factor node.
-  - `(edge = 1, ...)`: Highlight an edge by edge id or edge object.
+  - `(edge = 1, ...)`: Highlight an edge by edge ID or edge object.
   - `(variable = x1, factor = f1, ...)`: Highlight the edge connecting a
     variable and factor.
 

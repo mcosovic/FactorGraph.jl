@@ -556,7 +556,7 @@ Return whether outgoing messages from a variable are frozen.
 
 - `graph`: Gaussian or discrete factor graph.
 - `inference`: Matching inference object.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Returns
 
@@ -597,7 +597,7 @@ Return whether both message directions on an edge are frozen.
 
 # Keywords
 
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `factor`: Factor index or label.
 
 # Returns
@@ -674,7 +674,7 @@ Freeze all outgoing variable-to-factor messages for a variable.
 
 - `graph`: Gaussian or discrete factor graph.
 - `inference`: Matching inference object.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Example
 
@@ -711,7 +711,7 @@ Freeze both message directions on the edge connecting `variable` and `factor`.
 
 # Keywords
 
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `factor`: Factor index or label.
 
 # Example
@@ -779,7 +779,7 @@ Unfreeze outgoing variable-to-factor messages for a variable.
 
 - `graph`: Gaussian or discrete factor graph.
 - `inference`: Matching inference object.
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 
 # Example
 
@@ -816,7 +816,7 @@ Unfreeze both message directions on the edge connecting `variable` and `factor`.
 
 # Keywords
 
-- `variable`: Variable id or label.
+- `variable`: Variable ID or label.
 - `factor`: Factor index or label.
 
 # Example
@@ -855,7 +855,7 @@ Return whether all selected edges are marked for damping.
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 - `factor`: Optional factor index or label.
 
 # Notes
@@ -905,7 +905,7 @@ Enable damping for selected edges.
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 - `factor`: Optional factor index or label.
 - `prob`: Damping probability.
 - `alpha`: Previous-message mixing weight.
@@ -956,7 +956,7 @@ Disable damping for selected edges.
 
 # Keywords
 
-- `variable`: Optional variable id or label.
+- `variable`: Optional variable ID or label.
 - `factor`: Optional factor index or label.
 
 # Notes

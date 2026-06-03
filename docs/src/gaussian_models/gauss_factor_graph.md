@@ -142,7 +142,7 @@ nothing # hide
 
 The first arguments define the variable nodes connected to the factor node. Their order is
 important and must match the column ordering of the coefficient matrix. A variable can be
-referenced by id, such as `:x1` or `1`, by label, such as `"x1"`, or by passing the
+referenced by ID, such as `:x1` or `1`, by label, such as `"x1"`, or by passing the
 [`GaussianVariable`](@ref) node itself.
 
 ---
@@ -305,7 +305,7 @@ factor graph. It stores the selected root variable, parent-edge orientation, and
 forward/backward edge orders used by tree inference.
 
 The root controls the order of forward and backward messages, but not the final exact
-marginals. The `root` keyword accepts the same variable references used elsewhere: ids such
+marginals. The `root` keyword accepts the same variable references used elsewhere: IDs such
 as `:x3` or labels such as `"x3"`.
 
 If a regular [`GaussianFactorGraph`](@ref) already exists, it can still be converted
@@ -346,7 +346,7 @@ object should also reset warm-start messages from the initializing unary factor.
 
 ## Lookup Functions
 
-Most lookup functions accept either a variable id or a variable label:
+Most lookup functions accept either a variable ID or a variable label:
 
 ```@example general_gaussian_factor_graph
 variableIndex(graph, :x2)
@@ -392,11 +392,11 @@ nothing # hide
 
 The print helpers are intended for interactive inspection in the REPL.
 
-[`printModel`](@ref) prints the model data: variable labels, ids, dimensions, factor labels,
-ids, connected variables, and matrix sizes.
+[`printModel`](@ref) prints the model data: variable labels, IDs, dimensions, factor labels,
+IDs, connected variables, and matrix sizes.
 
 [`printGraph`](@ref) prints a compact table view of the graph. It shows which factors are
-connected to each variable, which variables are connected to each factor, and the edge ids
+connected to each variable, which variables are connected to each factor, and the edge IDs
 used internally by message passing.
 
 [`printEdges`](@ref) prints one line per edge, using the form

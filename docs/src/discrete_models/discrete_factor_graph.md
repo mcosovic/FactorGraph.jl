@@ -105,7 +105,7 @@ nothing # hide
 
 The first arguments define the variable nodes connected to the factor node. Their order is
 important and must match the dimensions of the factor table. A variable can be referenced by
-id, such as `:x1` or `1`, by label, such as `"x1"`, or by passing the
+ID, such as `:x1` or `1`, by label, such as `"x1"`, or by passing the
 [`DiscreteVariable`](@ref) node itself.
 
 ---
@@ -242,7 +242,7 @@ nothing # hide
 The returned tree object stores the selected root variable, parent-edge orientation, and
 the forward/backward edge orders used by tree inference. The root controls message order,
 but not the final exact marginals after a complete sweep. The `root` keyword accepts the
-same variable references used elsewhere: ids such as `:x3` or labels such as `"x3"`.
+same variable references used elsewhere: IDs such as `:x3` or labels such as `"x3"`.
 
 If the graph is disconnected or cyclic, [`factorGraph`](@ref) throws an error.
 
@@ -284,7 +284,7 @@ connected variable.
 
 ## Lookup Functions
 
-Most lookup functions accept either a variable id or a variable label:
+Most lookup functions accept either a variable ID or a variable label:
 
 ```@example discrete_factor_graph
 variableIndex(graph, :x2)
@@ -332,11 +332,11 @@ nothing # hide
 
 The print helpers are intended for interactive inspection in the REPL.
 
-[`printModel`](@ref) prints the model data: variable labels, ids, cardinalities, factor
-labels, ids, connected variables, table sizes, and initialization flags.
+[`printModel`](@ref) prints the model data: variable labels, IDs, cardinalities, factor
+labels, IDs, connected variables, table sizes, and initialization flags.
 
 [`printGraph`](@ref) prints a compact table view of the graph. It shows which factors are
-connected to each variable, which variables are connected to each factor, and the edge ids
+connected to each variable, which variables are connected to each factor, and the edge IDs
 used internally by message passing.
 
 [`printEdges`](@ref) prints one line per edge, using the form
