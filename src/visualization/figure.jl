@@ -993,8 +993,14 @@ function treeGraphFigure(
         labelPlacement,
         showFactorLabels
     )
-    variableX = [levelX[depth] for depth in variableDepths]
-    factorX = [levelX[depth] for depth in factorDepths]
+    variableX = zeros(Float64, length(graph.variables))
+    factorX = zeros(Float64, length(graph.factors))
+    for index in view.variables
+        variableX[index] = levelX[variableDepths[index]]
+    end
+    for index in view.factors
+        factorX[index] = levelX[factorDepths[index]]
+    end
     variableY = zeros(Float64, length(graph.variables))
     factorY = zeros(Float64, length(graph.factors))
 
@@ -1298,8 +1304,14 @@ function verticalTreeGraphFigure(
     )
     variableX = zeros(Float64, length(graph.variables))
     factorX = zeros(Float64, length(graph.factors))
-    variableY = [levelY[depth] for depth in variableDepths]
-    factorY = [levelY[depth] for depth in factorDepths]
+    variableY = zeros(Float64, length(graph.variables))
+    factorY = zeros(Float64, length(graph.factors))
+    for index in view.variables
+        variableY[index] = levelY[variableDepths[index]]
+    end
+    for index in view.factors
+        factorY[index] = levelY[factorDepths[index]]
+    end
 
     for depth in 1:maxDepth
         nodes = Tuple{Symbol, Int}[]

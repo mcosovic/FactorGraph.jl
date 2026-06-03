@@ -296,6 +296,13 @@ end
         @test occursin("variable-context", viewSvg)
         @test occursin("<title>Variable x1", viewSvg)
         @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Variable x1", viewSvg)
+
+        spacedViewSvg = graphFigure(
+            tree;
+            layout = (rowSpacing = 80, columnSpacing = (90, 210)),
+            view = (variables = [:x1], hops = 2)
+        )
+        @test startswith(spacedViewSvg, "<svg")
     end
 
     @testset "File output" begin
