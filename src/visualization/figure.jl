@@ -21,12 +21,10 @@ Canvas options control the size, padding, and displayed scale of the SVG:
 Layout options control graph orientation, spacing, and edge geometry:
 - `layout = NamedTuple()`: Override layout options. Supported keys are:
   - `orientation`: Use `:horizontal` or `:vertical` layout.
-  - `rowSpacing`: Vertical spacing between node rows.
-  - `columnSpacing`: Horizontal spacing between node columns.
-  - `unaryFactorOffset`: Distance between unary factors and variables in the
-    general factor graph layout. Ignored for `TreeFactorGraph` layouts.
-  - `multiFactorOffset`: Distance between variables and multi-variable factors
-    in the general factor graph layout. Ignored for `TreeFactorGraph` layouts.
+  - `rowSpacing`: Vertical spacing between node rows. May be a scalar or a
+    tuple/vector of per-gap spacings; the last per-gap value is reused.
+  - `columnSpacing`: Horizontal spacing between node columns. May be a scalar
+    or a tuple/vector of per-gap spacings; the last per-gap value is reused.
   - `curvedEdges`: Draw edges as cubic curves instead of straight lines.
 
 Node options control the size of variable and factor nodes:
@@ -160,8 +158,6 @@ function graphFigure(
             labelPlacement = labelOptions.placement,
             outsideLabelGap = labelOptions.outsideGap,
             nodeGap = nodeGap,
-            unaryFactorOffset = layoutOptions.unaryFactorOffset,
-            multiFactorOffset = layoutOptions.multiFactorOffset,
             curvedEdges = layoutOptions.curvedEdges,
             style = graphStyle,
             highlight = highlight,
@@ -176,13 +172,13 @@ function graphFigure(
     end
 
     rowCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
-    defaultLayoutHeight = 2 * margin + (rowCount - 1) * layoutOptions.rowSpacing
+    defaultLayoutHeight =
+        2 * margin + graphFigureSpacingSum(layoutOptions.rowSpacing, rowCount - 1)
     layoutHeight = isnothing(canvasOptions.height) ?
         defaultLayoutHeight : max(canvasOptions.height, defaultLayoutHeight)
     minCanvasHeight = isnothing(canvasOptions.height) ? 0 : canvasOptions.height
 
-    layoutNodeSpacing = rowCount <= 1 ?
-        layoutOptions.rowSpacing : (layoutHeight - 2 * margin) / (rowCount - 1)
+    layoutNodeSpacing = layoutOptions.rowSpacing
 
     variableRadii = nodeRadii(
         graph.variables,
@@ -211,7 +207,7 @@ function graphFigure(
 
     maxFactorWidth = maximum(factorWidths; init = nodeOptions.factorSize)
     defaultLayoutWidth = 2 * margin + leftLabelReserve + maxFactorWidth +
-        layoutOptions.unaryFactorOffset + layoutOptions.multiFactorOffset + rightLabelReserve
+        graphFigureSpacingSum(layoutOptions.columnSpacing, 2) + rightLabelReserve
     layoutWidth = isnothing(canvasOptions.width) ?
         defaultLayoutWidth : max(canvasOptions.width, defaultLayoutWidth)
     minCanvasWidth = isnothing(canvasOptions.width) ? 0 : canvasOptions.width
@@ -221,11 +217,11 @@ function graphFigure(
         leftLabelReserve,
         rightLabelReserve,
         maxFactorWidth,
-        layoutOptions.unaryFactorOffset,
-        layoutOptions.multiFactorOffset
+        layoutOptions.columnSpacing
     )
     variableY = fill(0.0, length(graph.variables))
-    orderedVariableY = nodeRows(variableCount, rowCount, margin, layoutNodeSpacing)
+    orderedVariableY =
+        graphFigureCenteredRows(variableCount, rowCount, layoutHeight, layoutNodeSpacing)
     for (position, variableIndex) in pairs(viewOptions.variables)
         variableY[variableIndex] = orderedVariableY[position]
     end
@@ -475,15 +471,13 @@ function verticalGraphFigure(
     canvasPadding::Int,
     zoom::Real,
     margin::Int,
-    rowSpacing::Int,
-    columnSpacing::Int,
+    rowSpacing,
+    columnSpacing,
     variableRadius::Int,
     factorSize::Int,
     labelPlacement::Symbol,
     outsideLabelGap::Int,
     nodeGap::Int,
-    unaryFactorOffset::Int,
-    multiFactorOffset::Int,
     curvedEdges::Bool,
     style::NamedTuple,
     highlight::AbstractVector,
@@ -513,14 +507,14 @@ function verticalGraphFigure(
         showVariableLabels,
         fontSize
     )
-    defaultLayoutWidth = 2 * margin + (columnCount - 1) * columnSpacing
+    defaultLayoutWidth = 2 * margin + graphFigureSpacingSum(columnSpacing, columnCount - 1)
     layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
     minCanvasWidth = isnothing(width) ? 0 : width
-    layoutColumnSpacing = columnCount <= 1 ?
-        columnSpacing : (layoutWidth - 2 * margin) / (columnCount - 1)
+    layoutColumnSpacing = columnSpacing
 
     rawVariableX = fill(0.0, length(graph.variables))
-    orderedVariableX = nodeRows(variableCount, columnCount, margin, layoutColumnSpacing)
+    orderedVariableX =
+        graphFigureCenteredRows(variableCount, columnCount, layoutWidth, layoutColumnSpacing)
     for (position, variableIndex) in pairs(view.variables)
         rawVariableX[variableIndex] = orderedVariableX[position]
     end
@@ -565,7 +559,7 @@ function verticalGraphFigure(
 
     maxFactorHeight = maximum(factorHeights; init = factorSize)
     defaultLayoutHeight = 2 * margin + topLabelReserve + maxFactorHeight +
-        unaryFactorOffset + multiFactorOffset + bottomLabelReserve
+        graphFigureSpacingSum(rowSpacing, 2) + bottomLabelReserve
     layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
     minCanvasHeight = isnothing(height) ? 0 : height
     variableY, unaryFactorY, multiFactorY = centeredRows(
@@ -574,8 +568,7 @@ function verticalGraphFigure(
         topLabelReserve,
         bottomLabelReserve,
         maxFactorHeight,
-        unaryFactorOffset,
-        multiFactorOffset
+        rowSpacing
     )
 
     variableX = rawVariableX
@@ -899,8 +892,8 @@ function treeGraphFigure(
     canvasPadding::Int,
     zoom::Real,
     margin::Int,
-    rowSpacing::Int,
-    columnSpacing::Int,
+    rowSpacing,
+    columnSpacing,
     variableRadius::Int,
     factorSize::Int,
     labelPlacement::Symbol,
@@ -927,10 +920,6 @@ function treeGraphFigure(
 
     if canvasPadding < 0
         error("canvasPadding must be non-negative.")
-    end
-
-    if rowSpacing <= 0 || columnSpacing <= 0
-        error("rowSpacing and columnSpacing must be positive.")
     end
 
     if orientation == :vertical
@@ -974,16 +963,15 @@ function treeGraphFigure(
         for depth in 1:maxDepth
     ]
     maxDepthCount = maximum(depthCounts; init = 1)
-    defaultLayoutHeight = 2 * margin + (maxDepthCount - 1) * rowSpacing
+    defaultLayoutHeight = 2 * margin + graphFigureSpacingSum(rowSpacing, maxDepthCount - 1)
     layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
     minCanvasHeight = isnothing(height) ? 0 : height
 
-    layoutNodeSpacing = maxDepthCount <= 1 ?
-        rowSpacing : (layoutHeight - 2 * margin) / (maxDepthCount - 1)
-    defaultLayoutWidth = 2 * margin + (maxDepth - 1) * columnSpacing
+    layoutNodeSpacing = rowSpacing
+    defaultLayoutWidth = 2 * margin + graphFigureSpacingSum(columnSpacing, maxDepth - 1)
     layoutWidth = isnothing(width) ? defaultLayoutWidth : max(width, defaultLayoutWidth)
     minCanvasWidth = isnothing(width) ? 0 : width
-    levelGap = maxDepth == 1 ? 0.0 : (layoutWidth - 2 * margin) / (maxDepth - 1)
+    levelX = graphFigurePositions(maxDepth, layoutWidth, columnSpacing)
 
     variableRadii = nodeRadii(
         graph.variables,
@@ -1005,8 +993,8 @@ function treeGraphFigure(
         labelPlacement,
         showFactorLabels
     )
-    variableX = [margin + (depth - 1) * levelGap for depth in variableDepths]
-    factorX = [margin + (depth - 1) * levelGap for depth in factorDepths]
+    variableX = [levelX[depth] for depth in variableDepths]
+    factorX = [levelX[depth] for depth in factorDepths]
     variableY = zeros(Float64, length(graph.variables))
     factorY = zeros(Float64, length(graph.factors))
 
@@ -1025,7 +1013,12 @@ function treeGraphFigure(
             end
         end
 
-        rows = nodeRows(length(nodes), maxDepthCount, margin, layoutNodeSpacing)
+        rows = graphFigureCenteredRows(
+            length(nodes),
+            maxDepthCount,
+            layoutHeight,
+            layoutNodeSpacing
+        )
 
         for (position, (kind, index)) in pairs(nodes)
             if kind == :variable
@@ -1242,8 +1235,8 @@ function verticalTreeGraphFigure(
     canvasPadding::Int,
     zoom::Real,
     margin::Int,
-    rowSpacing::Int,
-    columnSpacing::Int,
+    rowSpacing,
+    columnSpacing,
     variableRadius::Int,
     factorSize::Int,
     labelPlacement::Symbol,
@@ -1277,11 +1270,11 @@ function verticalTreeGraphFigure(
     ]
     maxDepthCount = maximum(depthCounts; init = 1)
     minCanvasWidth = isnothing(width) ? 0 : width
-    defaultLayoutHeight = 2 * margin + (maxDepth - 1) * rowSpacing
+    defaultLayoutHeight = 2 * margin + graphFigureSpacingSum(rowSpacing, maxDepth - 1)
     layoutHeight = isnothing(height) ? defaultLayoutHeight : max(height, defaultLayoutHeight)
     minCanvasHeight = isnothing(height) ? 0 : height
 
-    levelGap = maxDepth == 1 ? 0.0 : (layoutHeight - 2 * margin) / (maxDepth - 1)
+    levelY = graphFigurePositions(maxDepth, layoutHeight, rowSpacing)
 
     variableRadii = nodeRadii(
         graph.variables,
@@ -1305,8 +1298,8 @@ function verticalTreeGraphFigure(
     )
     variableX = zeros(Float64, length(graph.variables))
     factorX = zeros(Float64, length(graph.factors))
-    variableY = [margin + (depth - 1) * levelGap for depth in variableDepths]
-    factorY = [margin + (depth - 1) * levelGap for depth in factorDepths]
+    variableY = [levelY[depth] for depth in variableDepths]
+    factorY = [levelY[depth] for depth in factorDepths]
 
     for depth in 1:maxDepth
         nodes = Tuple{Symbol, Int}[]
@@ -1559,12 +1552,14 @@ function verticalGraphColumnSpacing(
     graph::AbstractFactorGraph,
     variableIndices::AbstractVector{Int},
     variableRadii::AbstractVector,
-    columnSpacing::Int,
+    columnSpacing,
     outsideLabelGap::Int,
     labelPlacement::Symbol,
     showVariableLabels::Bool,
     fontSize::Int
 )
+    baseColumnSpacing = graphFigureSpacingMaximum(columnSpacing)
+
     if labelPlacement == :inside || !showVariableLabels
         return columnSpacing
     end
@@ -1576,7 +1571,9 @@ function verticalGraphColumnSpacing(
         maxWidth = max(maxWidth, 2 * variableRadii[index] + labelWidth)
     end
 
-    return max(columnSpacing, ceil(Int, maxWidth + 2 * outsideLabelGap))
+    requiredSpacing = ceil(Int, maxWidth + 2 * outsideLabelGap)
+
+    return requiredSpacing <= baseColumnSpacing ? columnSpacing : requiredSpacing
 end
 
 function treeLevelSpacing(
@@ -1584,13 +1581,15 @@ function treeLevelSpacing(
     nodes::AbstractVector{Tuple{Symbol, Int}},
     factorWidths::AbstractVector,
     variableRadii::AbstractVector,
-    columnSpacing::Int,
+    columnSpacing,
     outsideLabelGap::Int,
     labelPlacement::Symbol,
     showVariableLabels::Bool,
     showFactorLabels::Bool,
     fontSize::Int
 )
+    baseColumnSpacing = graphFigureSpacingMaximum(columnSpacing)
+
     if labelPlacement == :inside
         return columnSpacing
     end
@@ -1609,7 +1608,9 @@ function treeLevelSpacing(
         end
     end
 
-    return max(columnSpacing, ceil(Int, maxWidth + outsideLabelGap))
+    requiredSpacing = ceil(Int, maxWidth + outsideLabelGap)
+
+    return requiredSpacing <= baseColumnSpacing ? columnSpacing : requiredSpacing
 end
 
 

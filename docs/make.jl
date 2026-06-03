@@ -31,6 +31,7 @@ makedocs(
             "Binary Pump Diagnosis" => "examples/binary_pump_diagnosis.md",
             "Discrete Robot Localization" => "examples/discrete_robot_localization.md",
             "LDPC-Style Decoding" => "examples/ldpc_decoding.md",
+            "Graph Visualization" => "examples/graph_visualization.md",
         ],
         "API Reference" => [
             "Types" => "api/types.md",

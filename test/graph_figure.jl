@@ -319,9 +319,11 @@ end
         @test_throws ErrorException graphFigure(graph; canvas = (zoom = 0.0,))
         @test_throws ErrorException graphFigure(graph; style = (edgeStrokeWidth = 0,))
         @test_throws ErrorException graphFigure(graph; style = (edgeFill = "none",))
-        @test_throws ErrorException graphFigure(graph; layout = (unaryFactorOffset = 0,))
+        @test_throws ErrorException graphFigure(graph; layout = (factorSpacing = 90,))
         @test_throws ErrorException graphFigure(graph; layout = (rowSpacing = 0,))
         @test_throws ErrorException graphFigure(graph; layout = (columnSpacing = 0,))
+        @test_throws ErrorException graphFigure(graph; layout = (rowSpacing = (80, 0),))
+        @test_throws ErrorException graphFigure(graph; layout = (columnSpacing = (),))
         @test_throws ErrorException graphFigure(graph; node = (variableRadius = 0,))
         @test_throws ErrorException graphFigure(graph; label = (fontSize = 0,))
         @test_throws ErrorException graphFigure(graph; label = (tooltipDetail = :basic,))
@@ -336,7 +338,6 @@ end
         @test_throws MethodError graphFigure(graph; highlightStrokeWidth = 0)
         @test_throws MethodError graphFigure(graph; canvasPadding = -1)
         @test_throws MethodError graphFigure(graph; zoom = 0.0)
-        @test_throws MethodError graphFigure(graph; unaryFactorOffset = 0)
         @test_throws MethodError graphFigure(graph; rowSpacing = 0)
         @test_throws MethodError graphFigure(graph; columnSpacing = 0)
         @test_throws MethodError graphFigure(graph; nodeSpacing = 80)
@@ -345,5 +346,17 @@ end
         @test_throws MethodError graphFigure(graph; margin = 48)
         @test_throws MethodError graphFigure(graph; nodeGap = 10)
         @test_throws MethodError graphFigure(tree; treeLayout = false)
+
+        spacedSvg = graphFigure(
+            graph;
+            layout = (rowSpacing = (70, 90), columnSpacing = [80, 140])
+        )
+        @test startswith(spacedSvg, "<svg")
+
+        treeSpacedSvg = graphFigure(
+            tree;
+            layout = (rowSpacing = [60, 80], columnSpacing = (90, 120, 150))
+        )
+        @test startswith(treeSpacedSvg, "<svg")
     end
 end

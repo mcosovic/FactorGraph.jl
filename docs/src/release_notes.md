@@ -9,11 +9,13 @@
 - Removed the redundant factor node `id` line from `graphFigure` tooltips.
 - Replaced graph figure view `depth` with `hops`, using true bipartite graph
   hop expansion from selected variables and factors.
+- Replaced separate unary and multi-factor graph spacing layout options with
+  scalar or per-gap `rowSpacing` and `columnSpacing` values.
 
 #### Documentation
 
-- Clarified that `unaryFactorOffset` and `multiFactorOffset` apply only to
-  general `graphFigure` layouts, not `TreeFactorGraph` layouts.
+- Added a graph visualization example page covering figure layout, labels,
+  focused views, styles, highlights, and tree views.
 
 ---
 

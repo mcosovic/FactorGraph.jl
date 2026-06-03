@@ -218,18 +218,19 @@ function centeredColumns(
     leftLabelReserve::Real,
     rightLabelReserve::Real,
     maxFactorWidth::Real,
-    unaryFactorOffset::Int,
-    multiFactorOffset::Int
+    columnSpacing
 )
+    unaryFactorSpacing = graphFigureSpacingAt(columnSpacing, 1)
+    multiFactorSpacing = graphFigureSpacingAt(columnSpacing, 2)
     leftNodeHalf = maxFactorWidth / 2
     rightNodeHalf = maxFactorWidth / 2
-    graphWidth = leftLabelReserve + leftNodeHalf + unaryFactorOffset +
-        multiFactorOffset + rightNodeHalf + rightLabelReserve
+    graphWidth = leftLabelReserve + leftNodeHalf + unaryFactorSpacing +
+        multiFactorSpacing + rightNodeHalf + rightLabelReserve
     graphLeft = (width - graphWidth) / 2
 
     unaryFactorX = graphLeft + leftLabelReserve + leftNodeHalf
-    variableX = unaryFactorX + unaryFactorOffset
-    multiFactorX = variableX + multiFactorOffset
+    variableX = unaryFactorX + unaryFactorSpacing
+    multiFactorX = variableX + multiFactorSpacing
 
     return variableX, unaryFactorX, multiFactorX
 end
@@ -240,18 +241,19 @@ function centeredRows(
     topLabelReserve::Real,
     bottomLabelReserve::Real,
     maxFactorHeight::Real,
-    unaryFactorOffset::Int,
-    multiFactorOffset::Int
+    rowSpacing
 )
+    unaryFactorSpacing = graphFigureSpacingAt(rowSpacing, 1)
+    multiFactorSpacing = graphFigureSpacingAt(rowSpacing, 2)
     topNodeHalf = maxFactorHeight / 2
     bottomNodeHalf = maxFactorHeight / 2
-    graphHeight = topLabelReserve + topNodeHalf + unaryFactorOffset +
-        multiFactorOffset + bottomNodeHalf + bottomLabelReserve
+    graphHeight = topLabelReserve + topNodeHalf + unaryFactorSpacing +
+        multiFactorSpacing + bottomNodeHalf + bottomLabelReserve
     graphTop = (height - graphHeight) / 2
 
     unaryFactorY = graphTop + topLabelReserve + topNodeHalf
-    variableY = unaryFactorY + unaryFactorOffset
-    multiFactorY = variableY + multiFactorOffset
+    variableY = unaryFactorY + unaryFactorSpacing
+    multiFactorY = variableY + multiFactorSpacing
 
     return variableY, unaryFactorY, multiFactorY
 end
@@ -294,14 +296,82 @@ function average(values)
     return total / count
 end
 
-function nodeRows(count::Int, rowCount::Int, margin::Int, nodeSpacing::Real)
+function graphFigureSpacingAt(spacing::Real, index::Int)
+    return spacing
+end
+
+function graphFigureSpacingAt(spacing::Union{Tuple, AbstractVector}, index::Int)
+    return spacing[min(index, length(spacing))]
+end
+
+function graphFigureSpacingSum(spacing, gapCount::Int)
+    total = 0.0
+
+    for index in 1:gapCount
+        total += graphFigureSpacingAt(spacing, index)
+    end
+
+    return total
+end
+
+function graphFigureSpacingMaximum(spacing::Real)
+    return spacing
+end
+
+function graphFigureSpacingMaximum(spacing::Union{Tuple, AbstractVector})
+    return maximum(spacing)
+end
+
+function nodeRows(count::Int, rowCount::Int, margin::Int, nodeSpacing)
     if count == 0
         return Float64[]
     end
 
-    startOffset = (rowCount - count) * nodeSpacing / 2
+    startOffset =
+        (graphFigureSpacingSum(nodeSpacing, rowCount - 1) -
+            graphFigureSpacingSum(nodeSpacing, count - 1)) / 2
+    rows = Float64[]
+    position = margin + startOffset
 
-    return [margin + startOffset + (index - 1) * nodeSpacing for index in 1:count]
+    for index in 1:count
+        push!(rows, position)
+        position += graphFigureSpacingAt(nodeSpacing, index)
+    end
+
+    return rows
+end
+
+function graphFigurePositions(count::Int, canvasSize::Real, spacing)
+    if count == 0
+        return Float64[]
+    end
+
+    totalSpacing = graphFigureSpacingSum(spacing, count - 1)
+    positions = Float64[]
+    position = (canvasSize - totalSpacing) / 2
+
+    for index in 1:count
+        push!(positions, position)
+        position += graphFigureSpacingAt(spacing, index)
+    end
+
+    return positions
+end
+
+function graphFigureCenteredRows(count::Int, rowCount::Int, canvasSize::Real, spacing)
+    if count == 0
+        return Float64[]
+    end
+
+    totalRows = graphFigureSpacingSum(spacing, count - 1)
+    totalSlots = graphFigureSpacingSum(spacing, rowCount - 1)
+    position = (canvasSize - totalSlots) / 2 + (totalSlots - totalRows) / 2
+    rows = Float64[]
+    for index in 1:count
+        push!(rows, position)
+        position += graphFigureSpacingAt(spacing, index)
+    end
+    return rows
 end
 
 function fittedCanvasSizeAndShift(

@@ -1,3 +1,13 @@
+function isGraphFigureSpacing(spacing)
+    if spacing isa Real
+        return spacing > 0
+    elseif spacing isa Tuple || spacing isa AbstractVector
+        return !isempty(spacing) && all(value -> value isa Real && value > 0, spacing)
+    end
+
+    return false
+end
+
 function graphFigureCanvasOptions(canvas::NamedTuple)
     defaultCanvas = (
         width = nothing,
@@ -29,9 +39,7 @@ function graphFigureLayoutOptions(layout::NamedTuple)
     defaultLayout = (
         orientation = :horizontal,
         rowSpacing = 80,
-        columnSpacing = 160,
-        unaryFactorOffset = 90,
-        multiFactorOffset = 210,
+        columnSpacing = (90, 210),
         curvedEdges = true
     )
 
@@ -47,11 +55,7 @@ function graphFigureLayoutOptions(layout::NamedTuple)
         error("layout.orientation must be :horizontal or :vertical.")
     end
 
-    if options.unaryFactorOffset <= 0 || options.multiFactorOffset <= 0
-        error("layout unary and multi-factor offsets must be positive.")
-    end
-
-    if options.rowSpacing <= 0 || options.columnSpacing <= 0
+    if !isGraphFigureSpacing(options.rowSpacing) || !isGraphFigureSpacing(options.columnSpacing)
         error("layout rowSpacing and columnSpacing must be positive.")
     end
 
