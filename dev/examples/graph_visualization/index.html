@@ -14,7 +14,7 @@ factors = [
     GaussianFactor(:x3, 2.0, 1.0, 0.8; label = &quot;f4&quot;)
 ]
 
-graph = factorGraph(variables, factors)</code></pre><p>The graph has three variable nodes and four factor nodes. The factor labels are kept short (<code>f1</code>, <code>f2</code>, ...) so label placement and edge id labels remain easy to inspect in the generated SVGs.</p><hr/><h2 id="Default-Figure"><a class="docs-heading-anchor" href="#Default-Figure">Default Figure</a><a id="Default-Figure-1"></a><a class="docs-heading-anchor-permalink" href="#Default-Figure" title="Permalink"></a></h2><p>The default figure draws variable labels, factor labels, SVG hover tooltips, and curved edges. This is usually enough for a quick model check:</p><pre><code class="language-julia hljs">saveGraphFigure(&quot;../../gv_default.svg&quot;, graph)</code></pre><div class="graph-figure" style="text-align: center;">
+graph = factorGraph(variables, factors)</code></pre><p>The graph has three variable nodes and four factor nodes. The factor labels are kept short (<code>f1</code>, <code>f2</code>, ...) so label placement and edge id labels remain easy to inspect in the generated SVGs.</p><hr/><h2 id="Default-Figure"><a class="docs-heading-anchor" href="#Default-Figure">Default Figure</a><a id="Default-Figure-1"></a><a class="docs-heading-anchor-permalink" href="#Default-Figure" title="Permalink"></a></h2><p>The default figure draws variable labels, factor labels, SVG hover tooltips, and curved edges. This is usually enough for a quick model check:</p><pre><code class="language-julia hljs">saveGraphFigure(&quot;../gv_default.svg&quot;, graph)</code></pre><div class="graph-figure" style="text-align: center;">
   <object
     data="../../gv_default.svg"
     type="image/svg+xml"
@@ -23,7 +23,7 @@ graph = factorGraph(variables, factors)</code></pre><p>The graph has three varia
     <a href="../../gv_default.svg">Default graph figure</a>
   </object>
 </div><p>Hover over a node or edge in the rendered SVG to inspect its tooltip. Tooltips show identity metadata by default and can be expanded with <code>tooltipDetail = :full</code>.</p><hr/><h2 id="Layout-And-Labels"><a class="docs-heading-anchor" href="#Layout-And-Labels">Layout And Labels</a><a id="Layout-And-Labels-1"></a><a class="docs-heading-anchor-permalink" href="#Layout-And-Labels" title="Permalink"></a></h2><p>Layout options control orientation, spacing, and edge geometry. Label options control node labels, edge ids, tooltip detail, and font size. This example switches to a vertical layout, draws straight edges, and enables edge id labels:</p><pre><code class="language-julia hljs">saveGraphFigure(
-    &quot;../../gv_vertical.svg&quot;,
+    &quot;../gv_vertical.svg&quot;,
     graph;
     layout = (
         orientation = :vertical,
@@ -47,7 +47,7 @@ graph = factorGraph(variables, factors)</code></pre><p>The graph has three varia
     <a href="../../gv_vertical.svg">Vertical graph figure with edge ids</a>
   </object>
 </div><p>Spacing options may be scalars for uniform gaps, or tuples/vectors for per-gap spacing. In the default horizontal layout, <code>columnSpacing = (90, 210)</code> separates unary factors from variables, then variables from multi-variable factors. In vertical layout, the same idea applies through <code>rowSpacing</code>.</p><hr/><h2 id="Focused-Views"><a class="docs-heading-anchor" href="#Focused-Views">Focused Views</a><a id="Focused-Views-1"></a><a class="docs-heading-anchor-permalink" href="#Focused-Views" title="Permalink"></a></h2><p>Use <code>view.variables</code> and <code>view.factors</code> to choose focus nodes. The <code>hops</code> keyword expands through the bipartite graph by edge count. With <code>hops = 2</code>, the figure includes <code>x1</code>, its neighboring factors, and the variables connected to those factors:</p><pre><code class="language-julia hljs">saveGraphFigure(
-    &quot;../../gv_focus.svg&quot;,
+    &quot;../gv_focus.svg&quot;,
     graph;
     view = (variables = [:x1], hops = 2),
     label = (showEdgeIds = true,)
@@ -60,7 +60,7 @@ graph = factorGraph(variables, factors)</code></pre><p>The graph has three varia
     <a href="../../gv_focus.svg">Focused graph figure</a>
   </object>
 </div><p><code>hops = 0</code> draws only the selected seed nodes, while <code>hops = :all</code> expands through the connected component. Focused nodes are drawn normally and expanded context nodes are drawn with the context style.</p><hr/><h2 id="Style-And-Highlights"><a class="docs-heading-anchor" href="#Style-And-Highlights">Style And Highlights</a><a id="Style-And-Highlights-1"></a><a class="docs-heading-anchor-permalink" href="#Style-And-Highlights" title="Permalink"></a></h2><p>Style options set the default colors and stroke widths. Highlight entries can select variables, factors, edges, or a variable-factor edge pair. Highlights are useful when a figure is meant to explain one local relationship in a larger model:</p><pre><code class="language-julia hljs">saveGraphFigure(
-    &quot;../../gv_highlight.svg&quot;,
+    &quot;../gv_highlight.svg&quot;,
     graph;
     style = (
         backgroundFill = &quot;#f8fafc&quot;,
@@ -91,7 +91,7 @@ graph = factorGraph(variables, factors)</code></pre><p>The graph has three varia
 </div><p>Variable and factor highlights can also highlight incident edges. Edge-specific highlights can be selected either by edge id or by a <code>(variable, factor)</code> pair.</p><hr/><h2 id="Tree-Views"><a class="docs-heading-anchor" href="#Tree-Views">Tree Views</a><a id="Tree-Views-1"></a><a class="docs-heading-anchor-permalink" href="#Tree-Views" title="Permalink"></a></h2><p>Tree figures use graph depth for placement. The same label, style, highlight, and view options are available. Here the graph is converted to a tree view and drawn horizontally from root variable <code>x1</code>:</p><pre><code class="language-julia hljs">tree = treeFactorGraph(graph; root = :x1)
 
 saveGraphFigure(
-    &quot;../../gv_tree.svg&quot;,
+    &quot;../gv_tree.svg&quot;,
     tree;
     layout = (orientation = :horizontal, rowSpacing = 70, columnSpacing = (95, 120, 145)),
     view = (variables = [:x1], hops = :all),
@@ -144,4 +144,4 @@ saveGraphFigure(
         (factor = &quot;f2&quot;, stroke = &quot;#f59e0b&quot;, fill = &quot;#fef3c7&quot;, strokeWidth = 4),
         (edge = 1, stroke = &quot;#7c3aed&quot;, strokeWidth = 4)
     ]
-)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ldpc_decoding/">« LDPC-Style Decoding</a><a class="docs-footer-nextpage" href="../../api/types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 3 June 2026 13:00">Wednesday 3 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ldpc_decoding/">« LDPC-Style Decoding</a><a class="docs-footer-nextpage" href="../../api/types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 3 June 2026 13:04">Wednesday 3 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

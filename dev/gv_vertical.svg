@@ -1,0 +1,401 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="329" height="332" viewBox="0 0 329 332">
+<title>Factor graph</title>
+<style>
+  .background { fill: #ffffff; }
+  .edge {
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.6;
+    stroke-opacity: 1.0;
+  }
+  .edge-hitbox {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 14;
+    stroke-opacity: 0;
+    pointer-events: stroke;
+  }
+  .variable {
+    fill: #e0f2fe;
+    stroke: #0369a1;
+    stroke-width: 1.8;
+  }
+  .variable-context { opacity: 0.38; }
+  .factor {
+    fill: #dc2626;
+    stroke: #991b1b;
+    stroke-width: 1.8;
+  }
+  .factor-context { opacity: 0.42; }
+  .edge-highlight { stroke-opacity: 1.0; }
+  .edge-label {
+    fill: #64748b;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .edge-label-background {
+    fill: #ffffff;
+    stroke: #ffffff;
+    stroke-linejoin: round;
+    stroke-width: 4px;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .label {
+    fill: #111827;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .label-start { text-anchor: start; }
+  .label-end { text-anchor: end; }
+</style>
+  <rect class="background" x="0" y="0" width="329" height="332"/>
+  <line class="edge" x1="32.44" y1="55.0" x2="32.44" y2="120.0"/>
+<line class="edge-hitbox" x1="32.44" y1="55.0" x2="32.44" y2="120.0">
+  <title>Edge 1
+
+Identity
+  variable: x1
+  factor: f1
+  variable index: 1
+  factor index: 1</title>
+</line>
+  <line class="edge" x1="32.44" y1="152.0" x2="92.44" y2="277.0"/>
+<line class="edge-hitbox" x1="32.44" y1="152.0" x2="92.44" y2="277.0">
+  <title>Edge 2
+
+Identity
+  variable: x1
+  factor: f2
+  variable index: 1
+  factor index: 2</title>
+</line>
+  <line class="edge" x1="152.44" y1="152.0" x2="92.44" y2="277.0"/>
+<line class="edge-hitbox" x1="152.44" y1="152.0" x2="92.44" y2="277.0">
+  <title>Edge 3
+
+Identity
+  variable: x2
+  factor: f2
+  variable index: 2
+  factor index: 2</title>
+</line>
+  <line class="edge" x1="152.44" y1="152.0" x2="212.44" y2="277.0"/>
+<line class="edge-hitbox" x1="152.44" y1="152.0" x2="212.44" y2="277.0">
+  <title>Edge 4
+
+Identity
+  variable: x2
+  factor: f3
+  variable index: 2
+  factor index: 3</title>
+</line>
+  <line class="edge" x1="272.44" y1="152.0" x2="212.44" y2="277.0"/>
+<line class="edge-hitbox" x1="272.44" y1="152.0" x2="212.44" y2="277.0">
+  <title>Edge 5
+
+Identity
+  variable: x3
+  factor: f3
+  variable index: 3
+  factor index: 3</title>
+</line>
+  <line class="edge" x1="272.44" y1="55.0" x2="272.44" y2="120.0"/>
+<line class="edge-hitbox" x1="272.44" y1="55.0" x2="272.44" y2="120.0">
+  <title>Edge 6
+
+Identity
+  variable: x3
+  factor: f4
+  variable index: 3
+  factor index: 4</title>
+</line>
+  <text class="edge-label-background" x="32.44" y="87.5">e1</text>
+  <text class="edge-label-background" x="62.44" y="214.5">e2</text>
+  <text class="edge-label-background" x="122.44" y="214.5">e3</text>
+  <text class="edge-label-background" x="182.44" y="214.5">e4</text>
+  <text class="edge-label-background" x="242.44" y="214.5">e5</text>
+  <text class="edge-label-background" x="272.44" y="87.5">e6</text>
+  <text class="edge-label" x="32.44" y="87.5"><title>Edge 1
+
+Identity
+  variable: x1
+  factor: f1
+  variable index: 1
+  factor index: 1</title>e1</text>
+  <text class="edge-label" x="62.44" y="214.5"><title>Edge 2
+
+Identity
+  variable: x1
+  factor: f2
+  variable index: 1
+  factor index: 2</title>e2</text>
+  <text class="edge-label" x="122.44" y="214.5"><title>Edge 3
+
+Identity
+  variable: x2
+  factor: f2
+  variable index: 2
+  factor index: 2</title>e3</text>
+  <text class="edge-label" x="182.44" y="214.5"><title>Edge 4
+
+Identity
+  variable: x2
+  factor: f3
+  variable index: 2
+  factor index: 3</title>e4</text>
+  <text class="edge-label" x="242.44" y="214.5"><title>Edge 5
+
+Identity
+  variable: x3
+  factor: f3
+  variable index: 3
+  factor index: 3</title>e5</text>
+  <text class="edge-label" x="272.44" y="87.5"><title>Edge 6
+
+Identity
+  variable: x3
+  factor: f4
+  variable index: 3
+  factor index: 4</title>e6</text>
+<circle class="variable" cx="32.44" cy="136.0" r="16">
+  <title>Variable x1
+
+Identity
+  type: Gaussian
+  index: 1
+  id: :x1
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>
+</circle>
+  <text class="label label-start" x="56.44" y="136.0"><title>Variable x1
+
+Identity
+  type: Gaussian
+  index: 1
+  id: :x1
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>x1</text>
+<circle class="variable" cx="152.44" cy="136.0" r="16">
+  <title>Variable x2
+
+Identity
+  type: Gaussian
+  index: 2
+  id: :x2
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>
+</circle>
+  <text class="label label-start" x="176.44" y="136.0"><title>Variable x2
+
+Identity
+  type: Gaussian
+  index: 2
+  id: :x2
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>x2</text>
+<circle class="variable" cx="272.44" cy="136.0" r="16">
+  <title>Variable x3
+
+Identity
+  type: Gaussian
+  index: 3
+  id: :x3
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>
+</circle>
+  <text class="label label-start" x="296.44" y="136.0"><title>Variable x3
+
+Identity
+  type: Gaussian
+  index: 3
+  id: :x3
+  dimension: 1
+  degree: 2
+
+Initialization
+  mean: not set
+  variance: not set
+
+Components
+  component: 1</title>x3</text>
+<rect class="factor" x="23.439999999999998" y="37.0" width="18" height="18" rx="3">
+  <title>Factor f1
+
+Identity
+  type: Gaussian
+  index: 1
+  variables: x1
+  degree: 1
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0]
+  covariance:
+    [0.5]
+
+Options
+  initialize: true</title>
+</rect>
+  <text class="label" x="32.44" y="22.5"><title>Factor f1
+
+Identity
+  type: Gaussian
+  index: 1
+  variables: x1
+  degree: 1
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0]
+  covariance:
+    [0.5]
+
+Options
+  initialize: true</title>f1</text>
+<rect class="factor" x="83.44" y="277.0" width="18" height="18" rx="3">
+  <title>Factor f2
+
+Identity
+  type: Gaussian
+  index: 2
+  variables: x1, x2
+  degree: 2
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0  -1.0]
+  covariance:
+    [0.3]</title>
+</rect>
+  <text class="label" x="92.44" y="309.5"><title>Factor f2
+
+Identity
+  type: Gaussian
+  index: 2
+  variables: x1, x2
+  degree: 2
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0  -1.0]
+  covariance:
+    [0.3]</title>f2</text>
+<rect class="factor" x="203.44" y="277.0" width="18" height="18" rx="3">
+  <title>Factor f3
+
+Identity
+  type: Gaussian
+  index: 3
+  variables: x2, x3
+  degree: 2
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0  -1.0]
+  covariance:
+    [0.3]</title>
+</rect>
+  <text class="label" x="212.44" y="309.5"><title>Factor f3
+
+Identity
+  type: Gaussian
+  index: 3
+  variables: x2, x3
+  degree: 2
+
+Parameters
+  mean:
+    [0.0]
+  coefficient:
+    [1.0  -1.0]
+  covariance:
+    [0.3]</title>f3</text>
+<rect class="factor" x="263.44" y="37.0" width="18" height="18" rx="3">
+  <title>Factor f4
+
+Identity
+  type: Gaussian
+  index: 4
+  variables: x3
+  degree: 1
+
+Parameters
+  mean:
+    [2.0]
+  coefficient:
+    [1.0]
+  covariance:
+    [0.8]
+
+Options
+  initialize: false</title>
+</rect>
+  <text class="label" x="272.44" y="22.5"><title>Factor f4
+
+Identity
+  type: Gaussian
+  index: 4
+  variables: x3
+  degree: 1
+
+Parameters
+  mean:
+    [2.0]
+  coefficient:
+    [1.0]
+  covariance:
+    [0.8]
+
+Options
+  initialize: false</title>f4</text>
+</svg>
