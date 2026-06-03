@@ -64,7 +64,7 @@ node or edge details.
 
 ---
 
-## Layout And Labels
+## Layout and Labels
 
 Layout options control orientation, spacing, and edge geometry. Label options
 control node labels, edge IDs, tooltip detail, and font size. The next figure
@@ -148,7 +148,7 @@ context nodes use the context style.
 
 ---
 
-## Style And Highlights
+## Style and Highlights
 
 Style options set the default colors and stroke widths. Highlight entries can
 select variables, factors, edges, or a variable-factor edge pair. This is useful
