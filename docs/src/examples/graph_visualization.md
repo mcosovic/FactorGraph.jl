@@ -44,7 +44,7 @@ The default figure draws variable labels, factor labels, SVG hover tooltips,
 and curved edges. This is usually enough for a quick model check:
 
 ```@example graph_visualization
-saveGraphFigure("../../gv_default.svg", graph)
+saveGraphFigure("../gv_default.svg", graph)
 
 nothing # hide
 ```
@@ -75,7 +75,7 @@ switches to a vertical layout, draws straight edges, and enables edge id labels:
 
 ```@example graph_visualization
 saveGraphFigure(
-    "../../gv_vertical.svg",
+    "../gv_vertical.svg",
     graph;
     layout = (
         orientation = :vertical,
@@ -123,7 +123,7 @@ to those factors:
 
 ```@example graph_visualization
 saveGraphFigure(
-    "../../gv_focus.svg",
+    "../gv_focus.svg",
     graph;
     view = (variables = [:x1], hops = 2),
     label = (showEdgeIds = true,)
@@ -159,7 +159,7 @@ model:
 
 ```@example graph_visualization
 saveGraphFigure(
-    "../../gv_highlight.svg",
+    "../gv_highlight.svg",
     graph;
     style = (
         backgroundFill = "#f8fafc",
@@ -211,7 +211,7 @@ drawn horizontally from root variable `x1`:
 tree = treeFactorGraph(graph; root = :x1)
 
 saveGraphFigure(
-    "../../gv_tree.svg",
+    "../gv_tree.svg",
     tree;
     layout = (orientation = :horizontal, rowSpacing = 70, columnSpacing = (95, 120, 145)),
     view = (variables = [:x1], hops = :all),
