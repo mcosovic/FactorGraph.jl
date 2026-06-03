@@ -118,7 +118,7 @@ Identity
   <title>Variable x1
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :x1
   cardinality: 2
@@ -133,7 +133,7 @@ States
   <text class="label" x="138.5" y="74.0"><title>Variable x1
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :x1
   cardinality: 2
@@ -148,7 +148,7 @@ States
   <title>Variable x2
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :x2
   cardinality: 3
@@ -163,7 +163,7 @@ States
   <text class="label" x="138.5" y="154.0"><title>Variable x2
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :x2
   cardinality: 3
@@ -178,7 +178,7 @@ States
   <title>Variable x3
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :x3
   cardinality: 2
@@ -193,7 +193,7 @@ States
   <text class="label" x="138.5" y="234.0"><title>Variable x3
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :x3
   cardinality: 2
@@ -208,7 +208,7 @@ States
   <title>Factor f1
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: x1
   degree: 1
@@ -222,7 +222,7 @@ Options
   <text class="label label-end" x="33.499999999999986" y="45.0"><title>Factor f1
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: x1
   degree: 1
@@ -236,7 +236,7 @@ Options
   <title>Factor f2
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: x1, x2
   degree: 2
@@ -247,7 +247,7 @@ Table
   <text class="label label-start" x="363.5" y="85.0"><title>Factor f2
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: x1, x2
   degree: 2
@@ -258,7 +258,7 @@ Table
   <title>Factor f3
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: x1, x2, x3
   degree: 3
@@ -269,7 +269,7 @@ Table
   <text class="label label-start" x="363.5" y="125.0"><title>Factor f3
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: x1, x2, x3
   degree: 3

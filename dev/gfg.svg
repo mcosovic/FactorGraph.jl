@@ -88,7 +88,7 @@ Identity
   <title>Variable x1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :x1
   dimension: 1
@@ -104,7 +104,7 @@ Components
   <text class="label" x="138.5" y="74.0"><title>Variable x1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :x1
   dimension: 1
@@ -120,7 +120,7 @@ Components
   <title>Variable x2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :x2
   dimension: 2
@@ -136,7 +136,7 @@ Components
   <text class="label" x="138.5" y="154.0"><title>Variable x2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :x2
   dimension: 2
@@ -152,7 +152,7 @@ Components
   <title>Factor f1
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: x1
   degree: 1
@@ -168,7 +168,7 @@ Options
   <text class="label label-end" x="33.499999999999986" y="45.0"><title>Factor f1
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: x1
   degree: 1
@@ -184,7 +184,7 @@ Options
   <title>Factor f2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: x1, x2
   degree: 2
@@ -197,7 +197,7 @@ Parameters
   <text class="label label-start" x="363.5" y="85.0"><title>Factor f2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: x1, x2
   degree: 2

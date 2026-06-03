@@ -166,7 +166,7 @@ Identity
   <title>Variable Bus 1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :V₁
   dimension: 2
@@ -182,7 +182,7 @@ Components
   <text class="label" x="138.5" y="74.0"><title>Variable Bus 1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :V₁
   dimension: 2
@@ -198,7 +198,7 @@ Components
   <title>Variable Bus 2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :V₂
   dimension: 2
@@ -214,7 +214,7 @@ Components
   <text class="label" x="138.5" y="154.0"><title>Variable Bus 2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :V₂
   dimension: 2
@@ -230,7 +230,7 @@ Components
   <title>Variable Bus 3
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 3
   id: :V₃
   dimension: 2
@@ -246,7 +246,7 @@ Components
   <text class="label" x="138.5" y="234.0"><title>Variable Bus 3
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 3
   id: :V₃
   dimension: 2
@@ -262,7 +262,7 @@ Components
   <title>Factor f1
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: Bus 1
   degree: 1
@@ -283,7 +283,7 @@ Options
   <text class="label label-end" x="33.499999999999986" y="45.0"><title>Factor f1
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: Bus 1
   degree: 1
@@ -304,7 +304,7 @@ Options
   <title>Factor f2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: Bus 2
   degree: 1
@@ -325,7 +325,7 @@ Options
   <text class="label label-end" x="33.499999999999986" y="125.0"><title>Factor f2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: Bus 2
   degree: 1
@@ -346,7 +346,7 @@ Options
   <title>Factor f3
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 3
   variables: Bus 1, Bus 2
   degree: 2
@@ -364,7 +364,7 @@ Parameters
   <text class="label label-start" x="363.5" y="85.0"><title>Factor f3
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 3
   variables: Bus 1, Bus 2
   degree: 2
@@ -382,7 +382,7 @@ Parameters
   <title>Factor f4
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 4
   variables: Bus 1, Bus 3
   degree: 2
@@ -400,7 +400,7 @@ Parameters
   <text class="label label-start" x="363.5" y="125.0"><title>Factor f4
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 4
   variables: Bus 1, Bus 3
   degree: 2

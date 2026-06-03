@@ -148,7 +148,7 @@ Identity
   <title>Variable x1
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :x1
   cardinality: 3
@@ -163,7 +163,7 @@ States
   <text class="label" x="32.120000000000005" y="119.0"><title>Variable x1
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :x1
   cardinality: 3
@@ -178,7 +178,7 @@ States
   <title>Variable x2
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :x2
   cardinality: 3
@@ -193,7 +193,7 @@ States
   <text class="label" x="272.12" y="119.0"><title>Variable x2
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :x2
   cardinality: 3
@@ -208,7 +208,7 @@ States
   <title>Variable x3
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :x3
   cardinality: 3
@@ -223,7 +223,7 @@ States
   <text class="label" x="512.12" y="119.0"><title>Variable x3
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :x3
   cardinality: 3
@@ -238,7 +238,7 @@ States
   <title>Variable x4
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 4
   id: :x4
   cardinality: 3
@@ -253,7 +253,7 @@ States
   <text class="label" x="752.12" y="119.0"><title>Variable x4
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 4
   id: :x4
   cardinality: 3
@@ -268,7 +268,7 @@ States
   <title>Factor prior_x1
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: x1
   degree: 1
@@ -282,7 +282,7 @@ Options
   <text class="label" x="152.12" y="23.0"><title>Factor prior_x1
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: x1
   degree: 1
@@ -296,7 +296,7 @@ Options
   <title>Factor motion12
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: x1, x2
   degree: 2
@@ -307,7 +307,7 @@ Table
   <text class="label" x="152.12" y="113.0"><title>Factor motion12
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: x1, x2
   degree: 2
@@ -318,7 +318,7 @@ Table
   <title>Factor motion23
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: x2, x3
   degree: 2
@@ -329,7 +329,7 @@ Table
   <text class="label" x="392.12" y="68.0"><title>Factor motion23
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: x2, x3
   degree: 2
@@ -340,7 +340,7 @@ Table
   <title>Factor motion34
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 4
   variables: x3, x4
   degree: 2
@@ -351,7 +351,7 @@ Table
   <text class="label" x="632.12" y="23.0"><title>Factor motion34
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 4
   variables: x3, x4
   degree: 2
@@ -362,7 +362,7 @@ Table
   <title>Factor beacon3
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 5
   variables: x3
   degree: 1
@@ -376,7 +376,7 @@ Options
   <text class="label" x="632.12" y="113.0"><title>Factor beacon3
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 5
   variables: x3
   degree: 1
@@ -390,7 +390,7 @@ Options
   <title>Factor beacon4
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 6
   variables: x4
   degree: 1
@@ -404,7 +404,7 @@ Options
   <text class="label" x="872.12" y="68.0"><title>Factor beacon4
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 6
   variables: x4
   degree: 1

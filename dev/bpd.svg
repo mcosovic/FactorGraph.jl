@@ -364,7 +364,7 @@ Identity
   <title>Variable power
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :power
   cardinality: 2
@@ -379,7 +379,7 @@ States
   <text class="label" x="251.32" y="74.0"><title>Variable power
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 1
   id: :power
   cardinality: 2
@@ -394,7 +394,7 @@ States
   <title>Variable fuse
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :fuse
   cardinality: 2
@@ -409,7 +409,7 @@ States
   <text class="label" x="251.32" y="154.0"><title>Variable fuse
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 2
   id: :fuse
   cardinality: 2
@@ -424,7 +424,7 @@ States
   <title>Variable motor
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :motor
   cardinality: 2
@@ -439,7 +439,7 @@ States
   <text class="label" x="251.32" y="234.0"><title>Variable motor
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 3
   id: :motor
   cardinality: 2
@@ -454,7 +454,7 @@ States
   <title>Variable vibration
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 4
   id: :vibration
   cardinality: 2
@@ -469,7 +469,7 @@ States
   <text class="label" x="251.32" y="314.0"><title>Variable vibration
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 4
   id: :vibration
   cardinality: 2
@@ -484,7 +484,7 @@ States
   <title>Variable temperature
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 5
   id: :temperature
   cardinality: 2
@@ -499,7 +499,7 @@ States
   <text class="label" x="251.32" y="394.0"><title>Variable temperature
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 5
   id: :temperature
   cardinality: 2
@@ -514,7 +514,7 @@ States
   <title>Variable trip
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 6
   id: :trip
   cardinality: 2
@@ -529,7 +529,7 @@ States
   <text class="label" x="251.32" y="474.0"><title>Variable trip
 
 Identity
-  type: DiscreteVariable
+  type: Discrete
   index: 6
   id: :trip
   cardinality: 2
@@ -544,7 +544,7 @@ States
   <title>Factor power_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: power
   degree: 1
@@ -560,7 +560,7 @@ Options
   <text class="label label-end" x="146.32" y="45.0"><title>Factor power_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 1
   variables: power
   degree: 1
@@ -576,7 +576,7 @@ Options
   <title>Factor fuse_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: fuse
   degree: 1
@@ -592,7 +592,7 @@ Options
   <text class="label label-end" x="146.32" y="125.0"><title>Factor fuse_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 2
   variables: fuse
   degree: 1
@@ -608,7 +608,7 @@ Options
   <title>Factor motor_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: motor
   degree: 1
@@ -624,7 +624,7 @@ Options
   <text class="label label-end" x="146.32" y="205.0"><title>Factor motor_prior
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 3
   variables: motor
   degree: 1
@@ -640,7 +640,7 @@ Options
   <title>Factor power_fuse
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 4
   variables: power, fuse
   degree: 2
@@ -654,7 +654,7 @@ Table
   <text class="label label-start" x="476.32" y="85.0"><title>Factor power_fuse
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 4
   variables: power, fuse
   degree: 2
@@ -668,7 +668,7 @@ Table
   <title>Factor fuse_motor
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 5
   variables: fuse, motor
   degree: 2
@@ -682,7 +682,7 @@ Table
   <text class="label label-start" x="476.32" y="165.0"><title>Factor fuse_motor
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 5
   variables: fuse, motor
   degree: 2
@@ -696,7 +696,7 @@ Table
   <title>Factor motor_vibration
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 6
   variables: motor, vibration
   degree: 2
@@ -710,7 +710,7 @@ Table
   <text class="label label-start" x="476.32" y="245.0"><title>Factor motor_vibration
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 6
   variables: motor, vibration
   degree: 2
@@ -724,7 +724,7 @@ Table
   <title>Factor motor_temperature
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 7
   variables: motor, temperature
   degree: 2
@@ -738,7 +738,7 @@ Table
   <text class="label label-start" x="476.32" y="285.0"><title>Factor motor_temperature
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 7
   variables: motor, temperature
   degree: 2
@@ -752,7 +752,7 @@ Table
   <title>Factor trip_logic
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 8
   variables: vibration, temperature, trip
   degree: 3
@@ -774,7 +774,7 @@ Table
   <text class="label label-start" x="476.32" y="365.0"><title>Factor trip_logic
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 8
   variables: vibration, temperature, trip
   degree: 3
@@ -796,7 +796,7 @@ Table
   <title>Factor obs_vibration
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 9
   variables: vibration
   degree: 1
@@ -812,7 +812,7 @@ Options
   <text class="label label-end" x="146.32" y="285.0"><title>Factor obs_vibration
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 9
   variables: vibration
   degree: 1
@@ -828,7 +828,7 @@ Options
   <title>Factor obs_temperature
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 10
   variables: temperature
   degree: 1
@@ -844,7 +844,7 @@ Options
   <text class="label label-end" x="146.32" y="365.0"><title>Factor obs_temperature
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 10
   variables: temperature
   degree: 1
@@ -860,7 +860,7 @@ Options
   <title>Factor obs_trip
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 11
   variables: trip
   degree: 1
@@ -876,7 +876,7 @@ Options
   <text class="label label-end" x="146.32" y="445.0"><title>Factor obs_trip
 
 Identity
-  type: DiscreteFactor
+  type: Discrete
   index: 11
   variables: trip
   degree: 1

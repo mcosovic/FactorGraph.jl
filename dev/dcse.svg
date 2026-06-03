@@ -202,7 +202,7 @@ Identity
   <title>Variable Bus 1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :θ₁
   dimension: 1
@@ -218,7 +218,7 @@ Components
   <text class="label" x="164.68" y="74.0"><title>Variable Bus 1
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 1
   id: :θ₁
   dimension: 1
@@ -234,7 +234,7 @@ Components
   <title>Variable Bus 2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :θ₂
   dimension: 1
@@ -250,7 +250,7 @@ Components
   <text class="label" x="164.68" y="154.0"><title>Variable Bus 2
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 2
   id: :θ₂
   dimension: 1
@@ -266,7 +266,7 @@ Components
   <title>Variable Bus 3
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 3
   id: :θ₃
   dimension: 1
@@ -282,7 +282,7 @@ Components
   <text class="label" x="164.68" y="234.0"><title>Variable Bus 3
 
 Identity
-  type: GaussianVariable
+  type: Gaussian
   index: 3
   id: :θ₃
   dimension: 1
@@ -298,7 +298,7 @@ Components
   <title>Factor Slack
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: Bus 1
   degree: 1
@@ -317,7 +317,7 @@ Options
   <text class="label label-end" x="59.68000000000001" y="45.0"><title>Factor Slack
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 1
   variables: Bus 1
   degree: 1
@@ -336,7 +336,7 @@ Options
   <title>Factor P12
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: Bus 1, Bus 2
   degree: 2
@@ -352,7 +352,7 @@ Parameters
   <text class="label label-start" x="389.68" y="75.66666666666667"><title>Factor P12
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 2
   variables: Bus 1, Bus 2
   degree: 2
@@ -368,7 +368,7 @@ Parameters
   <title>Factor P31
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 3
   variables: Bus 1, Bus 3
   degree: 2
@@ -384,7 +384,7 @@ Parameters
   <text class="label label-start" x="389.68" y="115.66666666666667"><title>Factor P31
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 3
   variables: Bus 1, Bus 3
   degree: 2
@@ -400,7 +400,7 @@ Parameters
   <title>Factor P2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 4
   variables: Bus 1, Bus 2, Bus 3
   degree: 3
@@ -416,7 +416,7 @@ Parameters
   <text class="label label-start" x="389.68" y="143.66666666666669"><title>Factor P2
 
 Identity
-  type: GaussianFactor
+  type: Gaussian
   index: 4
   variables: Bus 1, Bus 2, Bus 3
   degree: 3
