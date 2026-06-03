@@ -236,7 +236,6 @@ Components
 Identity
   type: GaussianFactor
   index: 1
-  id: 1
   variables: Bus 1
   degree: 1
 
@@ -253,7 +252,6 @@ Options
 Identity
   type: GaussianFactor
   index: 1
-  id: 1
   variables: Bus 1
   degree: 1
 
@@ -270,7 +268,6 @@ Options
 Identity
   type: GaussianFactor
   index: 2
-  id: 2
   variables: Bus 1, Bus 2
   degree: 2
 
@@ -284,7 +281,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 2
-  id: 2
   variables: Bus 1, Bus 2
   degree: 2
 
@@ -298,7 +294,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 3
-  id: 3
   variables: Bus 1, Bus 3
   degree: 2
 
@@ -312,7 +307,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 3
-  id: 3
   variables: Bus 1, Bus 3
   degree: 2
 
@@ -326,7 +320,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 4
-  id: 4
   variables: Bus 1, Bus 2, Bus 3
   degree: 3
 
@@ -340,7 +333,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 4
-  id: 4
   variables: Bus 1, Bus 2, Bus 3
   degree: 3
 

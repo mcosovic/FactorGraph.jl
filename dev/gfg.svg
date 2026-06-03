@@ -154,7 +154,6 @@ Components
 Identity
   type: GaussianFactor
   index: 1
-  id: 1
   variables: x1
   degree: 1
 
@@ -171,7 +170,6 @@ Options
 Identity
   type: GaussianFactor
   index: 1
-  id: 1
   variables: x1
   degree: 1
 
@@ -188,7 +186,6 @@ Options
 Identity
   type: GaussianFactor
   index: 2
-  id: 2
   variables: x1, x2
   degree: 2
 
@@ -202,7 +199,6 @@ Parameters
 Identity
   type: GaussianFactor
   index: 2
-  id: 2
   variables: x1, x2
   degree: 2
 
