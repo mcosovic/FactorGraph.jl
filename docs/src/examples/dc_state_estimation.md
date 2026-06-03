@@ -141,6 +141,7 @@ The figure below shows the updated `P12` factor together with its incident edges
 saveGraphFigure(
     "../ddcse.svg",
     graph;
+    label = (showEdgeIds = true, tooltipDetail = :full),
     highlight = [(factor = "P12", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 3)]
 )
 
