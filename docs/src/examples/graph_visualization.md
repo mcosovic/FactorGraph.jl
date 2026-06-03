@@ -4,6 +4,8 @@ This example walks through common ways to customize [`graphFigure`](@ref) and
 [`saveGraphFigure`](@ref). The same visualization options work for Gaussian
 factor graphs, discrete factor graphs, and tree views.
 
+---
+
 ## Base Graph
 
 Start with a small Gaussian factor graph that has three variables, two pairwise
