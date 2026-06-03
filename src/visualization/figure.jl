@@ -1795,7 +1795,7 @@ function graphFigureVariableTooltip(
 )
     variable = graph.variables[variableIndex]
     identityLines = [
-        "type: $(nameof(typeof(variable)))",
+        "type: $(graphFigureModelKind(variable))",
         "index: $variableIndex",
         "id: $(graphFigureValueText(variable.id))",
         graphFigureVariableSizeTooltip(variable),
@@ -1822,7 +1822,7 @@ function graphFigureFactorTooltip(
         if edge.factorIndex == factorIndex
     ]
     identityLines = [
-        "type: $(nameof(typeof(factor)))",
+        "type: $(graphFigureModelKind(factor))",
         "index: $factorIndex",
         "variables: $(join(variableLabels, ", "))",
         "degree: $(length(graph.factorEdges[factorIndex]))"
@@ -1836,6 +1836,9 @@ function graphFigureFactorTooltip(
 
     return escapeXML(join(lines, "\n"))
 end
+
+graphFigureModelKind(::Union{GaussianVariable, GaussianFactor}) = "Gaussian"
+graphFigureModelKind(::Union{DiscreteVariable, DiscreteFactor}) = "Discrete"
 
 function graphFigureEdgeTooltip(graph::AbstractFactorGraph, edge::Edge, detail::Symbol)
     variable = graph.variables[edge.variableIndex]

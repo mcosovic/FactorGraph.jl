@@ -144,10 +144,13 @@ end
         @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Variable x1", svg)
         @test occursin(r"<text class=\"label[^\"]*\"[^>]*>\s*<title>Factor prior", svg)
         @test occursin("Identity", svg)
+        @test occursin("type: Discrete", svg)
+        @test !occursin("type: DiscreteVariable", svg)
+        @test !occursin("type: DiscreteFactor", svg)
         @test occursin("Table\n  size: 2 x 2", svg)
         @test !occursin("table: [0.9 0.1; 0.2 0.8]", svg)
         @test !occursin("Factor link_1_2" * "\n\nIdentity" *
-            "\n  type: DiscreteFactor" *
+            "\n  type: Discrete" *
             "\n  index: 3" *
             "\n  id: 3" *
             "\n  variables: x1, x2" *
@@ -164,7 +167,7 @@ end
             fullSvg
         )
         @test !occursin("Factor link_1_2" * "\n\nIdentity" *
-            "\n  type: DiscreteFactor" *
+            "\n  type: Discrete" *
             "\n  index: 3" *
             "\n  id: 3" *
             "\n  variables: x1, x2" *
@@ -202,6 +205,9 @@ end
         @test !occursin("<title>Factor prior", noTooltipSvg)
 
         gaussianSvg = graphFigure(graphFigureGaussianTooltipGraph())
+        @test occursin("type: Gaussian", gaussianSvg)
+        @test !occursin("type: GaussianVariable", gaussianSvg)
+        @test !occursin("type: GaussianFactor", gaussianSvg)
         @test occursin("mean size: 2", gaussianSvg)
         @test occursin("covariance size: 2 x 2", gaussianSvg)
         @test occursin("component count: 2", gaussianSvg)
