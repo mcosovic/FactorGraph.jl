@@ -49,7 +49,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gv_default.svg"
+    data="../../gv_default.svg"
     type="image/svg+xml"
     aria-label="Default graph figure"
     style="width: 45%; height: auto;">
@@ -96,7 +96,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gv_vertical.svg"
+    data="../../gv_vertical.svg"
     type="image/svg+xml"
     aria-label="Vertical graph figure with edge IDs"
     style="width: 37%; height: auto;">
@@ -134,7 +134,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gv_focus.svg"
+    data="../../gv_focus.svg"
     type="image/svg+xml"
     aria-label="Focused graph figure"
     style="width: 43%; height: auto;">
@@ -185,7 +185,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gv_highlight.svg"
+    data="../../gv_highlight.svg"
     type="image/svg+xml"
     aria-label="Highlighted graph figure"
     style="width: 45%; height: auto;">
@@ -224,7 +224,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../gv_tree.svg"
+    data="../../gv_tree.svg"
     type="image/svg+xml"
     aria-label="Tree graph figure"
     style="width: 90%; height: auto;">
