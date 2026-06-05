@@ -142,6 +142,36 @@ end
         end
     end
 
+    @testset "Manual Gaussian sequential schedule matches keyword" begin
+        graph = gaussianTreeTestGraph()
+
+        for keywordInference in (
+            moment(graph; mean = 0.0, covariance = 1e6),
+            canonical(graph; mean = 0.0, covariance = 1e6),
+            minsum(graph)
+        )
+            manualInference = deepcopy(keywordInference)
+            schedule = sequentialSchedule(graph, manualInference)
+
+            messages!(graph, keywordInference; schedule = :sequential)
+            messages!(graph, manualInference, schedule)
+
+            @test maxMessageChange(graph, keywordInference, manualInference) == 0.0
+        end
+    end
+
+    @testset "Manual Gaussian tree sequential schedule delegates to graph" begin
+        tree = treeFactorGraph(gaussianTreeTestGraph(); root = :x1)
+        automatic = moment(tree; mean = 0.0, covariance = 1e6)
+        manual = moment(tree; mean = 0.0, covariance = 1e6)
+        schedule = sequentialSchedule(tree, manual)
+
+        messages!(tree.graph, automatic; schedule = :sequential)
+        messages!(tree, manual, schedule)
+
+        @test maxMessageChange(tree, automatic, manual) == 0.0
+    end
+
     @testset "Residual GBP produces Gaussian tree MAP means" begin
         graph = gaussianTreeTestGraph()
         inference = canonical(graph; mean = 0.0, covariance = 1e6)
@@ -284,6 +314,35 @@ end
             messages!(graph, manualInference, schedule)
 
             @test maxMessageChange(graph, keywordInference, manualInference) == 0.0
+        end
+    end
+
+    @testset "Manual discrete sequential schedule matches keyword" begin
+        graph = residualDiscreteGraph()
+
+        for keywordInference in (sumproduct(graph), minsum(graph))
+            manualInference = deepcopy(keywordInference)
+            schedule = sequentialSchedule(graph, manualInference)
+
+            messages!(graph, keywordInference; schedule = :sequential)
+            messages!(graph, manualInference, schedule)
+
+            @test maxMessageChange(graph, keywordInference, manualInference) == 0.0
+        end
+    end
+
+    @testset "Manual discrete tree sequential schedule delegates to graph" begin
+        tree = treeFactorGraph(residualDiscreteGraph(); root = :x1)
+
+        for constructor in (sumproduct, minsum)
+            automatic = constructor(tree)
+            manual = constructor(tree)
+            schedule = sequentialSchedule(tree, manual)
+
+            messages!(tree.graph, automatic; schedule = :sequential)
+            messages!(tree, manual, schedule)
+
+            @test maxMessageChange(tree, automatic, manual) == 0.0
         end
     end
 

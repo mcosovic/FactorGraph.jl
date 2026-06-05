@@ -1,5 +1,16 @@
 include("setup.jl")
 
+function quietValidationOutput(call)
+    display = TextDisplay(devnull)
+
+    pushdisplay(display)
+    try
+        return redirect_stdout(call, devnull)
+    finally
+        popdisplay(display)
+    end
+end
+
 @testset verbose = true "Validation helpers" begin
     @testset "Residuals use current marginal means" begin
         graph = GaussianFactorGraph(
@@ -44,5 +55,35 @@ include("setup.jl")
         @test residuals(tree, inference) == residuals(tree.graph, inference)
         @test normalizedResiduals(tree, inference) ==
               normalizedResiduals(tree.graph, inference)
+    end
+
+    @testset "WLS comparison printers support graph and tree views" begin
+        graph = gaussianTreeTestGraph()
+        tree = factorGraph(graph.variables, graph.factors; root = :x1)
+        graphInference = moment(graph; mean = 0.0, covariance = 1e6)
+        treeInference = moment(tree; mean = 0.0, covariance = 1e6)
+
+        gbp!(graph, graphInference; iterations = 6)
+        forwardBackward!(tree, treeInference)
+
+        result = solveWLS(graph)
+        treeResult = solveWLS(tree)
+
+        @test quietValidationOutput() do
+            compareMeanWithWLS(graph, graphInference, result)
+        end === nothing
+        @test quietValidationOutput() do
+            compareCovarianceWithWLS(graph, graphInference, result)
+        end === nothing
+
+        @test treeResult.variableMean == result.variableMean
+        @test treeResult.variableCovariance == result.variableCovariance
+
+        @test quietValidationOutput() do
+            compareMeanWithWLS(tree, treeInference, treeResult)
+        end === nothing
+        @test quietValidationOutput() do
+            compareCovarianceWithWLS(tree, treeInference, treeResult)
+        end === nothing
     end
 end
