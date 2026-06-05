@@ -28,6 +28,14 @@ function asCovarianceMatrix(data)
     end
 end
 
+function asFactorCovarianceMatrix(covariance, meanDimension::Int)
+    if covariance isa Number
+        return Float64(covariance) * Matrix{Float64}(I, meanDimension, meanDimension)
+    end
+
+    return asCovarianceMatrix(covariance)
+end
+
 function defaultComponentRefs(dimension::Int)
     return ComponentRef[1:dimension...]
 end
@@ -65,33 +73,35 @@ end
 """
     GaussianVariable(
         id::VariableId, dimension::Int;
-        label = defaultNodeLabel(id), components = 1:dimension, mean = nothing, covariance = nothing
+        label = string(id), components = 1:dimension, mean = nothing, covariance = nothing
     )
 
-Create a GaussianVariable node.
+Create a Gaussian variable node.
 
 # Arguments
 
-- `id`: Symbolic or integer ID used in factors.
-- `dimension`: State dimension of the variable.
+* `id`: Symbolic or integer ID used by factors.
+* `dimension`: Dimension of the continuous state vector.
 
 # Keywords
 
-- `label`: Human-readable label that can also be used for lookup.
-- `components`: Names for entries of the continuous state vector.
-- `mean`: Optional initial mean for Gaussian inference.
-- `covariance`: Optional initial covariance for Gaussian inference.
+* `label`: Human-readable label that can also be used for lookup.
+* `components`: References for entries of the continuous state vector.
+* `mean`: Optional initial mean used by Gaussian inference.
+* `covariance`: Optional initial covariance used by Gaussian inference.
 
 # Notes
 
-If `label` is omitted, the variable ID is converted to a compact default label.
-For example, `:x_1` becomes `"x1"`. Explicit labels are kept unchanged.
+If `label` is omitted, the variable ID is converted to a default label with `string(id)`.
+For example, `:x_1` becomes `"x_1"`. Explicit labels are kept unchanged.
 
-If `mean` and `covariance` are provided, they define the GaussianVariable initial belief
-used by new inference objects. If they are omitted, [`moment`](@ref), [`canonical`](@ref),
-and Gaussian [`minsum`](@ref) use their own default initial belief arguments instead. This
-belief is used only to initialize Gaussian belief propagation messages. Scalar values are
-accepted for one-dimensional variables.
+If `mean` and `covariance` are provided, they define the initial belief used
+when a Gaussian inference object is created. If they are omitted,
+[`moment`](@ref), [`canonical`](@ref), and Gaussian [`minsum`](@ref) use their
+own default initial-belief arguments instead.
+
+The initial belief is used only to initialize Gaussian belief propagation
+messages. Scalar values are accepted for one-dimensional variables.
 
 # Example
 
@@ -185,32 +195,35 @@ Create a linear Gaussian factor node.
 
 # Arguments
 
-- `variable...`: Connected variable references or GaussianVariable nodes.
-- `mean`: Observed or target value.
-- `coefficient`: Linear coefficient matrix.
-- `covariance`: Measurement or factor covariance.
+* `variable...`: Connected variable references or Gaussian variable nodes.
+* `mean`: Observed or target value.
+* `coefficient`: Linear coefficient matrix.
+* `covariance`: Measurement or factor covariance.
 
 # Keywords
 
-- `label`: Human-readable label. If omitted inside a graph, a label is assigned.
-- `initialize`: Whether a unary factor initializes the connected variable belief.
+* `label`: Human-readable label. If omitted inside a graph, a label is assigned.
+* `initialize`: Whether a unary factor initializes the connected variable belief.
 
 # Notes
 
-The GaussianFactor represents a linear Gaussian relation
-`mean = coefficient * x + noise`, where `mean` is the GaussianFactor's observed or
-target value and the noise covariance is `covariance`. The columns of
-`coefficient` are ordered by the variables listed in `variables`.
+`GaussianFactor` represents a linear Gaussian relation
+`mean = coefficient * x + noise`, where `mean` is the observed or target value
+and `covariance` is the noise covariance.
 
-The constructor takes one or more GaussianVariable references or nodes followed by
-`mean`, `coefficient`, and `covariance`.
+The constructor takes one or more Gaussian variable references or nodes followed
+by `mean`, `coefficient`, and `covariance`. The length of `mean` defines the
+factor dimension. The columns of `coefficient` are ordered by concatenating the
+connected variable state vectors in the same order as `variable...`.
 
-Scalars and one-element vectors are accepted for one-dimensional factors. Coefficients for
-higher-dimensional factors must be given as matrices.
+Scalar means, scalar coefficients, and one-element coefficient vectors are
+accepted for one-dimensional factors. Higher-dimensional factors must use a
+matrix coefficient. A scalar covariance is expanded to an isotropic covariance
+matrix matching the factor mean dimension.
 
-If `initialize = true`, the GaussianFactor must be unary. Its Gaussian information is
-used as the initial belief for the connected GaussianVariable when an inference object
-is created or extended.
+If `initialize = true`, the factor must be unary. Its Gaussian information is
+used as the initial belief for the connected variable when a Gaussian inference
+object is created or extended.
 
 # Example
 
@@ -252,12 +265,13 @@ struct GaussianFactor
             label = defaultFactorLabel(id)
         end
 
-        covarianceMatrix = symmetricPart(asCovarianceMatrix(covariance))
+        meanVector = asVector(mean)
+        covarianceMatrix = symmetricPart(asFactorCovarianceMatrix(covariance, length(meanVector)))
 
         return new(
             id,
             VariableRef[variables...],
-            asVector(mean),
+            meanVector,
             asCoefficientMatrix(coefficient),
             covarianceMatrix,
             label,
@@ -311,28 +325,30 @@ end
     )
     GaussianFactorGraph()
 
-Construct a Gaussian factor graph from variables and factors, or construct an empty one.
+Construct a Gaussian factor graph from variables and factors, or create an empty graph.
 
 # Arguments
 
-- `variables`: Gaussian variable nodes.
-- `factors`: Gaussian factor nodes.
+* `variables`: Gaussian variable nodes.
+* `factors`: Gaussian factor nodes.
 
 # Fields
 
-- `variables`: Gaussian variable nodes in internal order.
-- `factors`: Gaussian factor nodes in internal order.
-- `referenceIndex`: Lookup from variable IDs and labels to internal indices.
-- `edges`: Factor-variable edges.
-- `factorEdges`: Edge IDs adjacent to each factor.
-- `variableEdges`: Edge IDs adjacent to each variable.
-- `topologyVersion`: Counter used to detect stale inference states.
+* `variables`: Gaussian variable nodes in internal order.
+* `factors`: Gaussian factor nodes in internal order.
+* `referenceIndex`: Lookup from variable IDs and labels to internal indices.
+* `edges`: Factor-variable edges.
+* `factorEdges`: Edge IDs adjacent to each factor.
+* `variableEdges`: Edge IDs adjacent to each variable.
+* `topologyVersion`: Counter used to detect stale inference states.
 
 # Notes
 
-The graph stores edges and adjacency lists used by message passing. New factors
-may be added with [`addFactor!`](@ref), and existing GaussianFactor means and
-coefficients and covariances may be updated with [`updateFactor!`](@ref).
+The graph stores the factor-variable topology, edge list, and adjacency lists
+used by Gaussian message passing. Variables and factors may be added
+incrementally with [`addVariable!`](@ref) and [`addFactor!`](@ref). Existing
+Gaussian factor means, coefficients, and covariances may be updated with
+[`updateFactor!`](@ref).
 
 # Example
 
@@ -363,9 +379,9 @@ Resolve a Gaussian component reference to its one-based index within a variable.
 
 # Arguments
 
-- `graph`: Gaussian factor graph used to resolve `variable`.
-- `variable`: Variable ID or label.
-- `component`: Component reference.
+* `graph`: Gaussian factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
+* `component`: Component reference.
 
 # Returns
 
@@ -375,9 +391,8 @@ The one-based component index.
 
 ```julia
 x1 = GaussianVariable(:x1, 2; label = "state", components = [:position, :velocity])
-f1 = GaussianFactor(:x1, [0.0, 0.0], [1.0 0.0; 0.0 1.0], [0.1 0.0; 0.0 0.1])
 
-graph = factorGraph([x1], [f1])
+graph = GaussianFactorGraph([x1], GaussianFactor[])
 
 componentIndex(graph, :x1, :velocity)
 ```
@@ -399,9 +414,9 @@ Return the component reference stored at a one-based index.
 
 # Arguments
 
-- `graph`: Gaussian factor graph used to resolve `variable`.
-- `variable`: Variable ID or label.
-- `index`: One-based component index.
+* `graph`: Gaussian factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
+* `index`: One-based component index.
 
 # Returns
 
@@ -411,9 +426,8 @@ The component reference at `index`.
 
 ```julia
 x1 = GaussianVariable(:x1, 2; label = "state", components = [:position, :velocity])
-f1 = GaussianFactor(:x1, [0.0, 0.0], [1.0 0.0; 0.0 1.0], [0.1 0.0; 0.0 0.1])
 
-graph = factorGraph([x1], [f1])
+graph = GaussianFactorGraph([x1], GaussianFactor[])
 
 componentValue(graph, :x1, 1)
 ```
@@ -429,14 +443,14 @@ function componentValue(
 end
 
 """
-    variableIndex(graph::AbstractFactorGraph, variable::VariableRef)
+    variableIndex(graph::GaussianFactorGraph, variable::VariableRef)
 
 Resolve a variable reference to its internal one-based variable index.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
-- `variable`: Variable ID or label.
+* `graph`: Gaussian factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
 
 # Returns
 
@@ -459,17 +473,14 @@ function variableIndex(
 end
 
 """
-    variableDimension(graph::AbstractFactorGraph, variable::VariableRef)
+    variableDimension(graph::GaussianFactorGraph, variable::VariableRef)
 
-Return the dimension of a variable.
-
-For Gaussian graphs this is the continuous state-vector dimension. For discrete
-graphs this is the variable cardinality.
+Return the continuous state-vector dimension of a Gaussian variable.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
-- `variable`: Variable ID or label.
+* `graph`: Gaussian factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
 
 # Returns
 
@@ -478,8 +489,8 @@ The variable dimension.
 # Example
 
 ```julia
-x1 = DiscreteVariable(:x1, 2; states = [:off, :on])
-graph = factorGraph([x1], DiscreteFactor[])
+x1 = GaussianVariable(:x1, 2; components = [:position, :velocity])
+graph = GaussianFactorGraph([x1], GaussianFactor[])
 
 variableDimension(graph, :x1)
 ```
@@ -523,14 +534,14 @@ function coefficientBlocks(graph::GaussianFactorGraph, factorData::GaussianFacto
 end
 
 """
-    factorIndex(graph::AbstractFactorGraph, factor::FactorRef)
+    factorIndex(graph::GaussianFactorGraph, factor::FactorRef)
 
 Resolve a factor reference to its internal one-based factor index.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
-- `factor`: Factor index or label.
+* `graph`: Gaussian factor graph used to resolve `factor`.
+* `factor`: Factor index or label.
 
 # Returns
 
@@ -539,8 +550,8 @@ The one-based internal factor index.
 # Example
 
 ```julia
-x1 = DiscreteVariable(:x1, 2)
-f1 = DiscreteFactor(:x1, [0.8, 0.2]; label = "f1")
+x1 = GaussianVariable(:x1, 1)
+f1 = GaussianFactor(:x1, 0.0, 1.0, 0.1; label = "f1")
 
 graph = factorGraph([x1], [f1])
 
@@ -560,24 +571,24 @@ end
     )
     addVariable!(
         graph::GaussianFactorGraph, id::VariableId, dimension::Int;
-        label = defaultNodeLabel(id), components = 1:dimension, mean = nothing, covariance = nothing
+        label = string(id), components = 1:dimension, mean = nothing, covariance = nothing
     )
 
 Add a continuous Gaussian variable to an existing Gaussian factor graph.
 
 # Arguments
 
-- `graph`: Gaussian factor graph to mutate.
-- `variable`: Gaussian variable node to add.
-- `id`: Variable ID.
-- `dimension`: Dimension of the continuous state vector.
+* `graph`: Gaussian factor graph to mutate.
+* `variable`: Gaussian variable node to add.
+* `id`: Variable ID.
+* `dimension`: Dimension of the continuous state vector.
 
 # Keywords
 
-- `label`: Variable label.
-- `components`: Component references for entries of the continuous state vector.
-- `mean`: Optional initial mean.
-- `covariance`: Optional initial covariance.
+* `label`: Variable label.
+* `components`: Component references for entries of the continuous state vector.
+* `mean`: Optional initial mean.
+* `covariance`: Optional initial covariance.
 
 # Returns
 
@@ -637,22 +648,22 @@ end
         label = "", initialize = false
     )
 
-Add a GaussianFactor node to an existing Gaussian factor graph.
+Add a Gaussian factor node to an existing Gaussian factor graph.
 
 # Arguments
 
-- `graph`: Gaussian factor graph to mutate.
-- `factor`: Factor node to add.
-- `variable...`: Connected variable references or GaussianVariable nodes for constructor-style
+* `graph`: Gaussian factor graph to mutate.
+* `factor`: Factor node to add.
+* `variable...`: Connected variable references or Gaussian variable nodes for constructor-style
   insertion.
-- `mean`: Observed or target value.
-- `coefficient`: Linear coefficient matrix.
-- `covariance`: Factor covariance.
+* `mean`: Observed or target value.
+* `coefficient`: Linear coefficient matrix.
+* `covariance`: Factor covariance.
 
 # Keywords
 
-- `label`: Factor label.
-- `initialize`: Whether a unary factor initializes the connected variable belief.
+* `label`: Factor label.
+* `initialize`: Whether a unary factor initializes the connected variable belief.
 
 # Returns
 
@@ -660,20 +671,20 @@ The added [`GaussianFactor`](@ref).
 
 # Notes
 
-The new GaussianFactor is validated against the graph's existing variables, assigned
-the next GaussianFactor ID, inserted into `graph.factors`, and connected by new
+The new Gaussian factor is validated against the graph's existing variables, assigned
+the next Gaussian factor ID, inserted into `graph.factors`, and connected by new
 edges. Existing variables are not modified, but their adjacency lists receive
 the new edge IDs.
 
-If `label` is omitted, the GaussianFactor is named `fN`, where `N` is the assigned
-GaussianFactor ID. Explicit labels are kept unchanged. GaussianFactor labels
+If `label` is omitted, the Gaussian factor is named `fN`, where `N` is the assigned
+Gaussian factor ID. Explicit labels are kept unchanged. Gaussian factor labels
 must remain unique.
 
 Calling this graph-only method does not resize existing inference objects.
-Create a fresh [`moment`](@ref) or [`canonical`](@ref) inference object before
-running message passing on the updated graph, or call
-`addFactor!(graph, inference, factorData)` to extend an existing inference object
-as a warm start.
+Create a fresh [`moment`](@ref), [`canonical`](@ref), or Gaussian
+[`minsum`](@ref) inference object before running message passing on the updated
+graph, or call `addFactor!(graph, inference, factorData)` to extend an existing
+inference object as a warm start.
 
 # Example
 
@@ -789,20 +800,20 @@ end
         mean = nothing, coefficient = nothing, covariance = nothing, initialize = nothing
     )
 
-Update a GaussianFactor node's mean, coefficient, and/or covariance without changing
-graph topology or GaussianFactor dimensions.
+Update a Gaussian factor node's mean, coefficient, covariance, and/or initialization
+flag without changing graph topology or factor dimensions.
 
 # Arguments
 
-- `graph`: Gaussian factor graph to mutate.
-- `factor`: Factor index or label.
+* `graph`: Gaussian factor graph to mutate.
+* `factor`: Factor index or label.
 
 # Keywords
 
-- `mean`: Replacement observed or target value.
-- `coefficient`: Replacement coefficient matrix.
-- `covariance`: Replacement covariance.
-- `initialize`: Replacement initialization flag; omitted keeps the current flag.
+* `mean`: Replacement observed or target value.
+* `coefficient`: Replacement coefficient matrix.
+* `covariance`: Replacement covariance.
+* `initialize`: Replacement initialization flag; omitted keeps the current flag.
 
 # Returns
 
@@ -810,15 +821,15 @@ The updated [`GaussianFactor`](@ref).
 
 # Notes
 
-Use `mean` for the observed or target value stored in the GaussianFactor. Use
-`coefficient` to replace the GaussianFactor coefficient matrix.
+Use `mean` for the observed or target value stored in the Gaussian factor. Use
+`coefficient` to replace the Gaussian factor coefficient matrix.
 
 The update keeps the existing connected variables, ID, and label. If
 `initialize` is omitted, the existing initialization flag is kept. The updated
 mean length, coefficient matrix size, and covariance matrix size must match the
-old GaussianFactor. Dimensions, positive definiteness, and initializing unary GaussianFactor
-conflicts are validated before the graph is modified, so a failed update leaves the old
-GaussianFactor unchanged.
+old Gaussian factor. Dimensions, positive definiteness, and initializing unary Gaussian
+factor conflicts are validated before the graph is modified, so a failed update leaves
+the old Gaussian factor unchanged.
 
 # Example
 
@@ -934,12 +945,12 @@ Construct a Gaussian or discrete factor graph from variable and factor nodes.
 
 # Arguments
 
-- `variables`: Variable nodes.
-- `factors`: Factor nodes.
+* `variables`: Variable nodes.
+* `factors`: Factor nodes.
 
 # Keywords
 
-- `root`: Optional root variable for returning a [`TreeFactorGraph`](@ref).
+* `root`: Optional root variable for returning a [`TreeFactorGraph`](@ref).
 
 # Returns
 
@@ -949,8 +960,8 @@ A [`GaussianFactorGraph`](@ref) or [`DiscreteFactorGraph`](@ref), or a
 # Example
 
 ```julia
-x1 = DiscreteVariable(:x1, 2; states = [:off, :on])
-f1 = DiscreteFactor(:x1, [0.8, 0.2]; label = "f1")
+x1 = GaussianVariable(:x1, 1)
+f1 = GaussianFactor(:x1, 0.0, 1.0, 0.1; label = "f1")
 
 graph = factorGraph([x1], [f1])
 ```
@@ -1218,16 +1229,16 @@ end
 """
     coefficientBlock(graph::GaussianFactorGraph; factor::FactorRef, variable::VariableRef)
 
-Return the coefficient submatrix in `GaussianFactor` corresponding to one variable.
+Return the coefficient submatrix for one variable connected to a Gaussian factor.
 
 # Arguments
 
-- `graph`: Gaussian factor graph.
+* `graph`: Gaussian factor graph.
 
 # Keywords
 
-- `factor`: Factor index or label.
-- `variable`: Variable ID or label.
+* `factor`: Factor index or label.
+* `variable`: Variable ID or label.
 
 # Returns
 
@@ -1235,9 +1246,9 @@ The coefficient block for the selected variable.
 
 # Notes
 
-This is useful when inspecting a multi-GaussianVariable GaussianFactor. The returned block uses
-the same row dimension as `GaussianFactor.coefficient` and the column dimension of the
-selected variable.
+This is useful when inspecting a Gaussian factor connected to multiple
+variables. The returned block uses the same row dimension as
+`GaussianFactor.coefficient` and the column dimension of the selected variable.
 
 # Example
 
@@ -1278,16 +1289,16 @@ end
 """
     coefficientBlocks(graph::GaussianFactorGraph, factor::FactorRef)
 
-Return coefficient submatrices for all variables connected to a GaussianFactor.
+Return coefficient submatrices for all variables connected to a Gaussian factor.
 
 # Arguments
 
-- `graph`: Gaussian factor graph.
-- `factor`: Factor index or label.
+* `graph`: Gaussian factor graph.
+* `factor`: Factor index or label.
 
 # Returns
 
-The blocks in the same order as `GaussianFactor.variables`.
+The blocks in the same order as the factor's `variables` field.
 
 # Example
 
@@ -1324,17 +1335,17 @@ function coefficientBlocks(
 end
 
 """
-    treeFactorGraph(graph::AbstractFactorGraph; root = nothing)
+    treeFactorGraph(graph::GaussianFactorGraph; root = nothing)
 
 Create a tree-oriented factor graph view rooted at `root`.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
+* `graph`: Gaussian factor graph.
 
 # Keywords
 
-- `root`: Optional root variable ID or label. If omitted, the first variable is used.
+* `root`: Optional root variable ID or label. If omitted, the first variable is used.
 
 # Returns
 
@@ -1343,16 +1354,16 @@ A [`TreeFactorGraph`](@ref) view that shares the original graph.
 # Notes
 
 The graph must be connected and must have exactly `nodes - 1` edges.
-The returned tree view does not copy variables, factors, or messages.
+The returned tree view shares the original graph data.
 
 # Example
 
 ```julia
-x1 = DiscreteVariable(:x1, 2; states = [:off, :on])
-x2 = DiscreteVariable(:x2, 2; states = [:low, :high])
+x1 = GaussianVariable(:x1, 1)
+x2 = GaussianVariable(:x2, 1)
 
-f1 = DiscreteFactor(:x1, [0.8, 0.2]; label = "f1")
-f2 = DiscreteFactor(:x1, :x2, [1.0 0.2; 0.1 0.9]; label = "f2")
+f1 = GaussianFactor(:x1, 0.0, 1.0, 0.1; label = "f1")
+f2 = GaussianFactor(:x1, :x2, 0.0, [1.0 -1.0], 0.2; label = "f2")
 
 graph = factorGraph([x1, x2], [f1, f2])
 tree = treeFactorGraph(graph; root = :x1)
@@ -1366,13 +1377,13 @@ function treeFactorGraph(
 end
 
 """
-    printModel(graph::AbstractFactorGraph)
+    printModel(graph::GaussianFactorGraph)
 
 Print a compact summary of variables and factors.
 
 # Arguments
 
-- `graph`: Gaussian factor graph, discrete factor graph, or tree view.
+* `graph`: Gaussian factor graph or Gaussian tree view.
 
 # Notes
 

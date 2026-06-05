@@ -4,8 +4,8 @@
 Create a discrete sum-product inference state for `graph`.
 
 The returned [`DiscreteSumProductInference`](@ref) stores probability-vector
-messages and marginals. DiscreteVariables with an initializing unary
-DiscreteFactor use that factor as their initial belief; other variables use
+messages and marginals. Discrete variables with an initializing unary discrete
+factor use that factor as their initial belief; other variables use
 their own probability vector or a uniform default.
 """
 function sumproduct(graph::DiscreteFactorGraph)
@@ -292,15 +292,15 @@ end
     messages!(
         graph::DiscreteFactorGraph, inference::DiscreteSumProductInference;
         damping = false, prob = 0.6, alpha = 0.4, schedule = nothing,
-        rng = Random.default_rng()
+        updateFraction = nothing, updateCount = nothing, rng = Random.default_rng()
     )
 
 Run one discrete sum-product message update sweep.
 
 The default schedule updates factor-to-variable messages and then
 variable-to-factor messages. Pass `schedule = :flooding` for simultaneous
-message commits, or use a concrete residual schedule with the residual
-message-passing API.
+message commits, or pass `schedule = :residual` with `updateFraction` or
+`updateCount` for one residual-scheduled step.
 """
 function messages!(
     graph::DiscreteFactorGraph,
@@ -309,6 +309,8 @@ function messages!(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     schedule = nothing,
+    updateFraction = nothing,
+    updateCount = nothing,
     rng = Random.default_rng()
 )
     assertDiscreteSumProductInferenceMatchesGraph(graph, inference)
@@ -318,7 +320,21 @@ function messages!(
     validateGBPSchedule(selectedSchedule)
 
     if selectedSchedule == :residual
-        error("Pass a ResidualSchedule object to messages! for residual scheduling.")
+        residual = residualSchedule(
+            graph,
+            inference;
+            updateFraction = updateFraction,
+            updateCount = updateCount
+        )
+        return messages!(
+            graph,
+            inference,
+            residual;
+            damping = damping,
+            prob = prob,
+            alpha = alpha,
+            rng = rng
+        )
     end
 
     if selectedSchedule == :flooding

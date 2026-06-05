@@ -73,8 +73,8 @@ Inference state for sum-product discrete belief propagation.
 
 # Notes
 
-Stores DiscreteVariable-to-DiscreteFactor messages, DiscreteFactor-to-DiscreteVariable
-messages, marginals, and update-control flags. Create instances with [`sumproduct`](@ref).
+Stores variable-to-factor and factor-to-variable probability messages,
+marginals, and update-control flags. Create instances with [`sumproduct`](@ref).
 
 # Example
 
@@ -224,9 +224,8 @@ Inference state for discrete min-sum MAP belief propagation.
 
 # Notes
 
-Stores DiscreteVariable-to-DiscreteFactor cost messages, DiscreteFactor-to-DiscreteVariable
-cost messages, MAP estimates, and update-control flags. Create instances with
-[`minsum`](@ref).
+Stores variable-to-factor and factor-to-variable cost messages, MAP estimates,
+and update-control flags. Create instances with [`minsum`](@ref).
 
 # Example
 
@@ -313,15 +312,15 @@ end
         label = string(id), components = 1:dimension, mean = nothing, covariance = nothing
     )
 
-Add a GaussianVariable node and extend an existing Gaussian inference state.
+Add a Gaussian variable node and extend an existing Gaussian inference state.
 
-Existing messages and marginals are kept as a warm start. The new GaussianVariable is
+Existing messages and marginals are kept as a warm start. The new Gaussian variable is
 initialized using its own `mean`/`covariance` if provided, otherwise the
 defaults stored in `inference` are used. The returned value is the added
 [`GaussianVariable`](@ref).
 
 In the `id`/`dimension` convenience form, `mean = nothing` and
-`covariance = nothing` create a GaussianVariable without an explicit prior; the
+`covariance = nothing` create a Gaussian variable without an explicit prior; the
 added variable is then initialized from the inference defaults.
 
 # Example
@@ -430,7 +429,7 @@ end
 """
     marginals!(graph::GaussianFactorGraph, inference::GaussianSumProductInference)
 
-Recompute GaussianVariable marginals from the current sum-product messages.
+Recompute Gaussian variable marginals from the current sum-product messages.
 """
 function marginals!(graph::AbstractFactorGraph, inference::AbstractSumProductInference)
     if graph isa TreeFactorGraph

@@ -311,7 +311,7 @@ end
         label = "", initialize = false
     )
 
-Add a GaussianFactor node and extend an existing Gaussian inference state.
+Add a Gaussian factor node and extend an existing Gaussian inference state.
 
 Existing messages and results are kept as a warm start. Moment inference extends
 Gaussian messages and marginals, canonical inference extends canonical messages
@@ -399,7 +399,7 @@ end
         mean = nothing, coefficient = nothing, covariance = nothing, initialize = nothing
     )
 
-Update an existing GaussianFactor and refresh the matching Gaussian inference state.
+Update an existing Gaussian factor and refresh the matching Gaussian inference state.
 
 The graph factor is updated first, then the inference object refreshes the
 representation it owns: moment messages, canonical messages, or min-sum
@@ -1368,26 +1368,26 @@ end
         broadcast = false
     )
 
-Run one GaussianFactor-to-GaussianVariable message update pass.
+Run one Gaussian factor-to-variable message update pass.
 
 # Arguments
 
-- `graph`: Gaussian factor graph.
-- `inference`: Matching Gaussian inference object.
+* `graph`: Gaussian factor graph.
+* `inference`: Matching Gaussian inference object.
 
 # Keywords
 
-- `damping`: Enable global factor-to-variable message damping.
-- `prob`: Damping probability.
-- `alpha`: Previous-message mixing weight.
-- `rng`: Random number generator used by damping.
-- `broadcast`: Compute messages in grouped broadcast form.
+* `damping`: Enable global factor-to-variable message damping.
+* `prob`: Damping probability.
+* `alpha`: Previous-message mixing weight.
+* `rng`: Random number generator used by damping.
+* `broadcast`: Compute messages in grouped broadcast form.
 
 # Notes
 
-This updates only messages sent from GaussianFactor nodes to GaussianVariable
-nodes. It does not recompute marginals or MAP estimates; call [`marginals!`](@ref)
-for moment and canonical inference, or [`estimates!`](@ref) for min-sum inference.
+This updates only messages sent from factor nodes to variable nodes. It does not
+recompute marginals or MAP estimates; call [`marginals!`](@ref) for moment and
+canonical inference, or [`estimates!`](@ref) for min-sum inference.
 
 # Example
 
@@ -1456,7 +1456,7 @@ end
         broadcast = false
     )
 
-Run one GaussianVariable-to-GaussianFactor message update pass.
+Run one Gaussian variable-to-factor message update pass.
 
 # Arguments
 
@@ -1469,8 +1469,8 @@ Run one GaussianVariable-to-GaussianFactor message update pass.
 
 # Notes
 
-This updates only messages sent from GaussianVariable nodes to GaussianFactor
-nodes. It does not recompute marginals or MAP estimates.
+This updates only messages sent from variable nodes to factor nodes. It does not
+recompute marginals or MAP estimates.
 
 # Example
 
@@ -1513,7 +1513,8 @@ end
     messages!(
         graph::GaussianFactorGraph, inference::GaussianInference;
         damping = false, prob = 0.6, alpha = 0.4, rng = Random.default_rng(),
-        schedule = nothing, broadcast = false
+        schedule = nothing, updateFraction = nothing, updateCount = nothing,
+        broadcast = false
     )
 
 Run one complete Gaussian message update step.
@@ -1530,6 +1531,8 @@ Run one complete Gaussian message update step.
 - `alpha`: Previous-message mixing weight.
 - `rng`: Random number generator used by damping.
 - `schedule`: `:sequential`, `:flooding`, `:residual`, a schedule object, or `nothing`.
+- `updateFraction`: Residual-schedule fraction when `schedule = :residual`.
+- `updateCount`: Residual-schedule count when `schedule = :residual`.
 - `broadcast`: Compute sequential or flooding passes in grouped form.
 
 # Notes
@@ -1556,6 +1559,8 @@ function messages!(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     schedule = nothing,
+    updateFraction = nothing,
+    updateCount = nothing,
     broadcast::Bool = false,
     rng = Random.default_rng()
 )
@@ -1569,6 +1574,8 @@ function messages!(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     schedule = nothing,
+    updateFraction = nothing,
+    updateCount = nothing,
     broadcast::Bool = false,
     rng = Random.default_rng()
 )
@@ -1577,7 +1584,25 @@ function messages!(
     validateGBPSchedule(selectedSchedule)
 
     if selectedSchedule == :residual
-        error("Pass a ResidualSchedule object to messages! for residual scheduling.")
+        if broadcast
+            error("broadcast = true is not supported with schedule = :residual.")
+        end
+
+        residual = residualSchedule(
+            graph,
+            inference;
+            updateFraction = updateFraction,
+            updateCount = updateCount
+        )
+        return messages!(
+            graph,
+            inference,
+            residual;
+            damping = damping,
+            prob = prob,
+            alpha = alpha,
+            rng = rng
+        )
     end
 
     if selectedSchedule == :flooding

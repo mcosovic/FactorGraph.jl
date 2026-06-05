@@ -12,11 +12,12 @@ Weighted least-squares solution returned by [`solveWLS`](@ref).
 
 # Notes
 
-Fields include the full `mean` and `covariance`, plus per-GaussianVariable
+Fields include the full `mean` and `covariance`, plus per-Gaussian-variable
 `variableMean` and `variableCovariance` blocks.
 
-The full state is ordered in the same order as `graph.variables`. Per-GaussianVariable
-blocks make it easier to compare WLS with Gaussian belief propagation marginals.
+The full state is ordered in the same order as `graph.variables`.
+Per-Gaussian-variable blocks make it easier to compare WLS with Gaussian belief
+propagation marginals.
 
 # Example
 
@@ -195,7 +196,7 @@ Print a weighted least-squares result.
 
 # Notes
 
-Prints one mean and covariance block per GaussianVariable.
+Prints one mean and covariance block per Gaussian variable.
 
 # Example
 
@@ -283,7 +284,7 @@ end
         inference::GaussianSumProductInference
     )
 
-Return one residual vector per GaussianFactor using the current marginal means.
+Return one residual vector per Gaussian factor using the current marginal means.
 
 # Arguments
 
@@ -296,9 +297,10 @@ A vector of named tuples with `factor`, `index`, and `value` fields.
 
 # Notes
 
-For each GaussianFactor this computes `GaussianFactor.mean - GaussianFactor.coefficient * x`, where
-`x` is the stacked vector of current marginal means for the variables connected
-to that GaussianFactor.
+For each Gaussian factor this computes
+`GaussianFactor.mean - GaussianFactor.coefficient * x`, where `x` is the
+stacked vector of current marginal means for the variables connected to that
+factor.
 
 # Example
 
@@ -326,7 +328,7 @@ end
         inference::GaussianSumProductInference
     )
 
-Return residuals scaled by each GaussianFactor component's standard deviation.
+Return residuals scaled by each Gaussian factor component's standard deviation.
 
 # Arguments
 
@@ -339,7 +341,7 @@ A vector of named tuples with `factor`, `index`, and normalized `value` fields.
 
 # Notes
 
-This uses the diagonal entries of the GaussianFactor covariance matrix, so each
+This uses the diagonal entries of the Gaussian factor covariance matrix, so each
 component is computed as `residual / sqrt(covariance_component)`. The return
 format matches [`residuals`](@ref).
 
@@ -372,7 +374,8 @@ end
         inference::GaussianSumProductInference, result::WeightedLeastSquaresResult
     )
 
-Print per-GaussianVariable mean differences between Gaussian belief propagation marginals and WLS.
+Print per-Gaussian-variable mean differences between Gaussian belief propagation
+marginals and WLS.
 
 # Arguments
 
@@ -433,7 +436,7 @@ end
         inference::GaussianSumProductInference, result::WeightedLeastSquaresResult
     )
 
-Return the maximum norm of per-GaussianVariable mean errors against WLS.
+Return the maximum norm of per-Gaussian-variable mean errors against WLS.
 
 # Arguments
 
@@ -492,7 +495,7 @@ end
         inference::GaussianSumProductInference, result::WeightedLeastSquaresResult
     )
 
-Print per-GaussianVariable covariance differences between Gaussian belief propagation
+Print per-Gaussian-variable covariance differences between Gaussian belief propagation
 marginals and WLS.
 
 # Arguments
@@ -554,7 +557,7 @@ end
         inference::GaussianSumProductInference, result::WeightedLeastSquaresResult
     )
 
-Return the maximum norm of per-GaussianVariable covariance errors against WLS.
+Return the maximum norm of per-Gaussian-variable covariance errors against WLS.
 
 # Arguments
 

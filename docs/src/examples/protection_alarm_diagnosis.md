@@ -7,8 +7,8 @@ CurrentModule = FactorGraph
 This example builds a small protection-alarm diagnosis model. A control center
 receives relay, breaker, and voltage indications from a feeder section. The
 variables are finite-state health or indication states, and the factors encode
-domain likelihoods. The graph contains cycles, so iterative discrete
-belief propagation is the natural schedule.
+domain likelihoods. The graph contains cycles, so iterative discrete belief
+propagation is the natural schedule.
 
 ---
 
@@ -25,7 +25,7 @@ variables = [
     DiscreteVariable(:breaker, 2; label = "breaker", states = [:closed, :open]),
     DiscreteVariable(:relay12, 2; label = "relay12", states = [:quiet, :trip]),
     DiscreteVariable(:relay23, 2; label = "relay23", states = [:quiet, :trip]),
-    DiscreteVariable(:voltage, 2; label = "voltage", states = [:normal, :low]),
+    DiscreteVariable(:voltage, 2; label = "voltage", states = [:normal, :low])
 ]
 
 nothing # hide
@@ -35,8 +35,8 @@ nothing # hide
 
 ## Prior and Sensor Model
 
-The fault prior is a unary factor. Pairwise factors encode how likely each
-relay or voltage alarm is under each fault state:
+The fault prior is a unary factor. Pairwise factors encode how likely each relay
+or voltage alarm is under each fault state:
 
 ```@example protection_alarm_diagnosis
 f1 = DiscreteFactor(:fault, [0.92, 0.05, 0.03]; label = "prior_fault", initialize = true)
@@ -66,7 +66,7 @@ nothing # hide
 
 ## Observed Evidence
 
-Observed SCADA indications are represented as unary likelihood factors. Here
+Observed SCADA indications are represented as unary likelihood factors. Here,
 relay 12 trips, relay 23 stays quiet, the breaker is open, and the voltage is
 low:
 
@@ -106,7 +106,7 @@ nothing # hide
     data="../../pad.svg"
     type="image/svg+xml"
     aria-label="Protection alarm diagnosis factor graph"
-    style="width: 60%; height: auto;">
+    style="width: 67%; height: auto;">
     <a href="../../pad.svg">Protection alarm diagnosis factor graph</a>
   </object>
 </div>
@@ -121,15 +121,16 @@ Run damped sum-product belief propagation on the graph:
 ```@example protection_alarm_diagnosis
 inference = sumproduct(graph)
 
-gbp!(
-    graph, inference;
-    iterations = 60, tolerance = 1e-8, schedule = :flooding, damping = true
-)
+gbp!(graph, inference; iterations = 60, tolerance = 1e-8, damping = true)
 
 nothing # hide
 ```
 
-And inspect the posterior probabilities:
+---
+
+## Results
+
+Inspect the posterior probabilities of the fault location and breaker state:
 
 ```@example protection_alarm_diagnosis
 printMarginal(graph, inference; variable = :fault)
@@ -150,4 +151,5 @@ gbp!(graph, inference; iterations = 40, tolerance = 1e-8, damping = true)
 printMarginal(graph, inference; variable = :fault)
 ```
 
-The inference object is reused, so the previous messages act as a warm start.
+The same `inference` object is reused, so the messages from the previous run act
+as a warm start.

@@ -5,11 +5,12 @@ CurrentModule = FactorGraph
 ```
 
 This example builds a small low-density parity-check style decoding problem. The
-transmitted codeword is observed through a binary symmetric channel. Unary factors encode
-the channel likelihoods, and parity-check factors enforce even parity constraints.
+transmitted codeword is observed through a binary symmetric channel. Unary
+factors encode the channel likelihoods, and parity-check factors enforce
+even-parity constraints.
 
-The graph contains cycles, so iterative sum-product belief propagation is used to estimate the posterior
-probability of each bit.
+The graph contains cycles, so iterative sum-product belief propagation is used
+to estimate the posterior probability of each bit.
 
 ---
 
@@ -35,10 +36,10 @@ nothing # hide
 
 ## Channel Factors
 
-Assume a binary symmetric channel with bit-flip probability `p`. The example transmits a
-valid nonzero codeword and flips one received bit. If the received bit is `0`, the
-likelihood over states `[0, 1]` is `[1 - p, p]`; if it is `1`, the likelihood is
-`[p, 1 - p]`.
+Assume a binary symmetric channel with bit-flip probability `p`. The example
+transmits a valid nonzero codeword and flips one received bit. If the received
+bit is `0`, the likelihood over states `[0, 1]` is `[1 - p, p]`. If the
+received bit is `1`, the likelihood is `[p, 1 - p]`.
 
 ```@example ldpc_decoding
 p = 0.08
@@ -49,10 +50,8 @@ channelLikelihood(y, p) = y == 0 ? [1.0 - p, p] : [p, 1.0 - p]
 
 channelFactors = [
     DiscreteFactor(
-        bitIds[index],
-        channelLikelihood(received[index], p);
-        label = "channel_$(bitIds[index])",
-        initialize = true
+        bitIds[index], channelLikelihood(received[index], p);
+        label = "channel_$(bitIds[index])", initialize = true
     )
     for index in eachindex(bitIds)
 ]
@@ -64,7 +63,8 @@ nothing # hide
 
 ## Parity-Check Factors
 
-The parity-check matrix defines which bits participate in each even-parity constraint:
+The parity-check matrix defines which bits participate in each even-parity
+constraint:
 
 ```@example ldpc_decoding
 H = [
@@ -86,10 +86,8 @@ end
 parityFactors = [
     begin
         checkVariables = bitIds[findall(H[checkIndex, :] .== 1)]
-
         DiscreteFactor(
-            checkVariables...,
-            evenParityTable(length(checkVariables));
+            checkVariables..., evenParityTable(length(checkVariables));
             label = "check_$checkIndex"
         )
     end
@@ -127,7 +125,7 @@ nothing # hide
     data="../../ldpcd.svg"
     type="image/svg+xml"
     aria-label="LDPC decoding factor graph"
-    style="width: 55%; height: auto;">
+    style="width: 58%; height: auto;">
     <a href="../../ldpcd.svg">LDPC decoding factor graph</a>
   </object>
 </div>
@@ -137,7 +135,7 @@ nothing # hide
 
 ## Running Belief Propagation
 
-Run loopy discrete belief propagation on the graph:
+Run loopy sum-product belief propagation on the graph:
 
 ```@example ldpc_decoding
 inference = sumproduct(graph)
@@ -146,6 +144,10 @@ gbp!(graph, inference; iterations = 25, tolerance = 1e-8, schedule = :flooding)
 
 nothing # hide
 ```
+
+---
+
+## Posterior Marginals
 
 The posterior marginal of each bit gives the decoder's soft information:
 
@@ -156,6 +158,10 @@ posterior = [
 ]
 ```
 
+---
+
+## Hard Decision
+
 A hard decision chooses the most likely state for each bit:
 
 ```@example ldpc_decoding
@@ -164,6 +170,10 @@ decoded = [
     for bitId in bitIds
 ]
 ```
+
+---
+
+## Parity-Check Validation
 
 The decoded word satisfies the parity checks:
 

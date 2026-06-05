@@ -34,8 +34,8 @@ nothing # hide
 
 ## Prior Factor Node
 
-The initial position is measured or known approximately. This is represented
-as a unary prior factor:
+The initial position is measured or known approximately. This is represented as
+a unary prior factor:
 
 ```@example robot_localization
 prior = GaussianFactor(:x1, 0.0, 1.0, 0.01)
@@ -94,7 +94,7 @@ nothing # hide
 The graph can be rendered as an SVG factor graph figure:
 
 ```@example robot_localization
-saveGraphFigure("../rl.svg", graph; layout = (columnSpacing = 120,))
+saveGraphFigure("../rl.svg", graph; layout = (columnSpacing = 120, rowSpacing = 100))
 
 nothing # hide
 ```
@@ -114,7 +114,7 @@ nothing # hide
 
 ## Running Belief Propagation
 
-Run Gaussian belief propagation on the graph:
+Run canonical-form Gaussian belief propagation on the tree:
 
 ```@example robot_localization
 inference = canonical(graph)
@@ -124,7 +124,11 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-And print results:
+---
+
+## Results
+
+Print the resulting Gaussian marginals:
 
 ```@example robot_localization
 printMarginal(graph, inference)
@@ -145,18 +149,19 @@ addFactor!(graph, inference, :x4, :x5, 0.90, [-1.0 1.0], 0.04; label = "odom45")
 forwardStep!(graph, inference; variable = :x5, factor = "odom45")
 backward!(graph, inference)
 marginals!(graph, inference)
+
+nothing # hide
 ```
 
 The previous messages and marginals are kept as a warm start. The new factor
 extends the chain, so the updated graph is still a tree. Use the inference-aware
 `addVariable!` and `addFactor!` forms for this warm start; graph-only topology
-changes require a fresh inference object. The old forward messages are still
-valid because the old part of the chain did not change. The only new forward
-message comes from the new terminal state through the new odometry factor. After
-that, a backward pass sends the updated information from the root side of the
-chain toward all later positions, including the new terminal state. A full
-[`forwardBackward!`](@ref) sweep can be used instead when all messages in the
-updated tree should be recomputed.
+changes require a fresh inference object.
+
+The old messages remain useful because the old part of the chain did not change.
+Here, only the new edge is advanced manually before the backward pass updates the
+messages toward the new terminal state. A full [`forwardBackward!`](@ref) sweep
+can be used instead when all messages in the updated tree should be recomputed.
 
 ```@example robot_localization
 printMarginal(graph, inference)
@@ -166,8 +171,8 @@ printMarginal(graph, inference)
 
 ## Validation
 
-Compare the current Gaussian belief propagation result with the centralized weighted least-squares
-solution:
+Compare the current Gaussian belief propagation result with the centralized
+weighted least-squares solution:
 
 ```@example robot_localization
 reference = solveWLS(graph)

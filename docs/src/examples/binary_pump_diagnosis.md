@@ -4,10 +4,10 @@
 CurrentModule = FactorGraph
 ```
 
-This example builds a small binary fault-diagnosis model for an industrial pump skid. Each
-variable has two states. Latent variables represent component health, and observed
-variables represent binary alarms from the control system. The graph contains a cycle, so
-iterative discrete belief propagation is used.
+This example builds a small binary fault-diagnosis model for an industrial pump
+skid. Each variable has two states. Latent variables represent component health,
+and observed variables represent binary alarms from the control system. The
+graph contains a cycle, so iterative discrete belief propagation is used.
 
 ---
 
@@ -26,7 +26,7 @@ variables = [
     DiscreteVariable(:fuse, 2; label = "fuse", states = states),
     DiscreteVariable(:motor, 2; label = "motor", states = states),
     DiscreteVariable(:vibration, 2; label = "vibration", states = alarmStates),
-    DiscreteVariable(:temperature, 2;  label = "temperature", states = alarmStates),
+    DiscreteVariable(:temperature, 2; label = "temperature", states = alarmStates),
     DiscreteVariable(:trip, 2; label = "trip", states = alarmStates)
 ]
 
@@ -37,8 +37,8 @@ nothing # hide
 
 ## Component Priors
 
-Unary factors encode prior failure rates. The fuse and motor are expected to be healthy,
-but not guaranteed:
+Unary factors encode prior failure rates. The power feed, fuse, and motor are
+expected to be healthy, but not guaranteed:
 
 ```@example binary_pump_diagnosis
 f1 = DiscreteFactor(:power, [0.97, 0.03]; label = "power_prior", initialize = true)
@@ -52,9 +52,9 @@ nothing # hide
 
 ## Fault Propagation Factors
 
-Pairwise factors encode simple engineering relationships. A bad power feed makes a blown
-fuse more likely, a blown fuse makes motor trouble more likely, and a bad motor makes
-vibration and temperature alarms more likely:
+Pairwise factors encode simple engineering relationships. A bad power feed makes
+a blown fuse more likely, a blown fuse makes motor trouble more likely, and a bad
+motor makes vibration and temperature alarms more likely:
 
 ```@example binary_pump_diagnosis
 f4 = DiscreteFactor(:power, :fuse, [0.98 0.02; 0.30 0.70]; label = "power_fuse")
@@ -69,12 +69,13 @@ nothing # hide
 
 ## Protection Logic
 
-The trip indication depends on both vibration and temperature. This ternary factor keeps
-all variables binary while still using a multidimensional table. The first slice is
-`trip = :no`, and the second slice is `trip = :yes`:
+The trip indication depends on both vibration and temperature. This ternary
+factor keeps all variables binary while still using a multidimensional table.
+The first slice is `trip = :no`, and the second slice is `trip = :yes`:
 
 ```@example binary_pump_diagnosis
-f8 = DiscreteFactor(:vibration, :temperature, :trip,
+f8 = DiscreteFactor(
+    :vibration, :temperature, :trip,
     cat(
         [0.98 0.30; 0.25 0.05],
         [0.02 0.70; 0.75 0.95];
@@ -90,7 +91,8 @@ nothing # hide
 
 ## Observed Evidence
 
-The operator sees vibration and temperature alarms, and the protection relay has tripped:
+The operator sees vibration and temperature alarms, and the protection relay has
+tripped:
 
 ```@example binary_pump_diagnosis
 f9 = DiscreteFactor(:vibration, [0.05, 0.95]; label = "obs_vibration")
@@ -127,7 +129,7 @@ nothing # hide
     data="../../bpd.svg"
     type="image/svg+xml"
     aria-label="Binary pump diagnosis factor graph"
-    style="width: 65%; height: auto;">
+    style="width: 70%; height: auto;">
     <a href="../../bpd.svg">Binary pump diagnosis factor graph</a>
   </object>
 </div>
@@ -143,10 +145,7 @@ probabilities:
 ```@example binary_pump_diagnosis
 inference = sumproduct(graph)
 
-gbp!(
-    graph, inference;
-    iterations = 80, tolerance = 1e-8, schedule = :flooding, damping = true
-)
+gbp!(graph, inference; iterations = 80, tolerance = 1e-8, damping = true)
 
 nothing # hide
 ```
@@ -172,5 +171,5 @@ gbp!(graph, mapInference; iterations = 80, tolerance = 0.0, schedule = :residual
 estimates(graph, mapInference)
 ```
 
-The MAP estimate is a single most likely explanation, while the sum-product marginals show
-how much uncertainty remains around each component.
+The MAP estimate is a single most likely explanation, while the sum-product
+marginals show how much uncertainty remains around each component.

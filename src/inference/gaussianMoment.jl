@@ -263,9 +263,9 @@ The returned object contains all messages and marginals needed by [`gbp!`](@ref)
 Variables that were constructed without explicit priors use the provided
 default `mean` and `covariance`. Scalar defaults are expanded to the dimension
 of each variable. These defaults are stored and reused when new variables are
-added later through the warm-start [`addVariable!`](@ref) API. A unary GaussianFactor
-created with `initialize = true` overrides both the GaussianVariable prior and inference
-default for its connected variable.
+added later through the warm-start [`addVariable!`](@ref) API. A unary Gaussian
+factor created with `initialize = true` overrides both the Gaussian variable
+prior and inference default for its connected variable.
 
 # Example
 
@@ -1056,6 +1056,8 @@ function messages!(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     schedule = nothing,
+    updateFraction = nothing,
+    updateCount = nothing,
     broadcast::Bool = false,
     rng = Random.default_rng()
 )
@@ -1065,7 +1067,25 @@ function messages!(
     validateGBPSchedule(selectedSchedule)
 
     if selectedSchedule == :residual
-        error("Pass a ResidualSchedule object to messages! for residual scheduling.")
+        if broadcast
+            error("broadcast = true is not supported with schedule = :residual.")
+        end
+
+        residual = residualSchedule(
+            graph,
+            inference;
+            updateFraction = updateFraction,
+            updateCount = updateCount
+        )
+        return messages!(
+            graph,
+            inference,
+            residual;
+            damping = damping,
+            prob = prob,
+            alpha = alpha,
+            rng = rng
+        )
     end
 
     if selectedSchedule == :flooding

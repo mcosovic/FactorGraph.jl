@@ -6,16 +6,16 @@ CurrentModule = FactorGraph
 
 This example builds a PMU-based state estimation problem in rectangular
 coordinates. Each bus voltage is represented by its real and imaginary
-components, and each branch has susceptance 10 per-unit. The measured voltage
-and current phasors are modeled as Gaussian factors.
+components, and each branch has susceptance 10 p.u. The measured voltage and
+current phasors are modeled as Gaussian factors.
 
 ---
 
 ## Variable Nodes
 
-The state variables are bus voltage phasors in rectangular coordinates. Each
-bus voltage stores its real and imaginary components, so each bus is modeled as
-a two-dimensional variable:
+The state variables are bus voltage phasors in rectangular coordinates. Each bus
+voltage stores its real and imaginary components, so each bus is modeled as a
+two-dimensional variable:
 
 ```@example pmu_state_estimation
 using FactorGraph
@@ -33,11 +33,10 @@ nothing # hide
 
 ## Voltage Factor Nodes
 
-A PMU voltage measurement is a unary vector-valued factor. For example, a
-voltage phasor measurement at bus 1 is represented by a factor connected only
-to bus 1. The factor mean stores the measured real and imaginary voltage
-components, and the identity coefficient matrix maps the variable directly to
-that measurement:
+A PMU voltage measurement is a unary vector-valued factor. For example, a voltage
+phasor measurement at bus 1 is represented by a factor connected only to bus 1.
+The factor mean stores the measured real and imaginary voltage components, and
+the identity coefficient matrix maps the variable directly to that measurement:
 
 ```@example pmu_state_estimation
 V1 = GaussianFactor(:V₁, [1.02, 0.00], [1.0 0.0; 0.0 1.0], [1e-4, 1e-4])
@@ -57,13 +56,12 @@ nothing # hide
 
 ## Current Factor Nodes
 
-For a current phasor measurement, the factor connects the voltage variables at
-the two branch endpoints. The factor mean stores the measured real and
-imaginary current components. The coefficient matrix stores the linear relation
-between endpoint voltages and branch current. Here each branch has susceptance
-10 per-unit.
+A current phasor measurement connects the voltage variables at the two branch
+endpoints. The factor mean stores the measured real and imaginary current
+components. The coefficient matrix stores the linear relation between endpoint
+voltages and branch current. Here, each branch has susceptance 10 p.u.
 
-The current measurement on branch 1-2:
+The current measurement on branch 1-2 is:
 
 ```@example pmu_state_estimation
 I12 = GaussianFactor(:V₁, :V₂, [0.4, -0.1], [0 10.0 0 -10.0; -10.0 0 10.0 0], [4e-4, 4e-4])
@@ -107,7 +105,7 @@ nothing # hide
     data="../../pmuse.svg"
     type="image/svg+xml"
     aria-label="PMU state estimation factor graph"
-    style="width: 45%; height: auto;">
+    style="width: 47%; height: auto;">
     <a href="../../pmuse.svg">PMU state estimation factor graph</a>
   </object>
 </div>
@@ -117,15 +115,21 @@ nothing # hide
 
 ## Running Belief Propagation
 
-Run Gaussian belief propagation on the graph:
+Run canonical-form Gaussian belief propagation on the graph:
 
 ```@example pmu_state_estimation
 inference = canonical(graph)
 
 gbp!(graph, inference; iterations = 30)
+
+nothing # hide
 ```
 
-And print results:
+---
+
+## Results
+
+Print the resulting Gaussian marginals:
 
 ```@example pmu_state_estimation
 printMarginal(graph, inference)
@@ -135,8 +139,8 @@ printMarginal(graph, inference)
 
 ## Validation
 
-Compare the loopy Gaussian belief propagation result with the centralized weighted least-squares
-solution:
+Compare the loopy Gaussian belief propagation result with the centralized
+weighted least-squares solution:
 
 ```@example pmu_state_estimation
 reference = solveWLS(graph)

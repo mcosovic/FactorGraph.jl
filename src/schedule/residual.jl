@@ -14,9 +14,10 @@ Mutable schedule state for residual belief propagation.
 
 # Notes
 
-Use [`residualSchedule`](@ref) to create a schedule, pass it to
-[`messages!`](@ref) to update the largest-residual messages, and use
-[`gbp!`](@ref) with `schedule = :residual` for a complete iterative loop.
+Use [`messages!`](@ref) with `schedule = :residual` for one residual-scheduled
+step, or use [`gbp!`](@ref) with `schedule = :residual` for a complete
+iterative loop. Create a `ResidualSchedule` explicitly when you want to inspect
+or reuse the selected low-level schedule object.
 
 # Example
 
@@ -27,8 +28,7 @@ f1 = GaussianFactor(:x1, 0.0, 1.0, 0.1; label = "f1")
 graph = factorGraph([x1], [f1])
 inference = moment(graph)
 
-schedule = residualSchedule(graph, inference; updateFraction = 0.25)
-messages!(graph, inference, schedule)
+messages!(graph, inference; schedule = :residual, updateFraction = 0.25)
 ```
 """
 mutable struct ResidualSchedule
@@ -80,13 +80,13 @@ Create a residual schedule for belief propagation.
 
 # Arguments
 
-- `graph`: Gaussian factor graph.
-- `inference`: Matching Gaussian inference object.
+* `graph`: Gaussian or discrete factor graph.
+* `inference`: Matching inference object.
 
 # Keywords
 
-- `updateFraction`: Fraction of directed candidates to update per step.
-- `updateCount`: Fixed number of directed candidates to update per step.
+* `updateFraction`: Fraction of directed candidates to update per step.
+* `updateCount`: Fixed number of directed candidates to update per step.
 
 # Returns
 
@@ -839,16 +839,16 @@ largest-residual batch in place.
 
 # Arguments
 
-- `graph`: Gaussian factor graph.
-- `inference`: Matching Gaussian inference object.
-- `schedule`: Residual schedule created for the same graph and inference object.
+* `graph`: Gaussian or discrete factor graph.
+* `inference`: Matching inference object.
+* `schedule`: Residual schedule created for the same graph and inference object.
 
 # Keywords
 
-- `damping`: Enable damping for Gaussian residual updates.
-- `prob`: Damping probability.
-- `alpha`: Damping mixing weight.
-- `rng`: Random number generator used by damping.
+* `damping`: Enable damping for residual updates.
+* `prob`: Damping probability.
+* `alpha`: Damping mixing weight.
+* `rng`: Random number generator used by damping.
 
 # Returns
 
@@ -937,6 +937,38 @@ function residualStep!(
     return schedule
 end
 
+function residualStep!(
+    graph::DiscreteFactorGraph,
+    inference::DiscreteMinSumInference,
+    schedule::ResidualSchedule;
+    damping::Bool = false,
+    prob::Float64 = 0.6,
+    alpha::Float64 = 0.4,
+    rng = Random.default_rng()
+)
+    assertInferenceMatchesGraph(graph, inference)
+    validateResidualDamping(graph, prob, alpha)
+    refreshResiduals!(graph, inference, schedule)
+
+    empty!(schedule.lastUpdated)
+
+    for candidateIndex in selectedResidualCandidates(schedule)
+        updateResidualCandidate!(
+            graph,
+            inference,
+            schedule.edgeIds[candidateIndex],
+            schedule.directions[candidateIndex];
+            damping = damping,
+            prob = prob,
+            alpha = alpha,
+            rng = rng
+        )
+        push!(schedule.lastUpdated, candidateIndex)
+    end
+
+    return schedule
+end
+
 """
     messages!(
         graph::AbstractFactorGraph,
@@ -952,16 +984,16 @@ Run one residual-scheduled message update step without recomputing marginals.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
-- `inference`: Matching inference object.
-- `schedule`: Residual schedule created for the same graph and inference object.
+* `graph`: Gaussian or discrete factor graph.
+* `inference`: Matching inference object.
+* `schedule`: Residual schedule created for the same graph and inference object.
 
 # Keywords
 
-- `damping`: Enable damping for residual updates that support it.
-- `prob`: Damping probability.
-- `alpha`: Damping mixing weight.
-- `rng`: Random number generator used by damping.
+* `damping`: Enable damping for residual updates that support it.
+* `prob`: Damping probability.
+* `alpha`: Damping mixing weight.
+* `rng`: Random number generator used by damping.
 
 # Returns
 

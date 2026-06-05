@@ -76,26 +76,26 @@ end
 """
     DiscreteVariable(
         id::VariableId, cardinality::Int;
-        label = defaultNodeLabel(id), states = 1:cardinality, probability = nothing
+        label = string(id), states = 1:cardinality, probability = nothing
     )
 
 Create a discrete variable node.
 
 # Arguments
 
-- `id`: Symbolic or integer ID used in factors.
-- `cardinality`: Number of states.
+* `id`: Symbolic or integer ID used by factors.
+* `cardinality`: Number of states.
 
 # Keywords
 
-- `label`: Human-readable label that can also be used for lookup.
-- `states`: State references for entries of the finite state set.
-- `probability`: Optional initial probability vector.
+* `label`: Human-readable label that can also be used for lookup.
+* `states`: State references for entries of the finite state set.
+* `probability`: Optional initial probability vector.
 
 # Notes
 
-If `label` is omitted, the variable ID is converted to a compact default label.
-For example, `:x_1` becomes `"x1"`. Explicit labels are kept unchanged.
+If `label` is omitted, the variable ID is converted to a default label with `string(id)`.
+For example, `:x_1` becomes `"x_1"`. Explicit labels are kept unchanged.
 
 The state order defines the corresponding dimension order in connected factor tables.
 
@@ -164,13 +164,13 @@ Create a discrete factor node.
 
 # Arguments
 
-- `variable...`: Connected variable references or DiscreteVariable nodes.
-- `table`: Nonnegative factor table.
+* `variable...`: Connected variable references or discrete variable nodes.
+* `table`: Nonnegative factor table.
 
 # Keywords
 
-- `label`: Human-readable label. If omitted inside a graph, a label is assigned.
-- `initialize`: Whether a unary factor initializes the connected variable belief.
+* `label`: Human-readable label. If omitted inside a graph, a label is assigned.
+* `initialize`: Whether a unary factor initializes the connected variable belief.
 
 # Notes
 
@@ -266,22 +266,29 @@ end
     )
     DiscreteFactorGraph()
 
-Construct a discrete factor graph directly from variables and factors, or construct an empty one.
+Construct a discrete factor graph from variables and factors, or create an empty graph.
 
 # Arguments
 
-- `variables`: Discrete variable nodes.
-- `factors`: Discrete factor nodes.
+* `variables`: Discrete variable nodes.
+* `factors`: Discrete factor nodes.
 
 # Fields
 
-- `variables`: Discrete variable nodes in internal order.
-- `factors`: Discrete factor nodes in internal order.
-- `referenceIndex`: Lookup from variable IDs and labels to internal indices.
-- `edges`: Factor-variable edges.
-- `factorEdges`: Edge IDs adjacent to each factor.
-- `variableEdges`: Edge IDs adjacent to each variable.
-- `topologyVersion`: Counter used to detect stale inference states.
+* `variables`: Discrete variable nodes in internal order.
+* `factors`: Discrete factor nodes in internal order.
+* `referenceIndex`: Lookup from variable IDs and labels to internal indices.
+* `edges`: Factor-variable edges.
+* `factorEdges`: Edge IDs adjacent to each factor.
+* `variableEdges`: Edge IDs adjacent to each variable.
+* `topologyVersion`: Counter used to detect stale inference states.
+
+# Notes
+
+The graph stores the factor-variable topology, edge list, and adjacency lists
+used by discrete message passing. Variables and factors may be added
+incrementally with [`addVariable!`](@ref) and [`addFactor!`](@ref). Existing
+discrete factor tables may be updated with [`updateFactor!`](@ref).
 
 # Example
 
@@ -309,9 +316,9 @@ Resolve a discrete state reference to its one-based index within a variable.
 
 # Arguments
 
-- `graph`: Discrete factor graph used to resolve `variable`.
-- `variable`: Variable ID or label.
-- `state`: State reference.
+* `graph`: Discrete factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
+* `state`: State reference.
 
 # Returns
 
@@ -345,9 +352,9 @@ Return the state reference stored at a one-based index.
 
 # Arguments
 
-- `graph`: Discrete factor graph used to resolve `variable`.
-- `variable`: Variable ID or label.
-- `index`: One-based state index.
+* `graph`: Discrete factor graph used to resolve `variable`.
+* `variable`: Variable ID or label.
+* `index`: One-based state index.
 
 # Returns
 
@@ -398,16 +405,16 @@ end
 """
     factorAxis(graph::DiscreteFactorGraph; factor::FactorRef, variable::VariableRef)
 
-Return the table axis in `DiscreteFactor` corresponding to one variable.
+Return the table axis for one variable connected to a discrete factor.
 
 # Arguments
 
-- `graph`: Discrete factor graph.
+* `graph`: Discrete factor graph.
 
 # Keywords
 
-- `factor`: Factor index or label.
-- `variable`: Variable ID or label.
+* `factor`: Factor index or label.
+* `variable`: Variable ID or label.
 
 # Returns
 
@@ -415,8 +422,9 @@ The one-based table axis for the selected variable.
 
 # Notes
 
-Discrete factor table axes follow the same order as `DiscreteFactor.variables`.
-This helper is useful when inspecting a multi-DiscreteVariable factor table.
+Discrete factor table axes follow the same order as the factor's `variables`
+field. This helper is useful when inspecting a discrete factor connected to
+multiple variables.
 
 # Example
 
@@ -452,16 +460,16 @@ end
 """
     factorAxes(graph::DiscreteFactorGraph, factor::FactorRef)
 
-Return table axes for all variables connected to a DiscreteFactor.
+Return table axes for all variables connected to a discrete factor.
 
 # Arguments
 
-- `graph`: Discrete factor graph.
-- `factor`: Factor index or label.
+* `graph`: Discrete factor graph.
+* `factor`: Factor index or label.
 
 # Returns
 
-The axes in the same order as `DiscreteFactor.variables`.
+The axes in the same order as the factor's `variables` field.
 
 # Example
 
@@ -487,23 +495,23 @@ end
     )
     addVariable!(
         graph::DiscreteFactorGraph, id::VariableId, cardinality::Int;
-        label = defaultNodeLabel(id), states = 1:cardinality, probability = nothing
+        label = string(id), states = 1:cardinality, probability = nothing
     )
 
 Add a finite-state discrete variable to an existing discrete factor graph.
 
 # Arguments
 
-- `graph`: Discrete factor graph to mutate.
-- `variable`: Discrete variable node to add.
-- `id`: Variable ID.
-- `cardinality`: Number of states.
+* `graph`: Discrete factor graph to mutate.
+* `variable`: Discrete variable node to add.
+* `id`: Variable ID.
+* `cardinality`: Number of states.
 
 # Keywords
 
-- `label`: Variable label.
-- `states`: State references for entries of the finite state set.
-- `probability`: Optional initial probability vector.
+* `label`: Variable label.
+* `states`: State references for entries of the finite state set.
+* `probability`: Optional initial probability vector.
 
 # Returns
 
@@ -511,10 +519,11 @@ The added [`DiscreteVariable`](@ref).
 
 # Notes
 
-This graph-only method changes topology and makes existing inference objects stale. For
-warm-start inference, use the method that also receives an inference object.
+This graph-only method changes topology and makes existing inference objects
+stale. For warm-start inference, use the method that also receives an inference
+object.
 
-DiscreteVariable IDs and labels must remain unique.
+Discrete variable IDs and labels must remain unique.
 
 # Example
 
@@ -558,19 +567,19 @@ end
         label = "", initialize = false
     )
 
-Add a DiscreteFactor node to an existing discrete factor graph.
+Add a discrete factor node to an existing discrete factor graph.
 
 # Arguments
 
-- `graph`: Discrete factor graph to mutate.
-- `factorData`: Factor node to add.
-- `variable...`: Connected variable references or DiscreteVariable nodes.
-- `table`: Nonnegative factor table.
+* `graph`: Discrete factor graph to mutate.
+* `factorData`: Factor node to add.
+* `variable...`: Connected variable references or discrete variable nodes.
+* `table`: Nonnegative factor table.
 
 # Keywords
 
-- `label`: Factor label.
-- `initialize`: Whether a unary factor initializes the connected variable belief.
+* `label`: Factor label.
+* `initialize`: Whether a unary factor initializes the connected variable belief.
 
 # Returns
 
@@ -578,11 +587,17 @@ The added [`DiscreteFactor`](@ref).
 
 # Notes
 
-This graph-only method changes topology and makes existing inference objects stale. For
-warm-start inference, use the method that also receives an inference object.
+The new discrete factor is validated against the graph's existing variables,
+assigned the next discrete factor ID, inserted into `graph.factors`, and
+connected by new edges.
 
-If `label` is omitted, the DiscreteFactor is named `fN`, where `N` is the
-assigned DiscreteFactor ID. Explicit labels are kept unchanged.
+Calling this graph-only method changes topology and makes existing inference
+objects stale. For warm-start inference, use the method that also receives an
+inference object.
+
+If `label` is omitted, the discrete factor is named `fN`, where `N` is the
+assigned discrete factor ID. Explicit labels are kept unchanged. Discrete
+factor labels must remain unique.
 
 # Example
 
@@ -680,17 +695,18 @@ end
         table = nothing, initialize = nothing
     )
 
-Update a DiscreteFactor table without changing graph topology or table dimensions.
+Update a discrete factor table and/or initialization flag without changing graph
+topology or table dimensions.
 
 # Arguments
 
-- `graph`: Discrete factor graph to mutate.
-- `factor`: Factor index or label.
+* `graph`: Discrete factor graph to mutate.
+* `factor`: Factor index or label.
 
 # Keywords
 
-- `table`: Replacement table.
-- `initialize`: Replacement initialization flag; omitted keeps the current flag.
+* `table`: Replacement table.
+* `initialize`: Replacement initialization flag; omitted keeps the current flag.
 
 # Returns
 

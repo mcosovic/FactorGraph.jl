@@ -124,6 +124,24 @@ end
         ) > 0.0
     end
 
+    @testset "Keyword residual messages match manual Gaussian schedules" begin
+        graph = gaussianTreeTestGraph()
+
+        for keywordInference in (
+            moment(graph; mean = 0.0, covariance = 1e6),
+            canonical(graph; mean = 0.0, covariance = 1e6),
+            minsum(graph)
+        )
+            manualInference = deepcopy(keywordInference)
+            schedule = residualSchedule(graph, manualInference; updateCount = 3)
+
+            messages!(graph, keywordInference; schedule = :residual, updateCount = 3)
+            messages!(graph, manualInference, schedule)
+
+            @test maxMessageChange(graph, keywordInference, manualInference) == 0.0
+        end
+    end
+
     @testset "Residual GBP produces Gaussian tree MAP means" begin
         graph = gaussianTreeTestGraph()
         inference = canonical(graph; mean = 0.0, covariance = 1e6)
@@ -244,6 +262,31 @@ end
         ) > 0.0
     end
 
+    @testset "Rejects stale discrete residual schedules" begin
+        graph = residualDiscreteGraph()
+        inference = sumproduct(graph)
+        schedule = residualSchedule(graph, inference; updateCount = 2)
+
+        addVariable!(graph, inference, :x3, 2)
+        addFactor!(graph, inference, :x2, :x3, [0.9 0.1; 0.1 0.9])
+
+        @test_throws ErrorException messages!(graph, inference, schedule)
+    end
+
+    @testset "Keyword residual messages match manual discrete schedules" begin
+        graph = residualDiscreteGraph()
+
+        for keywordInference in (sumproduct(graph), minsum(graph))
+            manualInference = deepcopy(keywordInference)
+            schedule = residualSchedule(graph, manualInference; updateCount = 2)
+
+            messages!(graph, keywordInference; schedule = :residual, updateCount = 2)
+            messages!(graph, manualInference, schedule)
+
+            @test maxMessageChange(graph, keywordInference, manualInference) == 0.0
+        end
+    end
+
     @testset "Residual GBP matches brute-force marginals on a tree" begin
         graph = residualDiscreteGraph()
         inference = sumproduct(graph)
@@ -287,10 +330,36 @@ end
               )
     end
 
+    @testset "Residual tree overload supports discrete min-sum" begin
+        graph = treeFactorGraph(residualDiscreteGraph(); root = :x1)
+        inference = minsum(graph)
+        schedule = residualSchedule(graph, inference; updateCount = 2)
+        previousVariableMessages = deepcopy(inference.variableToFactor)
+        previousFactorMessages = deepcopy(inference.factorToVariable)
+
+        messages!(graph, inference, schedule)
+        estimates!(graph, inference)
+
+        @test length(schedule.lastUpdated) == 2
+        @test maxMessageChange(
+            graph,
+            inference,
+            previousVariableMessages,
+            previousFactorMessages
+        ) ==
+              maxMessageChange(
+                  graph.graph,
+                  inference,
+                  previousVariableMessages,
+                  previousFactorMessages
+              )
+    end
+
     @testset "gbp! selects discrete schedules" begin
         graph = residualDiscreteGraph()
         residualInference = sumproduct(graph)
         floodingInference = sumproduct(graph)
+        initialInference = sumproduct(graph)
 
         gbp!(
             graph,
@@ -307,6 +376,22 @@ end
         @test length(floodingInference.nextVariableToFactor) == length(graph.edges)
         @test length(floodingInference.nextFactorToVariable) == length(graph.edges)
         @test_throws ErrorException gbp!(graph, floodingInference; schedule = :unknown)
+
+        @test gbp!(
+            graph,
+            initialInference;
+            iterations = 0,
+            schedule = :residual,
+            updateCount = 2
+        ) === nothing
+
+        @test maxMessageChange(graph, initialInference, sumproduct(graph)) == 0.0
+        @test_throws ErrorException gbp!(
+            graph,
+            sumproduct(graph);
+            iterations = -1,
+            schedule = :residual
+        )
     end
 
     @testset "Manual discrete flooding schedule matches gbp!" begin

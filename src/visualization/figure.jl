@@ -1,7 +1,7 @@
 """
     graphFigure(graph::AbstractFactorGraph; kwargs...)
 
-Return a SVG visualization of a factor graph.
+Return an SVG visualization of a factor graph.
 
 # Arguments
 

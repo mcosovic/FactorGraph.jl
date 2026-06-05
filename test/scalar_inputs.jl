@@ -26,6 +26,9 @@ include("setup.jl")
         @test vectorFactor.coefficient == reshape([1.0], 1, 1)
         @test vectorFactor.covariance == reshape([0.15], 1, 1)
 
+        isotropicFactor = GaussianFactor(:x1, [0.25, 0.5], Matrix{Float64}(I, 2, 2), 0.15)
+        @test isotropicFactor.covariance == 0.15 * Matrix{Float64}(I, 2, 2)
+
         @test_throws ErrorException GaussianFactor(:x1, [0.25, 0.5], [1.0, 2.0], [0.15])
     end
 
@@ -55,13 +58,13 @@ include("setup.jl")
         @test_throws ErrorException GaussianVariable(:bad, 1; components = [""])
     end
 
-    @testset "Default Gaussian labels are compact" begin
+    @testset "Default Gaussian variable labels preserve IDs" begin
         graph = GaussianFactorGraph(
             [GaussianVariable(:x_1, 1)],
             [GaussianFactor(:x_1, 0.25, 1.0, 0.15)]
         )
 
-        @test graph.variables[1].label == "x1"
+        @test graph.variables[1].label == "x_1"
         @test graph.factors[1].label == "f1"
 
         explicit = GaussianVariable(:x_2, 1; label = "x_2")

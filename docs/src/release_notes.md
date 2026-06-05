@@ -2,7 +2,7 @@
 
 ---
 
-## Version 0.2.4 - Unreleased
+## Version 0.2.4 - 2026-06-05
 
 #### Changed
 
@@ -11,11 +11,30 @@
   hop expansion from selected variables and factors.
 - Replaced separate unary and multi-factor graph spacing layout options with
   scalar or per-gap `rowSpacing` and `columnSpacing` values.
+- Expanded scalar Gaussian factor covariances to isotropic covariance matrices
+  matching the factor mean dimension.
+- Added `messages!(...; schedule = :residual, updateFraction/updateCount)` as
+  the one-step counterpart to residual-scheduled `gbp!`.
+
+#### Fixed
+
+- Fixed residual-scheduled `messages!` for discrete min-sum inference.
 
 #### Documentation
 
 - Added a graph visualization example page covering figure layout, labels,
   focused views, styles, highlights, and tree views.
+- Clarified when Gaussian and discrete flooding and residual schedule objects
+  are needed instead of the `schedule` keyword.
+- Tightened Gaussian graph docstrings for labels, component lookup, factor
+  updates, and stale inference object guidance.
+- Tightened package docstrings for discrete graph construction, residual
+  schedules, inference updates, WLS helpers, and graph visualization.
+
+#### Tests
+
+- Added residual scheduling coverage for stale schedules, discrete min-sum tree
+  overloads, and zero/negative iteration handling.
 
 ---
 

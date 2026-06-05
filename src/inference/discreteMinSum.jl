@@ -5,7 +5,7 @@ Create a discrete min-sum inference state for `graph`.
 
 The returned [`DiscreteMinSumInference`](@ref) stores cost-vector messages and
 MAP state estimates. Variable probability vectors and initializing unary
-DiscreteFactors are converted to negative-log costs.
+discrete factors are converted to negative-log costs.
 """
 function minsum(graph::DiscreteFactorGraph)
     initial = Vector{Float64}[]
@@ -297,15 +297,15 @@ end
     messages!(
         graph::DiscreteFactorGraph, inference::DiscreteMinSumInference;
         damping = false, prob = 0.6, alpha = 0.4, schedule = nothing,
-        rng = Random.default_rng()
+        updateFraction = nothing, updateCount = nothing, rng = Random.default_rng()
     )
 
 Run one discrete min-sum message update sweep.
 
 The default schedule updates factor-to-variable messages and then
 variable-to-factor messages. Pass `schedule = :flooding` for simultaneous
-message commits, or use a concrete residual schedule with the residual
-message-passing API.
+message commits, or pass `schedule = :residual` with `updateFraction` or
+`updateCount` for one residual-scheduled step.
 """
 function messages!(
     graph::DiscreteFactorGraph,
@@ -314,6 +314,8 @@ function messages!(
     prob::Float64 = 0.6,
     alpha::Float64 = 0.4,
     schedule = nothing,
+    updateFraction = nothing,
+    updateCount = nothing,
     rng = Random.default_rng()
 )
     assertDiscreteMinSumInferenceMatchesGraph(graph, inference)
@@ -323,7 +325,21 @@ function messages!(
     validateGBPSchedule(selectedSchedule)
 
     if selectedSchedule == :residual
-        error("Pass a ResidualSchedule object to messages! for residual scheduling.")
+        residual = residualSchedule(
+            graph,
+            inference;
+            updateFraction = updateFraction,
+            updateCount = updateCount
+        )
+        return messages!(
+            graph,
+            inference,
+            residual;
+            damping = damping,
+            prob = prob,
+            alpha = alpha,
+            rng = rng
+        )
     end
 
     if selectedSchedule == :flooding

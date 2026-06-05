@@ -5,10 +5,10 @@ CurrentModule = FactorGraph
 ```
 
 This example builds a grid-cell robot localization problem. The robot moves
-through three corridor cells, and the state variables are the possible cell at
+through three corridor cells, and the state variables are the possible cells at
 consecutive time steps. Motion and beacon observations form a chain, so the
-factor graph is tree-structured and forward-backward discrete belief
-propagation is exact.
+factor graph is tree-structured and forward-backward discrete belief propagation
+is exact.
 
 ---
 
@@ -25,7 +25,7 @@ variables = [
     DiscreteVariable(:x1, length(cells); label = "x1", states = cells),
     DiscreteVariable(:x2, length(cells); label = "x2", states = cells),
     DiscreteVariable(:x3, length(cells); label = "x3", states = cells),
-    DiscreteVariable(:x4, length(cells); label = "x4", states = cells),
+    DiscreteVariable(:x4, length(cells); label = "x4", states = cells)
 ]
 
 nothing # hide
@@ -108,7 +108,8 @@ nothing # hide
   <object
     data="../../drl.svg"
     type="image/svg+xml"
-    aria-label="Discrete robot localization factor graph">
+    aria-label="Discrete robot localization factor graph"
+    style="width: 97%; height: auto;">
     <a href="../../drl.svg">Discrete robot localization factor graph</a>
   </object>
 </div>
@@ -118,7 +119,7 @@ nothing # hide
 
 ## Running Belief Propagation
 
-Run discrete belief propagation on the graph:
+Run sum-product belief propagation on the tree:
 
 ```@example discrete_robot_localization
 inference = sumproduct(graph)
@@ -128,7 +129,11 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-And inspect the posterior cell probabilities:
+---
+
+## Results
+
+Inspect the posterior cell probabilities:
 
 ```@example discrete_robot_localization
 printMarginal(graph, inference)
@@ -153,13 +158,16 @@ forwardStep!(graph, inference; variable = :x5, factor = "motion45")
 backward!(graph, inference)
 
 marginals!(graph, inference)
+
+nothing # hide
 ```
 
 The previous messages and marginals are kept as a warm start. Use the
 inference-aware `addVariable!` and `addFactor!` forms for this warm start;
-graph-only topology changes require a fresh inference object. A full
-[`forwardBackward!`](@ref) sweep can be used instead when all messages in the
-updated tree should be recomputed.
+graph-only topology changes require a fresh inference object.
+
+The updated graph is still a tree. A full [`forwardBackward!`](@ref) sweep can
+be used instead when all messages in the updated tree should be recomputed.
 
 ```@example discrete_robot_localization
 printMarginal(graph, inference; variable = :x5)

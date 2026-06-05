@@ -1,6 +1,6 @@
-# Graph Visualization
+# [Graph Visualization](@id graph-visualization-example)
 
-This example walks through common ways to customize [`graphFigure`](@ref) and
+This example shows common ways to customize [`graphFigure`](@ref) and
 [`saveGraphFigure`](@ref). The same visualization options work for Gaussian
 factor graphs, discrete factor graphs, and tree views.
 
@@ -36,9 +36,9 @@ nothing # hide
 
 ## Default Figure
 
-The default figure draws variable labels, factor labels, SVG hover tooltips,
-and curved edges. This is a compact way to check the graph structure while
-building a model:
+The default figure draws variable labels, factor labels, SVG hover tooltips, and
+curved edges. This is a compact way to check the graph structure while building
+a model:
 
 ```@example graph_visualization
 saveGraphFigure("../gv_default.svg", graph)
@@ -49,10 +49,10 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../../gv_default.svg"
+    data="../gv_default.svg"
     type="image/svg+xml"
     aria-label="Default graph figure"
-    style="width: 42%; height: auto;">
+    style="width: 45%; height: auto;">
     <a href="../../gv_default.svg">Default graph figure</a>
   </object>
 </div>
@@ -67,8 +67,9 @@ node or edge details.
 ## Layout and Labels
 
 Layout options control orientation, spacing, and edge geometry. Label options
-control node labels, edge IDs, tooltip detail, and font size. The next figure
-uses a vertical layout, straight edges, outside labels, and visible edge IDs:
+control node labels, edge identifiers, tooltip detail, and font size. The next
+figure uses a vertical layout, straight edges, outside labels, and visible edge
+identifiers:
 
 ```@example graph_visualization
 saveGraphFigure(
@@ -95,19 +96,19 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../../gv_vertical.svg"
+    data="../gv_vertical.svg"
     type="image/svg+xml"
     aria-label="Vertical graph figure with edge IDs"
-    style="width: 34%; height: auto;">
+    style="width: 37%; height: auto;">
     <a href="../../gv_vertical.svg">Vertical graph figure with edge IDs</a>
   </object>
 </div>
 ```
 
-Spacing options may be scalars for uniform gaps, or tuples/vectors for per-gap
-spacing. In the default horizontal layout, `columnSpacing = (90, 210)` first
-sets the gap from unary factors to variables, then the gap from variables to
-multi-variable factors. In vertical layout, the same idea applies through
+Spacing options can be scalars for uniform gaps, or tuples and vectors for
+per-gap spacing. In the default horizontal layout, `columnSpacing = (90, 210)`
+sets the gap from unary factors to variables first, then the gap from variables
+to multi-variable factors. In vertical layout, the same idea applies through
 `rowSpacing`.
 
 ---
@@ -133,10 +134,10 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../../gv_focus.svg"
+    data="../gv_focus.svg"
     type="image/svg+xml"
     aria-label="Focused graph figure"
-    style="width: 36%; height: auto;">
+    style="width: 43%; height: auto;">
     <a href="../../gv_focus.svg">Focused graph figure</a>
   </object>
 </div>
@@ -184,25 +185,26 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../../gv_highlight.svg"
+    data="../gv_highlight.svg"
     type="image/svg+xml"
     aria-label="Highlighted graph figure"
-    style="width: 42%; height: auto;">
+    style="width: 45%; height: auto;">
     <a href="../../gv_highlight.svg">Highlighted graph figure</a>
   </object>
 </div>
 ```
 
 Variable and factor highlights can include their incident edges. Edge-specific
-highlights can be selected either by edge ID or by a `(variable, factor)` pair.
+highlights can be selected either by edge identifier or by a `(variable, factor)`
+pair.
 
 ---
 
 ## Tree Views
 
 Tree figures place nodes by graph depth. The same label, style, highlight, and
-view options are available. Here the graph is converted to a tree view and drawn
-horizontally from root variable `x1`:
+view options are available. Here, the graph is converted to a tree view and
+drawn horizontally from root variable `x1`:
 
 ```@example graph_visualization
 tree = treeFactorGraph(graph; root = :x1)
@@ -222,7 +224,7 @@ nothing # hide
 ```@raw html
 <div class="graph-figure" style="text-align: center;">
   <object
-    data="../../gv_tree.svg"
+    data="../gv_tree.svg"
     type="image/svg+xml"
     aria-label="Tree graph figure"
     style="width: 90%; height: auto;">
@@ -233,8 +235,8 @@ nothing # hide
 
 In horizontal tree layout, `columnSpacing` separates depth levels and
 `rowSpacing` separates nodes within the same level. Vertical tree layout swaps
-that interpretation. Tuple or vector spacing sets the gaps one by one; the last
-value is reused when the graph has more gaps.
+that interpretation. Tuple or vector spacing sets the gaps one by one, and the
+last value is reused when the graph has more gaps.
 
 ---
 

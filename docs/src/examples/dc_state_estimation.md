@@ -4,16 +4,17 @@
 CurrentModule = FactorGraph
 ```
 
-This example builds a three-bus DC power system state estimation problem, where all susceptances
-of the branches are equal 10 per-unit. The buses are connected in a triangle, so the factor graph
-contains a cycle and is a natural fit for iterative Gaussian belief propagation.
+This example builds a three-bus DC power system state estimation problem, where
+all branch susceptances are equal to 10 p.u. The buses are connected in a
+triangle, so the factor graph contains a cycle and is a natural fit for
+iterative Gaussian belief propagation.
 
 ---
 
 ## Variable Nodes
 
-The state variables are the bus voltage angles at all three buses. Each angle is modeled as a
-scalar variable:
+The state variables are the bus voltage angles at all three buses. Each angle is
+modeled as a scalar variable:
 
 ```@example dc_state_estimation
 using FactorGraph
@@ -44,8 +45,9 @@ nothing # hide
 
 ## Flow Factor Nodes
 
-Branch-flow measurements connect the two endpoint angle variables. Here we use
-two flow active measurements between buses 1 and 2 and buses 3 and 1.
+Branch active-power flow measurements connect the two endpoint angle variables.
+Here, we use two flow measurements: one between buses 1 and 2, and one between
+buses 3 and 1.
 
 ```@example dc_state_estimation
 P12 = GaussianFactor(:θ₁, :θ₂, 0.70, [10.0 -10.0], 0.0016; label = "P12")
@@ -58,8 +60,8 @@ nothing # hide
 
 ## Injection Factor Node
 
-An active-power injection measurement at bus 2 depends on all neighboring bus
-angles:
+An active-power injection measurement at bus 2 depends on the voltage angle at
+bus 2 and the voltage angles at its neighboring buses:
 
 ```@example dc_state_estimation
 P2 = GaussianFactor(:θ₁, :θ₂, :θ₃, -1.70, [-10.0 20.0 -10.0], 0.0025; label = "P2")
@@ -95,7 +97,7 @@ nothing # hide
     data="../../dcse.svg"
     type="image/svg+xml"
     aria-label="DC state estimation factor graph"
-    style="width: 50%; height: auto;">
+    style="width: 53%; height: auto;">
     <a href="../../dcse.svg">DC state estimation factor graph</a>
   </object>
 </div>
@@ -105,19 +107,21 @@ nothing # hide
 
 ## Running Belief Propagation
 
-Run Gaussian belief propagation on the graph:
+Run canonical-form Gaussian belief propagation on the graph:
 
 ```@example dc_state_estimation
 inference = canonical(graph)
 
 gbp!(graph, inference; iterations = 60)
+
+nothing # hide
 ```
 
 ---
 
 ## Results
 
-And print results:
+Print the resulting Gaussian marginals:
 
 ```@example dc_state_estimation
 printMarginal(graph, inference)
@@ -127,22 +131,24 @@ printMarginal(graph, inference)
 
 ## Dynamic Measurement Update
 
-If a measurement changes, update the corresponding factor and continue Gaussian belief propagation
-from the current message state. For example, suppose the `P12` flow measurement changes:
+If a measurement changes, update the corresponding factor and continue Gaussian
+belief propagation from the current message state. For example, suppose the
+`P12` flow measurement changes:
 
 ```@example dc_state_estimation
-updateFactor!(graph, "P12"; mean = 0.74)
+updateFactor!(graph, inference; factor = "P12", mean = 0.74)
 
 nothing # hide
 ```
 
 The figure below shows the updated `P12` factor together with its incident edges:
+
 ```@example dc_state_estimation
 saveGraphFigure(
-    "../ddcse.svg",
-    graph;
-    label = (showEdgeIds = true, tooltipDetail = :full),
-    highlight = [(factor = "P12", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 3)]
+  "../ddcse.svg",
+  graph;
+  label = (showEdgeIds = true, tooltipDetail = :full),
+  highlight = [(factor = "P12", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 3)]
 )
 
 nothing # hide
@@ -154,27 +160,29 @@ nothing # hide
     data="../../ddcse.svg"
     type="image/svg+xml"
     aria-label="Dynamic DC state estimation factor graph"
-    style="width: 50%; height: auto;">
+    style="width: 53%; height: auto;">
     <a href="../../ddcse.svg">Dynamic DC state estimation factor graph</a>
   </object>
 </div>
 ```
 
 Gaussian belief propagation can then continue from the current message state:
+
 ```@example dc_state_estimation
 gbp!(graph, inference; iterations = 20)
 
 printMarginal(graph, inference)
 ```
 
-The same `inference` object is reused, so the messages from the previous run
-act as a warm start.
+The same `inference` object is reused, so the messages from the previous run act
+as a warm start.
 
 ---
 
 ## Validation
-Compare the loopy Gaussian belief propagation result with the centralized weighted least-squares
-solution:
+
+Compare the loopy Gaussian belief propagation result with the centralized
+weighted least-squares solution:
 
 ```@example dc_state_estimation
 reference = solveWLS(graph)

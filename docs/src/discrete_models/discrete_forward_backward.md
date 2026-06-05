@@ -4,18 +4,25 @@
 CurrentModule = FactorGraph
 ```
 
-Forward-backward discrete belief propagation solves tree-structured discrete factor graphs
-with one forward pass and one backward pass. On a tree, this schedule is exact: after both
-passes, every edge has sent the messages needed to compute the final variable marginals.
+Forward-backward discrete belief propagation solves tree-structured discrete
+factor graphs with one forward pass and one backward pass. On a tree, this
+schedule is exact: after both passes, every edge has sent the messages needed to
+compute the final variable marginals or MAP estimates.
 
-The inference object determines which discrete belief propagation variant is run:
+The inference object determines which discrete belief propagation variant is
+run:
 
-- [`sumproduct`](@ref) runs sum-product belief propagation and stores probability
+* [`sumproduct`](@ref) runs sum-product belief propagation and stores probability
   marginals.
-- [`minsum`](@ref) runs min-sum belief propagation for MAP inference and stores MAP
-  estimates.
+* [`minsum`](@ref) runs min-sum belief propagation for MAP inference and stores
+  MAP estimates.
 
-Start from a tree discrete factor graph:
+The forward-backward message order is the same for these inference states. The
+difference is the message representation and the stored variable result:
+[`sumproduct`](@ref) stores probability marginals, while [`minsum`](@ref) stores
+MAP estimates.
+
+Start from a tree-structured discrete factor graph:
 
 ```@example tree_discrete_inference
 using FactorGraph # hide
@@ -37,9 +44,10 @@ nothing # hide
 
 ## Sum-Product Inference
 
-Discrete tree inference uses the same [`sumproduct`](@ref) inference state as iterative
-discrete belief propagation. Messages and marginals are probability vectors. Create a sum-product
-inference state, then use [`forwardBackward!`](@ref) to run the exact tree sweep:
+Discrete tree inference uses the same [`sumproduct`](@ref) inference state as
+iterative discrete belief propagation. Messages and marginals are probability
+vectors. Create a sum-product inference state, then use
+[`forwardBackward!`](@ref) to run the exact tree sweep:
 
 ```@example tree_discrete_inference
 inference = sumproduct(graph)
@@ -48,13 +56,13 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-Variables created without an initial `probability` use a uniform initial message. A unary
-[`DiscreteFactor`](@ref) with `initialize = true` overrides the variable's initial
-probability for message initialization.
+Variables created without an initial `probability` use a uniform initial
+message. A unary [`DiscreteFactor`](@ref) with `initialize = true` overrides the
+variable's initial probability for message initialization.
 
-To inspect results use [`marginal`](@ref) for one variable's probability vector,
-[`marginalProbability`](@ref) for one state, or [`marginals`](@ref) to return all stored
-variable marginals:
+To inspect results, use [`marginal`](@ref) for one variable's probability vector,
+[`marginalProbability`](@ref) for one state, or [`marginals`](@ref) to return all
+stored variable marginals:
 
 ```@example tree_discrete_inference
 marginal(graph, inference, :x1)
@@ -63,18 +71,20 @@ marginalProbability(graph, inference, :x1, :on)
 nothing # hide
 ```
 
-For interactive inspection, [`printMessages`](@ref) prints messages adjacent to one
-variable or factor, and [`printMarginal`](@ref) prints one or all variable marginals.
+For interactive inspection, [`printMessages`](@ref) prints messages adjacent to
+one variable or factor, and [`printMarginal`](@ref) prints one or all variable
+marginals.
 
 ---
 
 ## Min-Sum MAP Inference
 
-The min-sum form computes exact MAP estimates on a tree. It is the negative-log form of
-discrete max-product belief propagation: factor tables become costs, messages are cost
-vectors, and variable beliefs are MAP states.
+The min-sum form computes exact MAP estimates on a tree. It is the negative-log
+form of discrete max-product belief propagation: factor tables become costs,
+messages are cost vectors, and variable beliefs are MAP states.
 
-Create a min-sum inference state with [`minsum`](@ref):
+Create a min-sum inference state with [`minsum`](@ref), then use
+[`forwardBackward!`](@ref) to run the exact tree sweep:
 
 ```@example tree_discrete_inference
 inference = minsum(graph)
@@ -83,7 +93,7 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-For `minsum`, use [`estimate`](@ref) for one variable and [`estimates`](@ref) for all
+Use [`estimate`](@ref) for one variable and [`estimates`](@ref) for all
 variables:
 
 ```@example tree_discrete_inference
@@ -93,20 +103,23 @@ estimates(graph, inference)
 nothing # hide
 ```
 
-For interactive inspection, [`printMessages`](@ref) prints min-sum messages adjacent to
-one variable or factor, and [`printEstimate`](@ref) prints MAP estimates.
+For interactive inspection, [`printMessages`](@ref) prints min-sum messages
+adjacent to one variable or factor, and [`printEstimate`](@ref) prints MAP
+estimates.
 
 ---
 
 ## Manual Message Updates
 
-Use the manual message functions when you want to control the tree sweep yourself. This
-is the same message-passing computation as [`forwardBackward!`](@ref), split into
-explicit forward, backward, and result steps.
+Use the manual message functions when you want to control the tree sweep
+yourself. They run the same message-passing computation as
+[`forwardBackward!`](@ref), but split it into explicit forward, backward, and
+result recomputation steps.
 
-[`forward!`](@ref) runs the forward pass and [`backward!`](@ref) runs the backward pass.
-They do not recompute variable results by themselves, so call [`marginals!`](@ref) for
-`sumproduct`, or [`estimates!`](@ref) for `minsum`:
+[`forward!`](@ref) runs the forward pass, and [`backward!`](@ref) runs the
+backward pass. They do not recompute variable results by themselves, so call
+[`marginals!`](@ref) for [`sumproduct`](@ref), or [`estimates!`](@ref) for
+[`minsum`](@ref):
 
 ```@example tree_discrete_inference
 inference = sumproduct(graph)
@@ -128,9 +141,9 @@ estimates!(graph, inference)
 nothing # hide
 ```
 
-For edge-level control, use [`forwardStep!`](@ref) and [`backwardStep!`](@ref). Each call
-updates one directed tree message and returns the edge that was updated, or `nothing` when
-that pass has no remaining scheduled edge:
+For edge-level control, use [`forwardStep!`](@ref) and [`backwardStep!`](@ref).
+Each call updates one directed tree message and returns the edge that was
+updated, or `nothing` when that pass has no remaining scheduled edge:
 
 ```@example tree_discrete_inference
 inference = sumproduct(graph)
@@ -150,8 +163,8 @@ marginals!(graph, inference)
 nothing # hide
 ```
 
-When you already know which edge should be updated, pass the edge selection directly to
-[`forwardStep!`](@ref) or [`backwardStep!`](@ref):
+When you already know which edge should be updated, pass the edge selection
+directly to [`forwardStep!`](@ref) or [`backwardStep!`](@ref):
 
 ```@example tree_discrete_inference
 inference = sumproduct(graph)
@@ -163,8 +176,9 @@ marginals!(graph, inference)
 nothing # hide
 ```
 
-Selected-edge calls update only that tree message. They are useful for manual or
-incremental schedules where the caller decides which edges need to be recomputed.
+Selected-edge calls update only the requested tree message. They are useful for
+manual or incremental schedules where the caller decides which edges need to be
+recomputed.
 
 Call [`reset!`](@ref) before reusing the tree's automatic step cursor:
 
@@ -178,31 +192,37 @@ nothing # hide
 
 ## Freezing Updates
 
-Freezing keeps selected messages unchanged while the rest of the tree continues updating.
-It uses the same inference-state flags as iterative belief propagation.
+Freezing keeps selected messages unchanged while the rest of the tree continues
+updating. It uses the same inference-state flags as iterative belief propagation.
 
 To freeze all outgoing messages from a factor or variable, use:
 
 ```@example tree_discrete_inference
 freezeFactor!(graph, inference, "f3")
 freezeVariable!(graph, inference, :x3)
+
+nothing # hide
 ```
 
 To freeze both message directions on one edge, use:
 
 ```@example tree_discrete_inference
 freezeEdge!(graph, inference; variable = :x3, factor = "f3")
+
+nothing # hide
 ```
 
-Resume updates with:
+Resume updates by unfreezing the same selections:
 
 ```@example tree_discrete_inference
 unfreezeFactor!(graph, inference, "f3")
 unfreezeVariable!(graph, inference, :x3)
 unfreezeEdge!(graph, inference; variable = :x3, factor = "f3")
+
+nothing # hide
 ```
 
-Inspection helpers return booleans:
+Inspection helpers return booleans and use the same references:
 
 ```julia
 isFrozenFactor(graph, inference, "f3")
@@ -210,18 +230,19 @@ isFrozenVariable(graph, inference, :x3)
 isFrozenEdge(graph, inference; variable = :x3, factor = "f3")
 ```
 
-A frozen message is not recomputed. While messages remain frozen, the resulting beliefs
-are partial warm-start beliefs rather than exact tree marginals or exact MAP estimates.
-Unfreeze the relevant messages and run another complete sweep when exact tree results are
-needed.
+A frozen message is not recomputed. While messages remain frozen, the resulting
+beliefs are partial warm-start beliefs rather than exact tree marginals or exact
+MAP estimates. Unfreeze the relevant messages and run another complete sweep
+when exact tree results are needed.
 
 ---
 
 ## Dynamic Tree Changes
 
-Use [`addVariable!`](@ref) with a tree inference object when a new variable node must be
-added after inference has already started. A new variable is usually followed by at least
-one new factor that connects it to the tree. The updated graph must still be a tree:
+Use [`addVariable!`](@ref) with a tree inference object when a new variable node
+must be added after inference has started. A new variable is usually followed by
+at least one new factor that connects it to the tree. The updated graph must
+still be a tree:
 
 ```@example tree_discrete_inference
 addVariable!(graph, inference, :x4, 2; label = "x4", states = [:a, :b])
@@ -232,17 +253,36 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-Passing the inference object makes this a warm-start update: existing messages and
-marginals are preserved, and the message arrays are extended when new factor edges are
+Passing the inference object makes this a warm-start update. Existing messages
+are preserved, and the message arrays are extended when new factor edges are
 added. Adding a factor through the tree view refreshes the tree message order.
 
-Warm-start topology updates extend only the inference object passed to
-[`addVariable!`](@ref) or [`addFactor!`](@ref). Any other inference object created from the
-same tree before the topology change no longer matches the tree and should be recreated or
-updated separately.
+For [`sumproduct`](@ref), existing marginals are also preserved, and a new
+variable receives an initial message from its own `probability` or from the
+uniform default. For [`minsum`](@ref), the corresponding initial belief is
+converted to an initial cost message and MAP estimate.
 
-Use [`updateFactor!`](@ref) when an existing factor table changes without changing tree
-topology:
+Warm-start topology updates extend only the inference object passed to
+[`addVariable!`](@ref) or [`addFactor!`](@ref). Any other inference object
+created from the same tree before the topology change no longer matches the tree
+and should be recreated or updated separately.
+
+For custom incremental schedules, use [`forwardStep!`](@ref) and
+[`backwardStep!`](@ref) on selected edges:
+
+```@example tree_discrete_inference
+forwardStep!(graph, inference; variable = :x4, factor = "f4")
+backwardStep!(graph, inference; variable = :x4, factor = "f4")
+marginals!(graph, inference)
+
+nothing # hide
+```
+
+Selected-edge calls update only the requested tree messages. They are useful
+when the caller decides which edges need to be recomputed.
+
+Use [`updateFactor!`](@ref) when an existing factor table changes without
+changing tree topology:
 
 ```@example tree_discrete_inference
 updateFactor!(graph, inference; factor = "f4", table = [0.8 0.2; 0.2 0.8])
@@ -251,20 +291,22 @@ forwardBackward!(graph, inference)
 nothing # hide
 ```
 
-This reuses the existing inference state as a warm start. The message state still contains
-information from previous sweeps, which is useful for dynamic inference. For an independent
-solve, update the tree and then create a fresh [`sumproduct`](@ref) object. Because
-[`updateFactor!`](@ref) does not change tree topology, other inference objects created
-from the same tree still match the tree, but their messages have not been refreshed for
-the new factor table. For custom incremental schedules, use [`forwardStep!`](@ref) and
-[`backwardStep!`](@ref) on selected edges.
+This reuses the existing inference state as a warm start. The message state still
+contains information from previous sweeps, which is useful for dynamic
+inference. For an independent solve, update the tree and then create a fresh
+[`sumproduct`](@ref) or [`minsum`](@ref) object.
+
+Because [`updateFactor!`](@ref) does not change tree topology, other inference
+objects created from the same tree still structurally match the tree. However,
+their messages have not been refreshed for the new factor table.
 
 ---
 
 ## Root Selection
 
-The root determines the forward and backward message order. On a connected tree, it does
-not change the final exact marginals after a complete sweep:
+The root determines the forward and backward message order. On a connected tree,
+it does not change the final exact marginals or MAP estimates after a complete
+sweep:
 
 ```@example tree_discrete_inference
 refresh!(graph; root = "x3")

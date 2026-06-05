@@ -1,12 +1,14 @@
+
 """
     AbstractFactorGraph
 
-Abstract supertype for factor graph containers.
+Abstract supertype for factor graph models and tree views.
 
 # Notes
 
-[`GaussianFactorGraph`](@ref), [`DiscreteFactorGraph`](@ref), and
-[`TreeFactorGraph`](@ref) are subtypes of `AbstractFactorGraph`.
+[`GaussianFactorGraph`](@ref) and [`DiscreteFactorGraph`](@ref) represent
+factor graph models, while [`TreeFactorGraph`](@ref) represents a tree view
+over an existing factor graph.
 """
 abstract type AbstractFactorGraph end
 
@@ -73,7 +75,7 @@ order used by factor table dimensions.
 const StateRef = Union{Int, Symbol, String}
 
 function defaultNodeLabel(id::Union{Int, Symbol, String})
-    return replace(string(id), "_" => "")
+    return string(id)
 end
 
 function defaultFactorLabel(id::Int)
@@ -83,7 +85,9 @@ end
 """
     Edge
 
-Internal graph edge connecting one factor node to one variable node.
+Graph edge connecting one factor node to one variable node.
+
+Each `Edge` represents one factor-variable incidence relation in a factor graph.
 """
 struct Edge
     id::Int
@@ -245,12 +249,12 @@ Return the edge ID connecting `variable` and `factor`.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
+* `graph`: Gaussian or discrete factor graph.
 
 # Keywords
 
-- `variable`: Variable ID or label.
-- `factor`: Factor index or label.
+* `variable`: Variable ID or label.
+* `factor`: Factor index or label.
 
 # Returns
 
@@ -300,12 +304,12 @@ Return edge IDs connected to a variable, a factor, or their specific pair.
 
 # Arguments
 
-- `graph`: Gaussian or discrete factor graph.
+* `graph`: Gaussian or discrete factor graph.
 
 # Keywords
 
-- `variable`: Optional variable ID or label.
-- `factor`: Optional factor index or label.
+* `variable`: Optional variable ID or label.
+* `factor`: Optional factor index or label.
 
 # Returns
 
@@ -435,28 +439,31 @@ end
 """
     TreeFactorGraph{G <: AbstractFactorGraph}
 
-Tree-oriented view of a factor graph.
+Tree view over an existing factor graph.
 
-`TreeFactorGraph` wraps an existing graph and stores only the tree root,
-parent-edge orientation, and traversal orders. It shares the underlying graph;
-it does not copy variables, factors, edges, or messages.
+`TreeFactorGraph` wraps a Gaussian or discrete factor graph and stores the
+tree root, parent-edge orientation, and traversal orders. It shares the
+underlying graph and does not copy variables, factors, edges, or messages.
 
 # Fields
 
-- `graph`: Underlying Gaussian or discrete factor graph.
-- `rootVariableIndex`: Internal root variable index.
-- `variableParentEdge`: Parent edge for each variable node.
-- `factorParentEdge`: Parent edge for each factor node.
-- `forwardOrder`: Leaf-to-root edge order.
-- `backwardOrder`: Root-to-leaf edge order.
-- `forwardIndex`: Cursor used by [`forwardStep!`](@ref).
-- `backwardIndex`: Cursor used by [`backwardStep!`](@ref).
+* `graph`: Wrapped Gaussian or discrete factor graph.
+* `rootVariableIndex`: Internal root variable index.
+* `variableParentEdge`: Parent edge for each variable node.
+* `factorParentEdge`: Parent edge for each factor node.
+* `forwardOrder`: Leaf-to-root edge traversal order.
+* `backwardOrder`: Root-to-leaf edge traversal order.
+* `forwardIndex`: Internal cursor used by [`forwardStep!`](@ref).
+* `backwardIndex`: Internal cursor used by [`backwardStep!`](@ref).
 
 # Notes
 
 The type parameter `G` is the wrapped graph type. For example,
 `TreeFactorGraph{DiscreteFactorGraph}` is a tree view over a
 [`DiscreteFactorGraph`](@ref).
+
+Most fields are internal and should not be modified directly. Construct tree
+views with [`treeFactorGraph`](@ref).
 
 # Example
 

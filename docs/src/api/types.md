@@ -4,10 +4,11 @@
 CurrentModule = FactorGraph
 ```
 
-This page lists public types used by the factor graph, inference, and scheduling APIs. Type relationships
-at a glance:
+This page lists the public types used by the factor graph, inference, and scheduling APIs.
 
-Factor graph types distinguish the graph model from tree views over that model.
+The following hierarchy gives a quick overview of the main type relationships.
+
+Factor graph types separate graph models from tree views over those models:
 
 ```text
 AbstractFactorGraph
@@ -16,7 +17,7 @@ AbstractFactorGraph
 └─ TreeFactorGraph{<:AbstractFactorGraph}
 ```
 
-Inference types are grouped first by model family, then by message-passing objective.
+Inference types are grouped first by model family and then by message-passing objective:
 
 ```text
 AbstractInference
@@ -30,7 +31,7 @@ AbstractInference
    └─ DiscreteMinSumInference
 ```
 
-Cross-model aliases collect equivalent inference objectives across model families.
+Cross-model aliases collect equivalent inference objectives across model families:
 
 ```text
 Cross-model inference aliases

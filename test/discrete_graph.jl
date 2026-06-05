@@ -58,13 +58,13 @@ include("setup.jl")
         @test stateValue(graph, :x, 3) == 3
     end
 
-    @testset "Default discrete labels are compact" begin
+    @testset "Default discrete variable labels preserve IDs" begin
         graph = DiscreteFactorGraph(
             [DiscreteVariable(:x_1, 2)],
             [DiscreteFactor(:x_1, [0.3, 0.7])]
         )
 
-        @test graph.variables[1].label == "x1"
+        @test graph.variables[1].label == "x_1"
         @test graph.factors[1].label == "f1"
 
         explicit = DiscreteVariable(:x_2, 2; label = "x_2")
