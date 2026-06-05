@@ -2,6 +2,7 @@
 
 [![Build][build-badge]][build]
 [![Documentation][documentation-badge]][documentation]
+[![Codecov][codecov-badge]][codecov]
 
 <a href="https://mcosovic.github.io/FactorGraph.jl/stable/">
   <img align="left" width="200" src="./docs/src/assets/logo2.png" />
@@ -118,3 +119,5 @@ FactorGraph is released under the MIT License.
 [build]: https://github.com/mcosovic/FactorGraph.jl/actions/workflows/Build.yml
 [documentation-badge]: https://github.com/mcosovic/FactorGraph.jl/actions/workflows/Documentation.yml/badge.svg
 [documentation]: https://mcosovic.github.io/FactorGraph.jl/stable/
+[codecov-badge]: https://codecov.io/github/mcosovic/FactorGraph.jl/graph/badge.svg?token=CWT8PIUXWB
+[codecov]: https://codecov.io/github/mcosovic/FactorGraph.jl
