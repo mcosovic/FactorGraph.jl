@@ -172,6 +172,88 @@ end
         @test maxMessageChange(tree, automatic, manual) == 0.0
     end
 
+    @testset "Residual Gaussian tree schedules and steps delegate to graph" begin
+        tree = treeFactorGraph(gaussianTreeTestGraph(); root = :x1)
+
+        for constructor in (
+            graph -> moment(graph; mean = 0.0, covariance = 1e6),
+            graph -> canonical(graph; mean = 0.0, covariance = 1e6),
+            minsum
+        )
+            treeInference = constructor(tree)
+            graphInference = constructor(tree.graph)
+            treeSchedule = residualSchedule(tree, treeInference; updateCount = 3)
+            graphSchedule = residualSchedule(tree.graph, graphInference; updateCount = 3)
+
+            residualStep!(tree, treeInference, treeSchedule)
+            residualStep!(tree.graph, graphInference, graphSchedule)
+
+            @test maxMessageChange(tree, treeInference, graphInference) == 0.0
+            @test treeSchedule.lastUpdated == graphSchedule.lastUpdated
+        end
+    end
+
+    @testset "Residual Gaussian tree messages delegate to graph" begin
+        tree = treeFactorGraph(gaussianTreeTestGraph(); root = :x1)
+        treeInference = moment(tree; mean = 0.0, covariance = 1e6)
+        graphInference = moment(tree.graph; mean = 0.0, covariance = 1e6)
+        treeSchedule = residualSchedule(tree, treeInference; updateCount = 3)
+        graphSchedule = residualSchedule(tree.graph, graphInference; updateCount = 3)
+
+        messages!(tree, treeInference, treeSchedule)
+        messages!(tree.graph, graphInference, graphSchedule)
+
+        @test maxMessageChange(tree, treeInference, graphInference) == 0.0
+        @test treeSchedule.lastUpdated == graphSchedule.lastUpdated
+    end
+
+    @testset "Residual Gaussian tree GBP delegates to graph" begin
+        tree = treeFactorGraph(gaussianTreeTestGraph(); root = :x1)
+
+        for constructor in (
+            graph -> moment(graph; mean = 0.0, covariance = 1e6),
+            graph -> canonical(graph; mean = 0.0, covariance = 1e6),
+            minsum
+        )
+            treeInference = constructor(tree)
+            graphInference = constructor(tree.graph)
+
+            treeSchedule = FactorGraph.runResidualGBP!(
+                tree,
+                treeInference;
+                iterations = 2,
+                updateCount = 3
+            )
+            graphSchedule = FactorGraph.runResidualGBP!(
+                tree.graph,
+                graphInference;
+                iterations = 2,
+                updateCount = 3
+            )
+
+            @test maxMessageChange(tree, treeInference, graphInference) == 0.0
+            @test treeSchedule.lastUpdated == graphSchedule.lastUpdated
+        end
+    end
+
+    @testset "Residual Gaussian updates honor per-edge damping" begin
+        graph = gaussianTreeTestGraph()
+
+        for inference in (
+            moment(graph; mean = 0.0, covariance = 1e6),
+            canonical(graph; mean = 0.0, covariance = 1e6),
+            minsum(graph)
+        )
+            dampEdges!(graph, inference; prob = 1.0, alpha = 0.25)
+            schedule = residualSchedule(graph, inference; updateFraction = 1.0)
+
+            residualStep!(graph, inference, schedule; prob = 0.0, alpha = 0.8)
+
+            @test all(inference.dampedEdges)
+            @test length(schedule.lastUpdated) == 2 * length(graph.edges)
+        end
+    end
+
     @testset "Residual GBP produces Gaussian tree MAP means" begin
         graph = gaussianTreeTestGraph()
         inference = canonical(graph; mean = 0.0, covariance = 1e6)
@@ -343,6 +425,62 @@ end
             messages!(tree, manual, schedule)
 
             @test maxMessageChange(tree, automatic, manual) == 0.0
+        end
+    end
+
+    @testset "Residual discrete tree steps delegate to graph" begin
+        tree = treeFactorGraph(residualDiscreteGraph(); root = :x1)
+
+        for constructor in (sumproduct, minsum)
+            treeInference = constructor(tree)
+            graphInference = constructor(tree.graph)
+            treeSchedule = residualSchedule(tree, treeInference; updateCount = 2)
+            graphSchedule = residualSchedule(tree.graph, graphInference; updateCount = 2)
+
+            residualStep!(tree, treeInference, treeSchedule)
+            residualStep!(tree.graph, graphInference, graphSchedule)
+
+            @test maxMessageChange(tree, treeInference, graphInference) == 0.0
+            @test treeSchedule.lastUpdated == graphSchedule.lastUpdated
+        end
+    end
+
+    @testset "Residual discrete tree GBP delegates to graph" begin
+        tree = treeFactorGraph(residualDiscreteGraph(); root = :x1)
+
+        for constructor in (sumproduct, minsum)
+            treeInference = constructor(tree)
+            graphInference = constructor(tree.graph)
+
+            treeSchedule = FactorGraph.runResidualGBP!(
+                tree,
+                treeInference;
+                iterations = 2,
+                updateCount = 2
+            )
+            graphSchedule = FactorGraph.runResidualGBP!(
+                tree.graph,
+                graphInference;
+                iterations = 2,
+                updateCount = 2
+            )
+
+            @test maxMessageChange(tree, treeInference, graphInference) == 0.0
+            @test treeSchedule.lastUpdated == graphSchedule.lastUpdated
+        end
+    end
+
+    @testset "Residual discrete updates honor per-edge damping" begin
+        graph = residualDiscreteGraph()
+
+        for inference in (sumproduct(graph), minsum(graph))
+            dampEdges!(graph, inference; prob = 1.0, alpha = 0.25)
+            schedule = residualSchedule(graph, inference; updateFraction = 1.0)
+
+            residualStep!(graph, inference, schedule; prob = 0.0, alpha = 0.8)
+
+            @test all(inference.dampedEdges)
+            @test length(schedule.lastUpdated) == 2 * length(graph.edges)
         end
     end
 
