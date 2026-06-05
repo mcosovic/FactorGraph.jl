@@ -81,7 +81,7 @@ function assertMomentMarginalsAccurate(;
     return nothing
 end
 
-function messageSnapshots(messages, edgeIds)
+function momentMessageSnapshots(messages, edgeIds)
     return [
         (
             mean = copy(messages[edgeId].mean),
@@ -91,7 +91,7 @@ function messageSnapshots(messages, edgeIds)
     ]
 end
 
-function assertMessagesUnchanged(messages, edgeIds, snapshots)
+function assertMomentMessagesUnchanged(messages, edgeIds, snapshots)
     for (snapshotIndex, edgeId) in pairs(edgeIds)
         @test messages[edgeId].mean == snapshots[snapshotIndex].mean
         @test messages[edgeId].covariance == snapshots[snapshotIndex].covariance
@@ -100,7 +100,7 @@ function assertMessagesUnchanged(messages, edgeIds, snapshots)
     return nothing
 end
 
-function assertFreezeFactor(;
+function assertMomentFreezeFactor(;
     broadcast::Bool,
     flooding::Bool,
     factor = "factor_x1_x2"
@@ -116,13 +116,13 @@ function assertFreezeFactor(;
 
     factorIdx = factorIndex(graph, factor)
     edgeIds = graph.factorEdges[factorIdx]
-    snapshots = messageSnapshots(inference.factorToVariable, edgeIds)
+    snapshots = momentMessageSnapshots(inference.factorToVariable, edgeIds)
 
     freezeFactor!(graph, inference, factor)
     @test isFrozenFactor(graph, inference, factor)
 
     gbp!(graph, inference; iterations = 3, schedule = gbpSchedule(flooding), broadcast = broadcast)
-    assertMessagesUnchanged(inference.factorToVariable, edgeIds, snapshots)
+    assertMomentMessagesUnchanged(inference.factorToVariable, edgeIds, snapshots)
 
     unfreezeFactor!(graph, inference, factor)
     @test !isFrozenFactor(graph, inference, factor)
@@ -133,7 +133,7 @@ function assertFreezeFactor(;
     return nothing
 end
 
-function assertFreezeVariable(;
+function assertMomentFreezeVariable(;
     broadcast::Bool,
     flooding::Bool,
     variable::VariableRef = :x2
@@ -149,13 +149,13 @@ function assertFreezeVariable(;
 
     variableIdx = variableIndex(graph, variable)
     edgeIds = graph.variableEdges[variableIdx]
-    snapshots = messageSnapshots(inference.variableToFactor, edgeIds)
+    snapshots = momentMessageSnapshots(inference.variableToFactor, edgeIds)
 
     freezeVariable!(graph, inference, variable)
     @test isFrozenVariable(graph, inference, variable)
 
     gbp!(graph, inference; iterations = 3, schedule = gbpSchedule(flooding), broadcast = broadcast)
-    assertMessagesUnchanged(inference.variableToFactor, edgeIds, snapshots)
+    assertMomentMessagesUnchanged(inference.variableToFactor, edgeIds, snapshots)
 
     unfreezeVariable!(graph, inference, variable)
     @test !isFrozenVariable(graph, inference, variable)
@@ -166,7 +166,7 @@ function assertFreezeVariable(;
     return nothing
 end
 
-function assertFreezeEdge(;
+function assertMomentFreezeEdge(;
     broadcast::Bool,
     flooding::Bool,
     variable::VariableRef = :x2,
@@ -182,19 +182,19 @@ function assertFreezeEdge(;
     gbp!(graph, inference; iterations = 2, schedule = gbpSchedule(flooding), broadcast = broadcast)
 
     edgeId = edgeIndex(graph; variable = variable, factor = factor)
-    variableToFactorSnapshot = messageSnapshots(inference.variableToFactor, [edgeId])
-    factorToVariableSnapshot = messageSnapshots(inference.factorToVariable, [edgeId])
+    variableToFactorSnapshot = momentMessageSnapshots(inference.variableToFactor, [edgeId])
+    factorToVariableSnapshot = momentMessageSnapshots(inference.factorToVariable, [edgeId])
 
     freezeEdge!(graph, inference; variable = variable, factor = factor)
     @test isFrozenEdge(graph, inference; variable = variable, factor = factor)
 
     gbp!(graph, inference; iterations = 3, schedule = gbpSchedule(flooding), broadcast = broadcast)
-    assertMessagesUnchanged(
+    assertMomentMessagesUnchanged(
         inference.variableToFactor,
         [edgeId],
         variableToFactorSnapshot
     )
-    assertMessagesUnchanged(
+    assertMomentMessagesUnchanged(
         inference.factorToVariable,
         [edgeId],
         factorToVariableSnapshot
@@ -209,7 +209,7 @@ function assertFreezeEdge(;
     return nothing
 end
 
-function assertGlobalDamping(;
+function assertMomentGlobalDamping(;
     broadcast::Bool,
     flooding::Bool
 )
@@ -235,7 +235,7 @@ function assertGlobalDamping(;
     return nothing
 end
 
-function assertDampedEdge(;
+function assertMomentDampedEdge(;
     broadcast::Bool,
     flooding::Bool,
     variable::VariableRef = :x2,
@@ -315,7 +315,7 @@ end
     @testset "Freeze: factor" begin
         for schedule in SCHEDULE_CASES
             @testset "schedule=$(schedule.name)" begin
-                assertFreezeFactor(
+                assertMomentFreezeFactor(
                     broadcast = schedule.broadcast,
                     flooding = schedule.flooding
                 )
@@ -326,7 +326,7 @@ end
     @testset "Freeze: variable" begin
         for schedule in SCHEDULE_CASES
             @testset "schedule=$(schedule.name)" begin
-                assertFreezeVariable(
+                assertMomentFreezeVariable(
                     broadcast = schedule.broadcast,
                     flooding = schedule.flooding
                 )
@@ -337,7 +337,7 @@ end
     @testset "Freeze: edge" begin
         for schedule in SCHEDULE_CASES
             @testset "schedule=$(schedule.name)" begin
-                assertFreezeEdge(
+                assertMomentFreezeEdge(
                     broadcast = schedule.broadcast,
                     flooding = schedule.flooding
                 )
@@ -348,7 +348,7 @@ end
     @testset "Damping: global" begin
         for schedule in SCHEDULE_CASES
             @testset "schedule=$(schedule.name)" begin
-                assertGlobalDamping(
+                assertMomentGlobalDamping(
                     broadcast = schedule.broadcast,
                     flooding = schedule.flooding
                 )
@@ -359,7 +359,7 @@ end
     @testset "Damping: edge" begin
         for schedule in SCHEDULE_CASES
             @testset "schedule=$(schedule.name)" begin
-                assertDampedEdge(
+                assertMomentDampedEdge(
                     broadcast = schedule.broadcast,
                     flooding = schedule.flooding
                 )

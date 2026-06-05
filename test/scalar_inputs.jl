@@ -30,6 +30,7 @@ include("setup.jl")
         @test isotropicFactor.covariance == 0.15 * Matrix{Float64}(I, 2, 2)
 
         @test_throws ErrorException GaussianFactor(:x1, [0.25, 0.5], [1.0, 2.0], [0.15])
+        @test_throws ErrorException GaussianFactor(:x1, 0.0, 1.0, "bad")
     end
 
     @testset "Gaussian variables accept named components" begin
@@ -56,6 +57,13 @@ include("setup.jl")
         @test_throws ErrorException GaussianVariable(:bad, 2; components = [:x])
         @test_throws ErrorException GaussianVariable(:bad, 2; components = [:x, :x])
         @test_throws ErrorException GaussianVariable(:bad, 1; components = [""])
+        @test_throws ErrorException GaussianVariable(:bad, 0)
+        @test_throws ErrorException GaussianVariable(:bad, 1; label = "")
+        @test_throws ErrorException GaussianVariable(:bad, 2; components = :x)
+        @test_throws ErrorException GaussianVariable(:bad, 2; components = Symbol[])
+        @test_throws ErrorException GaussianVariable(:bad, 2; components = [1.0, 2.0])
+        @test_throws ErrorException GaussianVariable(:bad, 2; mean = [0.0])
+        @test_throws ErrorException GaussianVariable(:bad, 2; covariance = [1.0 0.0; 0.0 -1.0])
     end
 
     @testset "Default Gaussian variable labels preserve IDs" begin

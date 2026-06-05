@@ -103,7 +103,9 @@ end
             highlight = [
                 (variable = :x2, stroke = "#16a34a", fill = "#dcfce7", strokeWidth = 5),
                 (factor = "link_1_2", stroke = "#2563eb", strokeWidth = 4),
-                (variable = :x1, factor = "link_1_2", stroke = "#7c3aed", strokeWidth = 6)
+                (variable = :x1, factor = "link_1_2", stroke = "#7c3aed", strokeWidth = 6),
+                (edge = 1, stroke = "#0f766e"),
+                (edge = graph.edges[6], stroke = "#be123c")
             ]
         )
 
@@ -111,6 +113,8 @@ end
         @test occursin("fill: #dcfce7", svg)
         @test occursin("stroke: #2563eb", svg)
         @test occursin("stroke: #7c3aed", svg)
+        @test occursin("stroke: #0f766e", svg)
+        @test occursin("stroke: #be123c", svg)
         @test occursin("stroke-width: 6", svg)
         @test count("stroke-width: 5", svg) > 1
     end
@@ -338,6 +342,18 @@ end
         @test_throws ErrorException graphFigure(graph; canvas = (canvasPadding = 16,))
         @test_throws ErrorException graphFigure(graph; layout = (orientation = :diagonal,))
         @test_throws ErrorException graphFigure(graph; label = (labelPlacement = :inside,))
+        @test_throws ErrorException graphFigure(graph; view = (depth = 1,))
+        @test_throws ErrorException graphFigure(graph; view = (variables = Symbol[], factors = String[]))
+        @test_throws ErrorException graphFigure(graph; view = (variables = [:x1, :x1],))
+        @test_throws ErrorException graphFigure(graph; view = (factors = ["prior", "prior"],))
+        @test_throws ErrorException graphFigure(graph; highlight = [(:x1,)])
+        @test_throws ErrorException graphFigure(graph; highlight = [(edge = 1, variable = :x1)])
+        @test_throws ErrorException graphFigure(graph; highlight = [NamedTuple()])
+        @test_throws ErrorException graphFigure(graph; highlight = [(edge = 0,)])
+        @test_throws ErrorException graphFigure(
+            graph;
+            highlight = [(variable = :x1, factor = "link_2_3")]
+        )
         @test_throws MethodError graphFigure(graph; highlightVariables = [:x1])
         @test_throws MethodError graphFigure(graph; highlightFactors = ["link_1_2"])
         @test_throws MethodError graphFigure(graph; highlightEdges = [(:x1, "link_1_2")])

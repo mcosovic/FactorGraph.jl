@@ -160,6 +160,17 @@ include("setup.jl")
         @test_throws ErrorException DiscreteVariable(:x1, 2; states = [:off, :off])
         @test_throws ErrorException DiscreteVariable(:x1, 1; states = [""])
         @test_throws ErrorException DiscreteVariable(:x1, 2; states = [:off])
+        @test_throws ErrorException DiscreteVariable(:x1, 0)
+        @test_throws ErrorException DiscreteVariable(:x1, 2; label = "")
+        @test_throws ErrorException DiscreteVariable(:x1, 2; states = :off)
+        @test_throws ErrorException DiscreteVariable(:x1, 2; states = Symbol[])
+        @test_throws ErrorException DiscreteVariable(:x1, 2; states = [1.0, 2.0])
+        @test_throws ErrorException DiscreteVariable(:x1, 2; probability = [0.5])
+        @test_throws ErrorException DiscreteVariable(:x1, 2; probability = [-0.1, 1.1])
+        @test_throws ErrorException DiscreteVariable(:x1, 2; probability = [0.0, 0.0])
+        @test_throws ErrorException DiscreteFactor()
+        @test_throws ErrorException DiscreteFactor(:x1, [])
+        @test_throws ErrorException DiscreteFactor(:x1, [-0.1, 1.1])
 
         @test_throws ErrorException factorGraph(
             [
@@ -172,6 +183,35 @@ include("setup.jl")
             ]
         )
 
+        @test_throws ErrorException factorGraph(
+            [
+                DiscreteVariable(:x1, 2; label = "x"),
+                DiscreteVariable(:x2, 2; label = "x")
+            ],
+            [
+                DiscreteFactor(:x1, [0.6, 0.4]; label = "prior_x1"),
+                DiscreteFactor(:x2, [0.5, 0.5]; label = "prior_x2")
+            ]
+        )
+        @test_throws ErrorException factorGraph(
+            [
+                DiscreteVariable(:x1, 2; label = "x1"),
+                DiscreteVariable(:x2, 2; label = "x2")
+            ],
+            [
+                DiscreteFactor(:x1, [0.6, 0.4]; label = "prior"),
+                DiscreteFactor(:x2, [0.5, 0.5]; label = "prior")
+            ]
+        )
+        @test_throws ErrorException factorGraph(
+            [DiscreteVariable(:x1, 2; label = "x1")],
+            [DiscreteFactor(:x1, :x1, [0.8 0.2; 0.2 0.8]; label = "duplicate")]
+        )
+        @test_throws ErrorException factorGraph(
+            [DiscreteVariable(:x1, 2; label = "x1")],
+            [DiscreteFactor(:x1, :missing, [0.8 0.2; 0.2 0.8]; label = "missing")]
+        )
+
         graph = factorGraph(
             [DiscreteVariable(:x1, 2; label = "x1")],
             [DiscreteFactor(:x1, [0.6, 0.4]; label = "prior_x1")]
@@ -180,6 +220,12 @@ include("setup.jl")
 
         @test_throws ErrorException updateFactor!(graph; factor = "prior_x1", table = [1.0])
         @test graph.factors[1] === original
+        @test_throws ErrorException factorIndex(graph, "missing")
+        @test_throws ErrorException edgeIndex(graph; variable = :x1, factor = "missing")
+        @test_throws ErrorException edgeIndex(graph; variable = :missing, factor = "prior_x1")
+        @test_throws ErrorException edgeIndices(graph)
+        @test_throws ErrorException stateIndex(graph, :x1, :missing)
+        @test_throws ErrorException stateValue(graph, :x1, 0)
     end
 
     @testset "Constructs tree view" begin
