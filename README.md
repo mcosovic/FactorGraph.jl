@@ -11,8 +11,7 @@ FactorGraph is a Julia package for constructing factor graphs and running
 belief propagation algorithms.
 
 Gaussian models can use scalar or vector variables, linear Gaussian factors,
-belief propagation in moment, canonical, and min-sum form, and weighted
-least-squares validation utilities.
+belief propagation in moment, canonical, and min-sum form.
 
 Discrete finite-state models are represented with variables over finite state
 spaces and factor tables, with iterative sum-product inference for marginals
