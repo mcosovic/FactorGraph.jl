@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Graph Visualization · FactorGraph</title><meta name="title" content="Graph Visualization · FactorGraph"/><meta property="og:title" content="Graph Visualization · FactorGraph"/><meta property="twitter:title" content="Graph Visualization · FactorGraph"/><meta name="description" content="Documentation for FactorGraph."/><meta property="og:description" content="Documentation for FactorGraph."/><meta property="twitter:description" content="Documentation for FactorGraph."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/style.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="FactorGraph logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">FactorGraph</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Gaussian Models</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../gaussian_models/gauss_factor_graph/">Factor Graph</a></li><li><a class="tocitem" href="../../gaussian_models/gauss_iterative/">Iterative Belief Propagation</a></li><li><a class="tocitem" href="../../gaussian_models/gauss_forward_backward/">Forward-Backward Belief Propagation</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Discrete Models</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../discrete_models/discrete_factor_graph/">Factor Graph</a></li><li><a class="tocitem" href="../../discrete_models/discrete_iterative/">Iterative Belief Propagation</a></li><li><a class="tocitem" href="../../discrete_models/discrete_forward_backward/">Forward-Backward Belief Propagation</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../dc_state_estimation/">DC State Estimation</a></li><li><a class="tocitem" href="../pmu_state_estimation/">PMU-Based State Estimation</a></li><li><a class="tocitem" href="../robot_localization/">Robot Localization on a Chain</a></li><li><a class="tocitem" href="../protection_alarm_diagnosis/">Protection Alarm Diagnosis</a></li><li><a class="tocitem" href="../binary_pump_diagnosis/">Binary Pump Diagnosis</a></li><li><a class="tocitem" href="../discrete_robot_localization/">Discrete Robot Localization</a></li><li><a class="tocitem" href="../ldpc_decoding/">LDPC-Style Decoding</a></li><li class="is-active"><a class="tocitem" href>Graph Visualization</a><ul class="internal"><li><a class="tocitem" href="#Base-Graph"><span>Base Graph</span></a></li><li><a class="tocitem" href="#Default-Figure"><span>Default Figure</span></a></li><li><a class="tocitem" href="#Layout-and-Labels"><span>Layout and Labels</span></a></li><li><a class="tocitem" href="#Focused-Views"><span>Focused Views</span></a></li><li><a class="tocitem" href="#Style-and-Highlights"><span>Style and Highlights</span></a></li><li><a class="tocitem" href="#Tree-Views"><span>Tree Views</span></a></li><li><a class="tocitem" href="#Full-Option-Sketch"><span>Full Option Sketch</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">API Reference</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/types/">Types</a></li><li><a class="tocitem" href="../../api/factor_graphs/">Factor Graphs</a></li><li><a class="tocitem" href="../../api/inference/">Inference</a></li><li><a class="tocitem" href="../../api/validation/">Validation</a></li><li><a class="tocitem" href="../../api/printing/">Print Functions</a></li></ul></li><li><a class="tocitem" href="../../release_notes/">Release Notes</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Graph Visualization</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Graph Visualization</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mcosovic/FactorGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mcosovic/FactorGraph.jl/master/docs/src/examples/graph_visualization.md#L" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="graph-visualization-example"><a class="docs-heading-anchor" href="#graph-visualization-example">Graph Visualization</a><a id="graph-visualization-example-1"></a><a class="docs-heading-anchor-permalink" href="#graph-visualization-example" title="Permalink"></a></h1><p>This example shows common ways to customize <a href="../../api/factor_graphs/#FactorGraph.graphFigure"><code>graphFigure</code></a> and <a href="../../api/factor_graphs/#FactorGraph.saveGraphFigure"><code>saveGraphFigure</code></a>. The same visualization options work for Gaussian factor graphs, discrete factor graphs, and tree views.</p><hr/><h2 id="Base-Graph"><a class="docs-heading-anchor" href="#Base-Graph">Base Graph</a><a id="Base-Graph-1"></a><a class="docs-heading-anchor-permalink" href="#Base-Graph" title="Permalink"></a></h2><p>Start with a small Gaussian factor graph that has three variables, two pairwise factors, and two unary factors:</p><pre><code class="language-julia hljs">using FactorGraph
+
+variables = [
+    GaussianVariable(:x1, 1; label = &quot;x1&quot;),
+    GaussianVariable(:x2, 1; label = &quot;x2&quot;),
+    GaussianVariable(:x3, 1; label = &quot;x3&quot;)
+]
+
+factors = [
+    GaussianFactor(:x1, 0.0, 1.0, 0.5; label = &quot;f1&quot;, initialize = true),
+    GaussianFactor(:x1, :x2, 0.0, [1.0 -1.0], 0.3; label = &quot;f2&quot;),
+    GaussianFactor(:x2, :x3, 0.0, [1.0 -1.0], 0.3; label = &quot;f3&quot;),
+    GaussianFactor(:x3, 2.0, 1.0, 0.8; label = &quot;f4&quot;)
+]
+
+graph = factorGraph(variables, factors)</code></pre><hr/><h2 id="Default-Figure"><a class="docs-heading-anchor" href="#Default-Figure">Default Figure</a><a id="Default-Figure-1"></a><a class="docs-heading-anchor-permalink" href="#Default-Figure" title="Permalink"></a></h2><p>The default figure draws variable labels, factor labels, SVG hover tooltips, and curved edges. This is a compact way to check the graph structure while building a model:</p><pre><code class="language-julia hljs">saveGraphFigure(&quot;../gv_default.svg&quot;, graph)</code></pre><div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_default.svg"
+    type="image/svg+xml"
+    aria-label="Default graph figure"
+    style="width: 45%; height: auto;">
+    <a href="../../gv_default.svg">Default graph figure</a>
+  </object>
+</div><p>Hover over a node or edge in the rendered SVG to inspect its tooltip. Summary tooltips show identity metadata, while <code>tooltipDetail = :full</code> includes more node or edge details.</p><hr/><h2 id="Layout-and-Labels"><a class="docs-heading-anchor" href="#Layout-and-Labels">Layout and Labels</a><a id="Layout-and-Labels-1"></a><a class="docs-heading-anchor-permalink" href="#Layout-and-Labels" title="Permalink"></a></h2><p>Layout options control orientation, spacing, and edge geometry. Label options control node labels, edge identifiers, tooltip detail, and font size. The next figure uses a vertical layout, straight edges, outside labels, and visible edge identifiers:</p><pre><code class="language-julia hljs">saveGraphFigure(
+    &quot;../gv_vertical.svg&quot;,
+    graph;
+    layout = (
+        orientation = :vertical,
+        rowSpacing = (90, 150),
+        columnSpacing = 120,
+        curvedEdges = false
+    ),
+    label = (
+        placement = :outside,
+        outsideGap = 8,
+        showEdgeIds = true,
+        tooltipDetail = :full,
+        fontSize = 13
+    )
+)</code></pre><div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_vertical.svg"
+    type="image/svg+xml"
+    aria-label="Vertical graph figure with edge IDs"
+    style="width: 37%; height: auto;">
+    <a href="../../gv_vertical.svg">Vertical graph figure with edge IDs</a>
+  </object>
+</div><p>Spacing options can be scalars for uniform gaps, or tuples and vectors for per-gap spacing. In the default horizontal layout, <code>columnSpacing = (90, 210)</code> sets the gap from unary factors to variables first, then the gap from variables to multi-variable factors. In vertical layout, the same idea applies through <code>rowSpacing</code>.</p><hr/><h2 id="Focused-Views"><a class="docs-heading-anchor" href="#Focused-Views">Focused Views</a><a id="Focused-Views-1"></a><a class="docs-heading-anchor-permalink" href="#Focused-Views" title="Permalink"></a></h2><p>Use <code>view</code> to draw a focused part of the graph. The <code>hops</code> keyword expands from the selected variables or factors through the bipartite graph. With <code>hops = 2</code>, the figure includes <code>x1</code>, its neighboring factors, and the variables connected to those factors:</p><pre><code class="language-julia hljs">saveGraphFigure(
+    &quot;../gv_focus.svg&quot;,
+    graph;
+    view = (variables = [:x1], hops = 2),
+    label = (showEdgeIds = true,)
+)</code></pre><div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_focus.svg"
+    type="image/svg+xml"
+    aria-label="Focused graph figure"
+    style="width: 43%; height: auto;">
+    <a href="../../gv_focus.svg">Focused graph figure</a>
+  </object>
+</div><p>Here, <code>hops = 0</code> draws only the selected seed nodes, while <code>hops = :all</code> expands through the connected component. Focus nodes keep the normal style, and expanded context nodes use the context style.</p><hr/><h2 id="Style-and-Highlights"><a class="docs-heading-anchor" href="#Style-and-Highlights">Style and Highlights</a><a id="Style-and-Highlights-1"></a><a class="docs-heading-anchor-permalink" href="#Style-and-Highlights" title="Permalink"></a></h2><p>Style options set the default colors and stroke widths. Highlight entries can select variables, factors, edges, or a variable-factor edge pair. This is useful when a figure needs to call attention to one relationship inside a larger model:</p><pre><code class="language-julia hljs">saveGraphFigure(
+    &quot;../gv_highlight.svg&quot;,
+    graph;
+    style = (
+        backgroundFill = &quot;#f8fafc&quot;,
+        variableFill = &quot;#e0f2fe&quot;,
+        variableStroke = &quot;#0369a1&quot;,
+        variableStrokeWidth = 2.2,
+        factorFill = &quot;#fee2e2&quot;,
+        factorStroke = &quot;#b91c1c&quot;,
+        factorStrokeWidth = 2.2,
+        edgeStroke = &quot;#64748b&quot;,
+        edgeStrokeWidth = 1.8,
+        edgeOpacity = 0.9,
+        labelFill = &quot;#0f172a&quot;
+    ),
+    highlight = [
+        (variable = :x2, stroke = &quot;#16a34a&quot;, fill = &quot;#dcfce7&quot;, strokeWidth = 4),
+        (factor = &quot;f2&quot;, stroke = &quot;#f59e0b&quot;, fill = &quot;#fef3c7&quot;, strokeWidth = 4),
+        (variable = :x3, factor = &quot;f4&quot;, stroke = &quot;#7c3aed&quot;, strokeWidth = 4)
+    ]
+)</code></pre><div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_highlight.svg"
+    type="image/svg+xml"
+    aria-label="Highlighted graph figure"
+    style="width: 45%; height: auto;">
+    <a href="../../gv_highlight.svg">Highlighted graph figure</a>
+  </object>
+</div><p>Variable and factor highlights can include their incident edges. Edge-specific highlights can be selected either by edge identifier or by a <code>(variable, factor)</code> pair.</p><hr/><h2 id="Tree-Views"><a class="docs-heading-anchor" href="#Tree-Views">Tree Views</a><a id="Tree-Views-1"></a><a class="docs-heading-anchor-permalink" href="#Tree-Views" title="Permalink"></a></h2><p>Tree figures place nodes by graph depth. The same label, style, highlight, and view options are available. Here, the graph is converted to a tree view and drawn horizontally from root variable <code>x1</code>:</p><pre><code class="language-julia hljs">tree = treeFactorGraph(graph; root = :x1)
+
+saveGraphFigure(
+    &quot;../gv_tree.svg&quot;,
+    tree;
+    layout = (orientation = :horizontal, rowSpacing = 70, columnSpacing = (105, 120, 145)),
+    view = (variables = [:x1], hops = :all),
+    label = (showEdgeIds = true, tooltipDetail = :full),
+    highlight = [(variable = :x1, stroke = &quot;#16a34a&quot;, fill = &quot;#dcfce7&quot;, strokeWidth = 4)]
+)</code></pre><div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_tree.svg"
+    type="image/svg+xml"
+    aria-label="Tree graph figure"
+    style="width: 90%; height: auto;">
+    <a href="../../gv_tree.svg">Tree graph figure</a>
+  </object>
+</div><p>In horizontal tree layout, <code>columnSpacing</code> separates depth levels and <code>rowSpacing</code> separates nodes within the same level. Vertical tree layout swaps that interpretation. Tuple or vector spacing sets the gaps one by one, and the last value is reused when the graph has more gaps.</p><hr/><h2 id="Full-Option-Sketch"><a class="docs-heading-anchor" href="#Full-Option-Sketch">Full Option Sketch</a><a id="Full-Option-Sketch-1"></a><a class="docs-heading-anchor-permalink" href="#Full-Option-Sketch" title="Permalink"></a></h2><p>This final call collects the option groups in one place. Treat it as a reference pattern rather than as a recommended visual style:</p><pre><code class="language-julia hljs">graphFigure(
+    graph;
+    canvas = (
+        width = 700,
+        height = nothing,
+        padding = 24,
+        zoom = 1.0
+    ),
+    layout = (
+        orientation = :horizontal,
+        rowSpacing = 90,
+        columnSpacing = (90, 210),
+        curvedEdges = true
+    ),
+    node = (
+        variableRadius = 24,
+        factorSize = 22
+    ),
+    label = (
+        placement = :outside,
+        outsideGap = 6,
+        showVariables = true,
+        showFactors = true,
+        showTooltips = true,
+        showEdgeIds = false,
+        tooltipDetail = :summary,
+        fontSize = 14
+    ),
+    view = (
+        variables = [:x1],
+        factors = nothing,
+        hops = :all
+    ),
+    style = (
+        backgroundFill = &quot;#ffffff&quot;,
+        variableFill = &quot;#e0f2fe&quot;,
+        variableStroke = &quot;#0369a1&quot;,
+        variableStrokeWidth = 1.8,
+        factorFill = &quot;#dc2626&quot;,
+        factorStroke = &quot;#991b1b&quot;,
+        factorStrokeWidth = 1.8,
+        edgeStroke = &quot;#64748b&quot;,
+        edgeStrokeWidth = 1.6,
+        edgeOpacity = 1.0,
+        labelFill = &quot;#111827&quot;
+    ),
+    highlight = [
+        (variable = :x1, stroke = &quot;#16a34a&quot;, fill = &quot;#dcfce7&quot;, strokeWidth = 4),
+        (factor = &quot;f2&quot;, stroke = &quot;#f59e0b&quot;, fill = &quot;#fef3c7&quot;, strokeWidth = 4),
+        (edge = 1, stroke = &quot;#7c3aed&quot;, strokeWidth = 4)
+    ]
+)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ldpc_decoding/">« LDPC-Style Decoding</a><a class="docs-footer-nextpage" href="../../api/types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 5 June 2026 20:03">Friday 5 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

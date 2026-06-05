@@ -1,0 +1,417 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="964" height="180" viewBox="0 0 964 180">
+<title>Factor graph</title>
+<style>
+  .background { fill: #ffffff; }
+  .edge {
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.6;
+    stroke-opacity: 1.0;
+  }
+  .edge-hitbox {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 14;
+    stroke-opacity: 0;
+    pointer-events: stroke;
+  }
+  .variable {
+    fill: #e0f2fe;
+    stroke: #0369a1;
+    stroke-width: 1.8;
+  }
+  .variable-context { opacity: 0.38; }
+  .factor {
+    fill: #dc2626;
+    stroke: #991b1b;
+    stroke-width: 1.8;
+  }
+  .factor-context { opacity: 0.42; }
+  .edge-highlight { stroke-opacity: 1.0; }
+  .edge-label {
+    fill: #64748b;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .edge-label-background {
+    fill: #ffffff;
+    stroke: #ffffff;
+    stroke-linejoin: round;
+    stroke-width: 4px;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .label {
+    fill: #111827;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .label-start { text-anchor: start; }
+  .label-end { text-anchor: end; }
+</style>
+  <rect class="background" x="0" y="0" width="964" height="180"/>
+  <path class="edge" d="M 48.120000000000005 90.0 C 90.87 90.0, 100.37 45.0, 143.12 45.0"/>
+<path class="edge-hitbox" d="M 48.120000000000005 90.0 C 90.87 90.0, 100.37 45.0, 143.12 45.0">
+  <title>Edge 1
+
+Identity
+  variable: x1
+  factor: prior_x1
+  variable index: 1
+  factor index: 1</title>
+</path>
+  <path class="edge" d="M 48.120000000000005 90.0 C 90.87 90.0, 100.37 135.0, 143.12 135.0"/>
+<path class="edge-hitbox" d="M 48.120000000000005 90.0 C 90.87 90.0, 100.37 135.0, 143.12 135.0">
+  <title>Edge 2
+
+Identity
+  variable: x1
+  factor: motion12
+  variable index: 1
+  factor index: 2</title>
+</path>
+  <path class="edge" d="M 161.12 135.0 C 203.87 135.0, 213.37 90.0, 256.12 90.0"/>
+<path class="edge-hitbox" d="M 161.12 135.0 C 203.87 135.0, 213.37 90.0, 256.12 90.0">
+  <title>Edge 3
+
+Identity
+  variable: x2
+  factor: motion12
+  variable index: 2
+  factor index: 2</title>
+</path>
+  <path class="edge" d="M 288.12 90.0 C 330.87 90.0, 340.37 90.0, 383.12 90.0"/>
+<path class="edge-hitbox" d="M 288.12 90.0 C 330.87 90.0, 340.37 90.0, 383.12 90.0">
+  <title>Edge 4
+
+Identity
+  variable: x2
+  factor: motion23
+  variable index: 2
+  factor index: 3</title>
+</path>
+  <path class="edge" d="M 401.12 90.0 C 443.87 90.0, 453.37 90.0, 496.12 90.0"/>
+<path class="edge-hitbox" d="M 401.12 90.0 C 443.87 90.0, 453.37 90.0, 496.12 90.0">
+  <title>Edge 5
+
+Identity
+  variable: x3
+  factor: motion23
+  variable index: 3
+  factor index: 3</title>
+</path>
+  <path class="edge" d="M 528.12 90.0 C 570.87 90.0, 580.37 45.0, 623.12 45.0"/>
+<path class="edge-hitbox" d="M 528.12 90.0 C 570.87 90.0, 580.37 45.0, 623.12 45.0">
+  <title>Edge 6
+
+Identity
+  variable: x3
+  factor: motion34
+  variable index: 3
+  factor index: 4</title>
+</path>
+  <path class="edge" d="M 528.12 90.0 C 570.87 90.0, 580.37 135.0, 623.12 135.0"/>
+<path class="edge-hitbox" d="M 528.12 90.0 C 570.87 90.0, 580.37 135.0, 623.12 135.0">
+  <title>Edge 7
+
+Identity
+  variable: x3
+  factor: beacon3
+  variable index: 3
+  factor index: 5</title>
+</path>
+  <path class="edge" d="M 641.12 45.0 C 683.87 45.0, 693.37 90.0, 736.12 90.0"/>
+<path class="edge-hitbox" d="M 641.12 45.0 C 683.87 45.0, 693.37 90.0, 736.12 90.0">
+  <title>Edge 8
+
+Identity
+  variable: x4
+  factor: motion34
+  variable index: 4
+  factor index: 4</title>
+</path>
+  <path class="edge" d="M 768.12 90.0 C 810.87 90.0, 820.37 90.0, 863.12 90.0"/>
+<path class="edge-hitbox" d="M 768.12 90.0 C 810.87 90.0, 820.37 90.0, 863.12 90.0">
+  <title>Edge 9
+
+Identity
+  variable: x4
+  factor: beacon4
+  variable index: 4
+  factor index: 6</title>
+</path>
+<circle class="variable" cx="32.120000000000005" cy="90.0" r="16">
+  <title>Variable x1
+
+Identity
+  type: Discrete
+  index: 1
+  id: :x1
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>
+</circle>
+  <text class="label" x="32.120000000000005" y="119.0"><title>Variable x1
+
+Identity
+  type: Discrete
+  index: 1
+  id: :x1
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x1</text>
+<circle class="variable" cx="272.12" cy="90.0" r="16">
+  <title>Variable x2
+
+Identity
+  type: Discrete
+  index: 2
+  id: :x2
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>
+</circle>
+  <text class="label" x="272.12" y="119.0"><title>Variable x2
+
+Identity
+  type: Discrete
+  index: 2
+  id: :x2
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x2</text>
+<circle class="variable" cx="512.12" cy="90.0" r="16">
+  <title>Variable x3
+
+Identity
+  type: Discrete
+  index: 3
+  id: :x3
+  cardinality: 3
+  degree: 3
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>
+</circle>
+  <text class="label" x="512.12" y="119.0"><title>Variable x3
+
+Identity
+  type: Discrete
+  index: 3
+  id: :x3
+  cardinality: 3
+  degree: 3
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x3</text>
+<circle class="variable" cx="752.12" cy="90.0" r="16">
+  <title>Variable x4
+
+Identity
+  type: Discrete
+  index: 4
+  id: :x4
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>
+</circle>
+  <text class="label" x="752.12" y="119.0"><title>Variable x4
+
+Identity
+  type: Discrete
+  index: 4
+  id: :x4
+  cardinality: 3
+  degree: 2
+
+Initialization
+  probability size: not set
+
+States
+  state count: 3</title>x4</text>
+<rect class="factor" x="143.12" y="36.0" width="18" height="18" rx="3">
+  <title>Factor prior_x1
+
+Identity
+  type: Discrete
+  index: 1
+  variables: x1
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: true</title>
+</rect>
+  <text class="label" x="152.12" y="23.0"><title>Factor prior_x1
+
+Identity
+  type: Discrete
+  index: 1
+  variables: x1
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: true</title>prior_x1</text>
+<rect class="factor" x="143.12" y="126.0" width="18" height="18" rx="3">
+  <title>Factor motion12
+
+Identity
+  type: Discrete
+  index: 2
+  variables: x1, x2
+  degree: 2
+
+Table
+  size: 3 x 3</title>
+</rect>
+  <text class="label" x="152.12" y="113.0"><title>Factor motion12
+
+Identity
+  type: Discrete
+  index: 2
+  variables: x1, x2
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion12</text>
+<rect class="factor" x="383.12" y="81.0" width="18" height="18" rx="3">
+  <title>Factor motion23
+
+Identity
+  type: Discrete
+  index: 3
+  variables: x2, x3
+  degree: 2
+
+Table
+  size: 3 x 3</title>
+</rect>
+  <text class="label" x="392.12" y="68.0"><title>Factor motion23
+
+Identity
+  type: Discrete
+  index: 3
+  variables: x2, x3
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion23</text>
+<rect class="factor" x="623.12" y="36.0" width="18" height="18" rx="3">
+  <title>Factor motion34
+
+Identity
+  type: Discrete
+  index: 4
+  variables: x3, x4
+  degree: 2
+
+Table
+  size: 3 x 3</title>
+</rect>
+  <text class="label" x="632.12" y="23.0"><title>Factor motion34
+
+Identity
+  type: Discrete
+  index: 4
+  variables: x3, x4
+  degree: 2
+
+Table
+  size: 3 x 3</title>motion34</text>
+<rect class="factor" x="623.12" y="126.0" width="18" height="18" rx="3">
+  <title>Factor beacon3
+
+Identity
+  type: Discrete
+  index: 5
+  variables: x3
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>
+</rect>
+  <text class="label" x="632.12" y="113.0"><title>Factor beacon3
+
+Identity
+  type: Discrete
+  index: 5
+  variables: x3
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>beacon3</text>
+<rect class="factor" x="863.12" y="81.0" width="18" height="18" rx="3">
+  <title>Factor beacon4
+
+Identity
+  type: Discrete
+  index: 6
+  variables: x4
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>
+</rect>
+  <text class="label" x="872.12" y="68.0"><title>Factor beacon4
+
+Identity
+  type: Discrete
+  index: 6
+  variables: x4
+  degree: 1
+
+Table
+  size: 3
+
+Options
+  initialize: false</title>beacon4</text>
+</svg>
