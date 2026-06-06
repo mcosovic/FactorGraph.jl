@@ -18,8 +18,6 @@ Discrete finite-state models are represented with variables over finite state
 spaces and factor tables, with iterative sum-product inference for marginals
 and min-sum inference for MAP estimates.
 
-<br clear="left"/>
-
 The Gaussian and discrete APIs share support for sequential, flooding, and
 residual schedules, damping, exact forward-backward inference on
 tree-structured graphs, dynamic graph updates, and inspection helpers for
