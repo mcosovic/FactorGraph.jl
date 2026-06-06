@@ -18,17 +18,16 @@ Discrete finite-state models are represented with variables over finite state
 spaces and factor tables, with iterative sum-product inference for marginals
 and min-sum inference for MAP estimates.
 
+<br clear="left"/>
+
 The Gaussian and discrete APIs share support for sequential, flooding, and
 residual schedules, damping, exact forward-backward inference on
 tree-structured graphs, dynamic graph updates, and inspection helpers for
 graphs, messages, marginals, and estimates.
 
-<br clear="left"/>
-
 ## Installation
 
-FactorGraph is registered as `FactorGraph.jl`. Install it from the Julia package
-manager:
+Install FactorGraph from the Julia package manager:
 
 ```julia-repl
 pkg> add FactorGraph
@@ -65,38 +64,14 @@ marginalMean(graph, inference, :x1)
 marginalCovariance(graph, inference, :x1)
 ```
 
-## Tree Inference
+## Features
 
-When the graph is tree-structured, pass a root variable to construct a
-`TreeFactorGraph` and run exact forward-backward belief propagation:
-
-```julia
-tree = treeFactorGraph(graph; root = :x1)
-inference = moment(graph)
-
-forwardBackward!(tree, inference)
-```
-
-## Discrete Models
-
-```julia
-variables = [
-    DiscreteVariable(:x1, 2; states = [:off, :on]),
-    DiscreteVariable(:x2, 2; states = [:low, :high]),
-]
-
-factors = [
-    DiscreteFactor(:x1, [0.8, 0.2]; label = "prior_x1"),
-    DiscreteFactor(:x1, :x2, [1.0 0.2; 0.1 0.9]; label = "link"),
-]
-
-graph = factorGraph(variables, factors)
-inference = sumproduct(graph)
-
-gbp!(graph, inference; iterations = 10)
-
-marginalProbability(graph, inference, :x1, :on)
-```
+- Gaussian factor graphs with moment, canonical, and min-sum inference
+- Discrete finite-state factor graphs with sum-product and min-sum inference
+- Sequential, flooding, and residual message schedules
+- Exact forward-backward inference on tree-structured graphs
+- Dynamic graph updates with stale-inference checks
+- Freezing, damping, diagnostics, WLS validation, and graph visualization
 
 ## Documentation
 
@@ -105,11 +80,11 @@ The full documentation is available at
 
 It includes:
 
-- Gaussian and discrete factor graph construction
-- Iterative sum-product and min-sum belief propagation
-- Forward-backward inference on tree-structured graphs
-- Dynamic graph updates and stale-inference checks
-- API references for types, graphs, inference, validation, and printing helpers
+- Gaussian and discrete model guides
+- Iterative and tree-structured inference
+- Domain examples and graph visualization
+- Dynamic graph updates and validation helpers
+- API references and release notes
 
 ## License
 
