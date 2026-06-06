@@ -1,6 +1,7 @@
 include("scalar_inputs.jl")
 include("discrete_graph.jl")
 include("discrete_inference.jl")
+include("numeric_correctness.jl")
 include("factor_update.jl")
 include("validation.jl")
 include("printing.jl")

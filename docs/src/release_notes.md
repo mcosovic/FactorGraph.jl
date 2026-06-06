@@ -2,6 +2,25 @@
 
 ---
 
+## Version 0.2.5 - Unreleased
+
+#### Fixed
+
+- Fixed Gaussian min-sum frozen variable and edge message updates so frozen
+  outgoing quadratic messages remain unchanged until explicitly unfrozen.
+- Fixed inference-aware discrete factor updates so invalid initializing unary
+  updates are rejected before mutating the graph.
+
+#### Tests
+
+- Added numerical correctness coverage for Gaussian schedules, damping,
+  freeze/unfreeze message preservation, tree exactness and selected
+  step-by-step sweeps, root refreshes, warm-start updates, dynamic stale-state
+  rejection, residual partial updates, WLS agreement for correlated vector
+  models, and discrete brute-force references.
+
+---
+
 ## Version 0.2.4 - 2026-06-05
 
 #### Changed

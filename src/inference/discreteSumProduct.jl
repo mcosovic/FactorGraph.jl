@@ -550,6 +550,12 @@ function updateFactor!(
     initialize::Union{Nothing, Bool} = nothing
 )
     assertDiscreteSumProductInferenceMatchesGraph(graph, inference)
+    validateDiscreteInferenceFactorUpdate(
+        graph,
+        factorRef;
+        table = table,
+        initialize = initialize
+    )
 
     updated = updateFactor!(
         graph,

@@ -1037,6 +1037,35 @@ function addFactor!(
     )
 end
 
+function validateDiscreteInferenceFactorUpdate(
+    graph::DiscreteFactorGraph,
+    factorRef::FactorRef;
+    table = nothing,
+    initialize::Union{Nothing, Bool} = nothing
+)
+    factorIdx = factorIndex(graph, factorRef)
+    current = graph.factors[factorIdx]
+    nextTable = table === nothing ? current.table : table
+    nextInitialize = initialize === nothing ? current.initialize : initialize
+    updated = DiscreteFactor(
+        current.id,
+        current.variables,
+        nextTable;
+        label = current.label,
+        initialize = nextInitialize
+    )
+
+    validateUpdatedFactorDimensions(current, updated)
+    validateFactor(updated, graph.variables, graph.referenceIndex)
+    validateUpdatedInitializingUnaryFactors(graph, factorIdx, updated)
+
+    if updated.initialize
+        initialMessageFromUnaryFactor(updated)
+    end
+
+    return nothing
+end
+
 function updateFactor!(
     graph::DiscreteFactorGraph,
     inference::DiscreteInference,

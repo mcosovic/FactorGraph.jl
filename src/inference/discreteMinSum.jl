@@ -595,6 +595,12 @@ function updateFactor!(
     initialize::Union{Nothing, Bool} = nothing
 )
     assertDiscreteMinSumInferenceMatchesGraph(graph, inference)
+    validateDiscreteInferenceFactorUpdate(
+        graph,
+        factorRef;
+        table = table,
+        initialize = initialize
+    )
 
     updated = updateFactor!(
         graph,

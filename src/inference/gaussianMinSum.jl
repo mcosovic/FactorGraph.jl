@@ -1037,13 +1037,13 @@ function variableToFactorMessage!(
 )
     edge = graph.edges[edgeId]
 
-    fill!(output.J, 0.0)
-    fill!(output.h, 0.0)
-    output.c = 0.0
-
     if inference.frozenEdges[edgeId] || inference.frozenVariables[edge.variableIndex]
         return output
     end
+
+    fill!(output.J, 0.0)
+    fill!(output.h, 0.0)
+    output.c = 0.0
 
     for incomingEdgeId in graph.variableEdges[edge.variableIndex]
         if incomingEdgeId == edgeId
