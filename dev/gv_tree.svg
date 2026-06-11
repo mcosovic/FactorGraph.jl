@@ -28,6 +28,15 @@
   }
   .factor-context { opacity: 0.42; }
   .edge-highlight { stroke-opacity: 1.0; }
+  .edge-residual-halo {
+    fill: none;
+    pointer-events: none;
+    stroke-linecap: round;
+  }
+  .variable-variance-halo {
+    fill: none;
+    pointer-events: none;
+  }
   .edge-label {
     fill: #64748b;
     font-size: 12px;
@@ -269,9 +278,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0]
+    [1]
   covariance:
     [0.5]
 
@@ -288,9 +297,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0]
+    [1]
   covariance:
     [0.5]
 
@@ -307,9 +316,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0  -1.0]
+    [1  -1]
   covariance:
     [0.3]</title>
 </rect>
@@ -323,9 +332,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0  -1.0]
+    [1  -1]
   covariance:
     [0.3]</title>f2</text>
 <rect class="factor factor-context" x="393.32" y="71.0" width="18" height="18" rx="3">
@@ -339,9 +348,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0  -1.0]
+    [1  -1]
   covariance:
     [0.3]</title>
 </rect>
@@ -355,9 +364,9 @@ Identity
 
 Parameters
   mean:
-    [0.0]
+    [0]
   coefficient:
-    [1.0  -1.0]
+    [1  -1]
   covariance:
     [0.3]</title>f3</text>
 <rect class="factor factor-context" x="683.3199999999999" y="71.0" width="18" height="18" rx="3">
@@ -371,9 +380,9 @@ Identity
 
 Parameters
   mean:
-    [2.0]
+    [2]
   coefficient:
-    [1.0]
+    [1]
   covariance:
     [0.8]
 
@@ -390,9 +399,9 @@ Identity
 
 Parameters
   mean:
-    [2.0]
+    [2]
   coefficient:
-    [1.0]
+    [1]
   covariance:
     [0.8]
 

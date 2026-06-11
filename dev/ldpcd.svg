@@ -28,6 +28,15 @@
   }
   .factor-context { opacity: 0.42; }
   .edge-highlight { stroke-opacity: 1.0; }
+  .edge-residual-halo {
+    fill: none;
+    pointer-events: none;
+    stroke-linecap: round;
+  }
+  .variable-variance-halo {
+    fill: none;
+    pointer-events: none;
+  }
   .edge-label {
     fill: #64748b;
     font-size: 12px;
@@ -711,13 +720,13 @@ Table
 
   slice x4 = 0
   rows: x1, columns: x2
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x4 = 1
   rows: x1, columns: x2
-    [0.0  1.0
-     1.0  0.0]</title>
+    [0  1
+     1  0]</title>
 </rect>
   <text class="label label-start" x="433.02" y="142.33333333333331"><title>Factor check_1
 
@@ -733,13 +742,13 @@ Table
 
   slice x4 = 0
   rows: x1, columns: x2
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x4 = 1
   rows: x1, columns: x2
-    [0.0  1.0
-     1.0  0.0]</title>check_1</text>
+    [0  1
+     1  0]</title>check_1</text>
 <rect class="factor" x="409.02" y="213.33333333333331" width="18" height="18" rx="3">
   <title>Factor check_2
 
@@ -755,13 +764,13 @@ Table
 
   slice x5 = 0
   rows: x2, columns: x3
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x5 = 1
   rows: x2, columns: x3
-    [0.0  1.0
-     1.0  0.0]</title>
+    [0  1
+     1  0]</title>
 </rect>
   <text class="label label-start" x="433.02" y="222.33333333333331"><title>Factor check_2
 
@@ -777,13 +786,13 @@ Table
 
   slice x5 = 0
   rows: x2, columns: x3
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x5 = 1
   rows: x2, columns: x3
-    [0.0  1.0
-     1.0  0.0]</title>check_2</text>
+    [0  1
+     1  0]</title>check_2</text>
 <rect class="factor" x="409.02" y="241.3333333333333" width="18" height="18" rx="3">
   <title>Factor check_3
 
@@ -799,13 +808,13 @@ Table
 
   slice x6 = 0
   rows: x1, columns: x3
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x6 = 1
   rows: x1, columns: x3
-    [0.0  1.0
-     1.0  0.0]</title>
+    [0  1
+     1  0]</title>
 </rect>
   <text class="label label-start" x="433.02" y="250.3333333333333"><title>Factor check_3
 
@@ -821,11 +830,11 @@ Table
 
   slice x6 = 0
   rows: x1, columns: x3
-    [1.0  0.0
-     0.0  1.0]
+    [1  0
+     0  1]
 
   slice x6 = 1
   rows: x1, columns: x3
-    [0.0  1.0
-     1.0  0.0]</title>check_3</text>
+    [0  1
+     1  0]</title>check_3</text>
 </svg>

@@ -28,6 +28,15 @@
   }
   .factor-context { opacity: 0.42; }
   .edge-highlight { stroke-opacity: 1.0; }
+  .edge-residual-halo {
+    fill: none;
+    pointer-events: none;
+    stroke-linecap: round;
+  }
+  .variable-variance-halo {
+    fill: none;
+    pointer-events: none;
+  }
   .edge-label {
     fill: #64748b;
     font-size: 12px;
