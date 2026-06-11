@@ -127,6 +127,31 @@ function graphFigure(
     style::NamedTuple = NamedTuple(),
     highlight::AbstractVector = NamedTuple[],
 )
+    return graphFigureWithInference(
+        graph;
+        canvas = canvas,
+        layout = layout,
+        node = node,
+        label = label,
+        view = view,
+        style = style,
+        residualInference = nothing,
+        highlight = highlight
+    )
+end
+
+function graphFigureWithInference(
+    graph::AbstractFactorGraph;
+    canvas::NamedTuple = NamedTuple(),
+    layout::NamedTuple = NamedTuple(),
+    node::NamedTuple = NamedTuple(),
+    label::NamedTuple = NamedTuple(),
+    view::NamedTuple = NamedTuple(),
+    style::NamedTuple = NamedTuple(),
+    residualInference::Union{Nothing, AbstractInference} = nothing,
+    marginalInference::Union{Nothing, AbstractInference} = nothing,
+    highlight::AbstractVector = NamedTuple[],
+)
     canvasOptions = graphFigureCanvasOptions(canvas)
     layoutOptions = graphFigureLayoutOptions(layout)
     nodeOptions = graphFigureNodeOptions(node)
@@ -167,7 +192,9 @@ function graphFigure(
             showEdgeIds = labelOptions.showEdgeIds,
             tooltipDetail = labelOptions.tooltipDetail,
             fontSize = labelOptions.fontSize,
-            view = viewOptions
+            view = viewOptions,
+            residualInference = residualInference,
+            marginalInference = marginalInference,
         )
     end
 
@@ -346,7 +373,12 @@ function graphFigure(
             highlightState.edges
         )
         tooltip = labelOptions.showTooltips ?
-            graphFigureEdgeTooltip(graph, edge, labelOptions.tooltipDetail) : nothing
+            graphFigureEdgeTooltip(
+                graph,
+                edge,
+                labelOptions.tooltipDetail,
+                residualInference
+            ) : nothing
         println(
             buffer,
             svgEdge(
@@ -390,7 +422,12 @@ function graphFigure(
             viewOptions.focusVariableSet
         )
         tooltip = labelOptions.showTooltips ?
-            graphFigureVariableTooltip(graph, index, labelOptions.tooltipDetail) : nothing
+            graphFigureVariableTooltip(
+                graph,
+                index,
+                labelOptions.tooltipDetail,
+                marginalInference
+            ) : nothing
         println(
             buffer,
             svgCircle(
@@ -487,7 +524,9 @@ function verticalGraphFigure(
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
     fontSize::Int,
-    view::NamedTuple
+    view::NamedTuple,
+    residualInference::Union{Nothing, AbstractInference},
+    marginalInference::Union{Nothing, AbstractInference}
 )
     columnCount = max(variableCount, length(unaryFactors), length(multiFactors), 1)
     variableRadii = nodeRadii(
@@ -684,7 +723,8 @@ function verticalGraphFigure(
             edge,
             highlightState.edges
         )
-        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureEdgeTooltip(graph, edge, tooltipDetail, residualInference) : nothing
         println(
             buffer,
             svgEdge(
@@ -723,7 +763,13 @@ function verticalGraphFigure(
         variable = graph.variables[index]
         label = escapeXML(variable.label)
         className = variableClassName(index, highlightState.variables, view.focusVariableSet)
-        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureVariableTooltip(
+                graph,
+                index,
+                tooltipDetail,
+                marginalInference
+            ) : nothing
         println(
             buffer,
             svgCircle(
@@ -801,6 +847,32 @@ function graphFigure(
     style::NamedTuple = NamedTuple(),
     highlight::AbstractVector = NamedTuple[]
 )
+    return graphFigureWithInference(
+        tree;
+        canvas = canvas,
+        layout = layout,
+        node = node,
+        label = label,
+        view = view,
+        style = style,
+        residualInference = nothing,
+        marginalInference = nothing,
+        highlight = highlight
+    )
+end
+
+function graphFigureWithInference(
+    tree::TreeFactorGraph;
+    canvas::NamedTuple = NamedTuple(),
+    layout::NamedTuple = NamedTuple(),
+    node::NamedTuple = NamedTuple(),
+    label::NamedTuple = NamedTuple(),
+    view::NamedTuple = NamedTuple(),
+    style::NamedTuple = NamedTuple(),
+    residualInference::Union{Nothing, AbstractInference} = nothing,
+    marginalInference::Union{Nothing, AbstractInference} = nothing,
+    highlight::AbstractVector = NamedTuple[]
+)
     margin = 48
     canvasOptions = graphFigureCanvasOptions(canvas)
     layoutOptions = graphFigureLayoutOptions(layout)
@@ -832,7 +904,97 @@ function graphFigure(
         showEdgeIds = labelOptions.showEdgeIds,
         tooltipDetail = labelOptions.tooltipDetail,
         fontSize = labelOptions.fontSize,
-        view = viewOptions
+        view = viewOptions,
+        residualInference = residualInference,
+        marginalInference = marginalInference
+    )
+end
+
+"""
+    graphFigure(graph::AbstractFactorGraph, inference::AbstractInference; kwargs...)
+
+Return an SVG visualization of `graph` with diagnostics from an existing
+`inference` object.
+
+# Arguments
+
+- `graph`: Factor graph to draw.
+- `inference`: Existing inference object used for diagnostic values.
+
+# Keywords
+
+Inference options control diagnostic overlays without running inference:
+- `residual = nothing`: Shade message residuals. Use `:all`, a positive integer
+  count, or a fraction in `(0, 1]`.
+- `variance = nothing`: Shade Gaussian sum-product marginal variances. Use
+  `:all`, a positive integer count, or a fraction in `(0, 1]`.
+
+Variable tooltips include current marginal values when available.
+
+All graph-only `graphFigure` keywords are also supported.
+
+# Example
+
+```julia
+inference = moment(graph)
+
+graphFigure(
+    graph,
+    inference;
+    residual = 4,
+    variance = :all
+)
+```
+"""
+function graphFigure(
+    graph::AbstractFactorGraph,
+    inference::AbstractInference;
+    residual = nothing,
+    variance = nothing,
+    highlight::AbstractVector = NamedTuple[],
+    kwargs...
+)
+    figureHighlight = graphFigureInferenceHighlights(
+        graph,
+        inference,
+        residual,
+        variance,
+        highlight
+    )
+    residualInference = residual === nothing ? nothing : inference
+
+    return graphFigureWithInference(
+        graph;
+        highlight = figureHighlight,
+        residualInference = residualInference,
+        marginalInference = inference,
+        kwargs...
+    )
+end
+
+function graphFigure(
+    tree::TreeFactorGraph,
+    inference::AbstractInference;
+    residual = nothing,
+    variance = nothing,
+    highlight::AbstractVector = NamedTuple[],
+    kwargs...
+)
+    figureHighlight = graphFigureInferenceHighlights(
+        tree.graph,
+        inference,
+        residual,
+        variance,
+        highlight
+    )
+    residualInference = residual === nothing ? nothing : inference
+
+    return graphFigureWithInference(
+        tree;
+        highlight = figureHighlight,
+        residualInference = residualInference,
+        marginalInference = inference,
+        kwargs...
     )
 end
 
@@ -877,9 +1039,60 @@ function saveGraphFigure(path::AbstractString, graph::AbstractFactorGraph; kwarg
     return path
 end
 
+"""
+    saveGraphFigure(path::AbstractString,
+        graph::AbstractFactorGraph,
+        inference::AbstractInference;
+        kwargs...
+    )
+
+Write an SVG visualization of `graph` with diagnostics from an existing
+`inference` object to `path`.
+
+This method forwards keyword arguments to `graphFigure(graph, inference; ...)`.
+"""
+function saveGraphFigure(
+    path::AbstractString,
+    graph::AbstractFactorGraph,
+    inference::AbstractInference;
+    kwargs...
+)
+    open(path, "w") do io
+        write(io, graphFigure(graph, inference; kwargs...))
+    end
+
+    return path
+end
+
 function saveGraphFigure(path::AbstractString, tree::TreeFactorGraph; kwargs...)
     open(path, "w") do io
         write(io, graphFigure(tree; kwargs...))
+    end
+
+    return path
+end
+
+"""
+    saveGraphFigure(
+        path::AbstractString,
+        tree::TreeFactorGraph,
+        inference::AbstractInference;
+        kwargs...
+    )
+
+Write an SVG visualization of `tree` with diagnostics from an existing
+`inference` object to `path`.
+
+This method forwards keyword arguments to `graphFigure(tree, inference; ...)`.
+"""
+function saveGraphFigure(
+    path::AbstractString,
+    tree::TreeFactorGraph,
+    inference::AbstractInference;
+    kwargs...
+)
+    open(path, "w") do io
+        write(io, graphFigure(tree, inference; kwargs...))
     end
 
     return path
@@ -908,7 +1121,9 @@ function treeGraphFigure(
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
     fontSize::Int,
-    view::NamedTuple
+    view::NamedTuple,
+    residualInference::Union{Nothing, AbstractInference},
+    marginalInference::Union{Nothing, AbstractInference}
 )
     if !(orientation in (:horizontal, :vertical))
         error("orientation must be :horizontal or :vertical.")
@@ -945,7 +1160,9 @@ function treeGraphFigure(
             showEdgeIds = showEdgeIds,
             tooltipDetail = tooltipDetail,
             fontSize = fontSize,
-            view = view
+            view = view,
+            residualInference = residualInference,
+            marginalInference = marginalInference
         )
     end
 
@@ -1128,7 +1345,8 @@ function treeGraphFigure(
             edge,
             highlightState.edges
         )
-        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureEdgeTooltip(graph, edge, tooltipDetail, residualInference) : nothing
         println(
             buffer,
             svgEdge(
@@ -1166,7 +1384,13 @@ function treeGraphFigure(
         variable = graph.variables[index]
         label = escapeXML(variable.label)
         className = variableClassName(index, highlightState.variables, view.focusVariableSet)
-        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureVariableTooltip(
+                graph,
+                index,
+                tooltipDetail,
+                marginalInference
+            ) : nothing
         println(
             buffer,
             svgCircle(
@@ -1256,7 +1480,9 @@ function verticalTreeGraphFigure(
     showEdgeIds::Bool,
     tooltipDetail::Symbol,
     fontSize::Int,
-    view::NamedTuple
+    view::NamedTuple,
+    residualInference::Union{Nothing, AbstractInference},
+    marginalInference::Union{Nothing, AbstractInference}
 )
     if zoom <= 0
         error("zoom must be positive.")
@@ -1438,7 +1664,8 @@ function verticalTreeGraphFigure(
             edge,
             highlightState.edges
         )
-        tooltip = showTooltips ? graphFigureEdgeTooltip(graph, edge, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureEdgeTooltip(graph, edge, tooltipDetail, residualInference) : nothing
         println(
             buffer,
             svgEdge(
@@ -1477,7 +1704,13 @@ function verticalTreeGraphFigure(
         variable = graph.variables[index]
         label = escapeXML(variable.label)
         className = variableClassName(index, highlightState.variables, view.focusVariableSet)
-        tooltip = showTooltips ? graphFigureVariableTooltip(graph, index, tooltipDetail) : nothing
+        tooltip = showTooltips ?
+            graphFigureVariableTooltip(
+                graph,
+                index,
+                tooltipDetail,
+                marginalInference
+            ) : nothing
         println(
             buffer,
             svgCircle(
@@ -1804,7 +2037,8 @@ end
 function graphFigureVariableTooltip(
     graph::AbstractFactorGraph,
     variableIndex::Int,
-    detail::Symbol
+    detail::Symbol,
+    marginalInference::Union{Nothing, AbstractInference} = nothing
 )
     variable = graph.variables[variableIndex]
     identityLines = [
@@ -1814,10 +2048,13 @@ function graphFigureVariableTooltip(
         graphFigureVariableSizeTooltip(variable),
         "degree: $(length(graph.variableEdges[variableIndex]))"
     ]
+    sections = graphFigureVariableDataTooltip(variable, detail)
+    append!(sections, graphFigureMarginalTooltip(graph, marginalInference, variableIndex, detail))
+
     lines = graphFigureTooltipLines(
         "Variable $(variable.label)",
         identityLines,
-        graphFigureVariableDataTooltip(variable, detail),
+        sections,
         detail
     )
 
@@ -1853,7 +2090,12 @@ end
 graphFigureModelKind(::Union{GaussianVariable, GaussianFactor}) = "Gaussian"
 graphFigureModelKind(::Union{DiscreteVariable, DiscreteFactor}) = "Discrete"
 
-function graphFigureEdgeTooltip(graph::AbstractFactorGraph, edge::Edge, detail::Symbol)
+function graphFigureEdgeTooltip(
+    graph::AbstractFactorGraph,
+    edge::Edge,
+    detail::Symbol,
+    residualInference::Union{Nothing, AbstractInference} = nothing
+)
     variable = graph.variables[edge.variableIndex]
     factor = graph.factors[edge.factorIndex]
     identityLines = [
@@ -1862,10 +2104,24 @@ function graphFigureEdgeTooltip(graph::AbstractFactorGraph, edge::Edge, detail::
         "variable index: $(edge.variableIndex)",
         "factor index: $(edge.factorIndex)"
     ]
+    sections = Pair{String, Vector{String}}[]
+
+    if residualInference !== nothing
+        residualText = graphFigureScientificText(
+            graphFigureEdgeResidual(graph, residualInference, edge)
+        )
+        push!(
+            sections,
+            "Residual" => [
+                "value: $residualText"
+            ]
+        )
+    end
+
     lines = graphFigureTooltipLines(
         "Edge $(edge.id)",
         identityLines,
-        Pair{String, Vector{String}}[],
+        sections,
         detail
     )
 
@@ -2128,8 +2384,82 @@ function graphFigureReferenceVectorText(values::AbstractVector)
     return "[$(join((graphFigureValueText(value) for value in values), ", "))]"
 end
 
+function graphFigureValueText(value::Real)
+    return graphFigureCompactNumberText(value)
+end
+
 function graphFigureValueText(value)
     return sprint(show, value)
+end
+
+function graphFigureScientificText(value::Real)
+    numericValue = Float64(value)
+    if !isfinite(numericValue)
+        return graphFigureValueText(value)
+    end
+
+    if numericValue == 0.0
+        return "0.0000e0"
+    end
+
+    exponent = floor(Int, log10(abs(numericValue)))
+    mantissa = numericValue / 10.0^exponent
+    mantissa = round(mantissa; digits = 4)
+
+    if abs(mantissa) >= 10.0
+        mantissa /= 10.0
+        exponent += 1
+    end
+
+    return "$(graphFigureFixedDecimalText(mantissa, 4))e$exponent"
+end
+
+function graphFigureCompactNumberText(value::Real)
+    numericValue = Float64(value)
+    if !isfinite(numericValue)
+        return graphFigureValueText(value)
+    end
+
+    if numericValue == 0.0
+        return "0"
+    end
+
+    if abs(numericValue) >= 10_000 || abs(numericValue) < 1.0e-4
+        return graphFigureScientificText(value)
+    end
+
+    rounded = round(numericValue; digits = 4)
+
+    if isinteger(rounded)
+        return string(Int(rounded))
+    end
+
+    return graphFigureTrimDecimalText(graphFigureFixedDecimalText(rounded, 4))
+end
+
+function graphFigureFixedDecimalText(value::Real, digits::Int)
+    text = string(value)
+
+    if !occursin(".", text)
+        return text * "." * repeat("0", digits)
+    end
+
+    integer, decimal = split(text, "."; limit = 2)
+    decimal = first(decimal * repeat("0", digits), digits)
+
+    return "$integer.$decimal"
+end
+
+function graphFigureTrimDecimalText(text::AbstractString)
+    if !occursin(".", text)
+        return String(text)
+    end
+
+    while endswith(text, "0")
+        text = text[begin:prevind(text, end)]
+    end
+
+    return endswith(text, ".") ? text[begin:prevind(text, end)] : String(text)
 end
 
 function graphFigureArrayText(array::AbstractVector)
@@ -2137,7 +2467,9 @@ function graphFigureArrayText(array::AbstractVector)
         return "  []"
     end
 
-    return "  [$(join((graphFigureValueText(value) for value in array), ", "))]"
+    format = graphFigureBlockNumberFormat(array)
+
+    return "  [$(join((graphFigureBlockValueText(value, format) for value in array), ", "))]"
 end
 
 function graphFigureArrayText(array::AbstractMatrix)
@@ -2202,8 +2534,9 @@ function graphFigureMatrixText(matrix::AbstractMatrix, indent::Int)
         return "$(spaces)[]"
     end
 
+    format = graphFigureBlockNumberFormat(matrix)
     cellText = [
-        graphFigureValueText(matrix[row, column])
+        graphFigureBlockValueText(matrix[row, column], format)
         for row in axes(matrix, 1), column in axes(matrix, 2)
     ]
     widths = [
@@ -2223,6 +2556,53 @@ function graphFigureMatrixText(matrix::AbstractMatrix, indent::Int)
     end
 
     return join(lines, "\n")
+end
+
+function graphFigureBlockNumberFormat(values::AbstractArray)
+    digits = 0
+
+    for value in values
+        if value isa Real && graphFigureUsesFixedDecimal(value)
+            digits = max(digits, graphFigureDecimalDigits(value))
+        end
+    end
+
+    return (digits = digits,)
+end
+
+function graphFigureBlockValueText(value::Real, format::NamedTuple)
+    numericValue = Float64(value)
+    if !isfinite(numericValue) || !graphFigureUsesFixedDecimal(value)
+        return graphFigureCompactNumberText(value)
+    end
+
+    if format.digits == 0
+        return string(Int(round(numericValue)))
+    end
+
+    return graphFigureFixedDecimalText(round(numericValue; digits = format.digits), format.digits)
+end
+
+function graphFigureBlockValueText(value, format::NamedTuple)
+    return graphFigureValueText(value)
+end
+
+function graphFigureUsesFixedDecimal(value::Real)
+    numericValue = Float64(value)
+    return isfinite(numericValue) &&
+        (numericValue == 0.0 || (abs(numericValue) < 10_000 && abs(numericValue) >= 1.0e-4))
+end
+
+function graphFigureDecimalDigits(value::Real)
+    numericValue = Float64(value)
+
+    for digits in 0:4
+        if round(numericValue; digits = digits) == numericValue
+            return digits
+        end
+    end
+
+    return 4
 end
 
 function graphFigureHighlightState(
@@ -2349,7 +2729,10 @@ function graphFigureNodeHighlightStyle(
         strokeWidth = something(
             graphFigureHighlightOption(highlight, :strokeWidth, defaultStrokeWidth),
             defaultStrokeWidth
-        )
+        ),
+        haloStroke = graphFigureHighlightOption(highlight, :haloStroke, nothing),
+        haloStrokeWidth = graphFigureHighlightOption(highlight, :haloStrokeWidth, nothing),
+        haloStrokeOpacity = graphFigureHighlightOption(highlight, :haloStrokeOpacity, nothing)
     )
 end
 
@@ -2358,16 +2741,21 @@ function graphFigureEdgeHighlightStyle(
     defaultStroke,
     defaultStrokeWidth
 )
+    strokeWidth = something(
+        graphFigureHighlightOption(highlight, :strokeWidth, defaultStrokeWidth),
+        defaultStrokeWidth
+    )
+
     return (
         stroke = something(
             graphFigureHighlightOption(highlight, :stroke, defaultStroke),
             defaultStroke
         ),
         fill = nothing,
-        strokeWidth = something(
-            graphFigureHighlightOption(highlight, :strokeWidth, defaultStrokeWidth),
-            defaultStrokeWidth
-        )
+        strokeWidth = strokeWidth,
+        haloStroke = graphFigureHighlightOption(highlight, :haloStroke, nothing),
+        haloStrokeWidth = graphFigureHighlightOption(highlight, :haloStrokeWidth, nothing),
+        haloStrokeOpacity = graphFigureHighlightOption(highlight, :haloStrokeOpacity, nothing)
     )
 end
 

@@ -52,6 +52,15 @@ function svgStyle(
     }
     .factor-context { opacity: 0.42; }
     .edge-highlight { stroke-opacity: 1.0; }
+    .edge-residual-halo {
+      fill: none;
+      pointer-events: none;
+      stroke-linecap: round;
+    }
+    .variable-variance-halo {
+      fill: none;
+      pointer-events: none;
+    }
     .edge-label {
       fill: $(style.edgeStroke);
       font-size: $(ceil(Int, 0.85 * fontSize))px;
@@ -169,6 +178,19 @@ function svgEdge(
     visibleEdge = curvedEdges ?
         svgPath(x1, y1, x2, y2, className, style, nothing, orientation) :
         svgLine(x1, y1, x2, y2, className, style)
+    haloEdge = svgEdgeHalo(
+        x1,
+        y1,
+        x2,
+        y2,
+        curvedEdges,
+        style,
+        orientation
+    )
+
+    if !isnothing(haloEdge)
+        visibleEdge = string(haloEdge, "\n", visibleEdge)
+    end
 
     if isnothing(tooltip)
         return visibleEdge
@@ -179,6 +201,35 @@ function svgEdge(
         svgLine(x1, y1, x2, y2, "edge-hitbox", nothing, tooltip)
 
     return string(visibleEdge, "\n", hitbox)
+end
+
+function svgEdgeHalo(
+    x1::Real,
+    y1::Real,
+    x2::Real,
+    y2::Real,
+    curvedEdges::Bool,
+    style::Union{Nothing, NamedTuple},
+    orientation::Symbol
+)
+    if isnothing(style) || !hasproperty(style, :haloStrokeWidth) ||
+            isnothing(style.haloStrokeWidth)
+        return nothing
+    end
+
+    stroke = hasproperty(style, :haloStroke) && !isnothing(style.haloStroke) ?
+        style.haloStroke : style.stroke
+    opacity = hasproperty(style, :haloStrokeOpacity) ? style.haloStrokeOpacity : 0.18
+    haloStyle = (
+        stroke = stroke,
+        fill = nothing,
+        strokeWidth = style.haloStrokeWidth,
+        strokeOpacity = opacity
+    )
+
+    return curvedEdges ?
+        svgPath(x1, y1, x2, y2, "edge-residual-halo", haloStyle, nothing, orientation) :
+        svgLine(x1, y1, x2, y2, "edge-residual-halo", haloStyle)
 end
 
 function svgEdgeIdLabelParts(
@@ -507,16 +558,20 @@ function svgStyleAttribute(style::Union{Nothing, NamedTuple})
 
     parts = String[]
 
-    if !isnothing(style.stroke)
+    if hasproperty(style, :stroke) && !isnothing(style.stroke)
         push!(parts, "stroke: $(style.stroke)")
     end
 
-    if !isnothing(style.fill)
+    if hasproperty(style, :fill) && !isnothing(style.fill)
         push!(parts, "fill: $(style.fill)")
     end
 
-    if !isnothing(style.strokeWidth)
+    if hasproperty(style, :strokeWidth) && !isnothing(style.strokeWidth)
         push!(parts, "stroke-width: $(style.strokeWidth)")
+    end
+
+    if hasproperty(style, :strokeOpacity) && !isnothing(style.strokeOpacity)
+        push!(parts, "stroke-opacity: $(style.strokeOpacity)")
     end
 
     return isempty(parts) ? "" : " style=\"$(join(parts, "; "))\""
@@ -550,7 +605,42 @@ function svgCircle(
         svgStyleAttribute(style)
     )
 
-    return svgShape("circle", attributes, tooltip)
+    visibleCircle = svgShape("circle", attributes, tooltip)
+    haloCircle = svgCircleHalo(x, y, radius, style)
+
+    if isnothing(haloCircle)
+        return visibleCircle
+    end
+
+    return string(haloCircle, "\n", visibleCircle)
+end
+
+function svgCircleHalo(
+    x::Real,
+    y::Real,
+    radius::Int,
+    style::Union{Nothing, NamedTuple}
+)
+    if isnothing(style) || !hasproperty(style, :haloStrokeWidth) ||
+            isnothing(style.haloStrokeWidth)
+        return nothing
+    end
+
+    stroke = hasproperty(style, :haloStroke) && !isnothing(style.haloStroke) ?
+        style.haloStroke : style.stroke
+    opacity = hasproperty(style, :haloStrokeOpacity) ? style.haloStrokeOpacity : 0.18
+    haloStyle = (
+        stroke = stroke,
+        fill = nothing,
+        strokeWidth = style.haloStrokeWidth,
+        strokeOpacity = opacity
+    )
+    attributes = string(
+        "class=\"variable-variance-halo\" cx=\"$x\" cy=\"$y\" r=\"$(radius + 2)\"",
+        svgStyleAttribute(haloStyle)
+    )
+
+    return svgShape("circle", attributes, nothing)
 end
 
 function svgRect(

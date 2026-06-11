@@ -4,6 +4,18 @@
 
 ## Version 0.2.5 - Unreleased
 
+#### Changed
+
+- Added inference residual views to `graphFigure` for drawing current message
+  residual magnitudes and reporting residual values in edge tooltips.
+- Added Gaussian marginal variance views to `graphFigure` for shading variable
+  nodes by marginal covariance.
+- Added marginal value tooltip sections to inference-aware `graphFigure` output
+  for Gaussian sum-product and discrete sum-product inference.
+- Documented inference-aware `graphFigure` and `saveGraphFigure` overloads for
+  residual and variance visualization.
+- Added graph visualization documentation examples for inference diagnostics.
+
 #### Fixed
 
 - Fixed Gaussian min-sum frozen variable and edge message updates so frozen

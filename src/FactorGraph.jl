@@ -33,6 +33,7 @@ include("visualization/figure.jl")
 include("visualization/options.jl")
 include("visualization/layout.jl")
 include("visualization/svg.jl")
+include("visualization/inference.jl")
 
 export AbstractFactorGraph,
     GaussianFactorGraph,

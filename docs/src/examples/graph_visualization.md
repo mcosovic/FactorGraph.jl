@@ -240,6 +240,50 @@ last value is reused when the graph has more gaps.
 
 ---
 
+
+## Inference Diagnostics
+
+Passing an existing inference object adds diagnostic values to graph tooltips
+without running inference. Residual shading highlights the largest message
+residuals, while variance shading highlights Gaussian variable nodes by marginal
+variance:
+
+```@example graph_visualization
+inference = moment(graph)
+
+for _ in 1:4
+    messages!(graph, inference; schedule = :flooding)
+end
+
+saveGraphFigure(
+    "../gv_inference.svg",
+    graph,
+    inference;
+    residual = 4,
+    variance = :all,
+    label = (tooltipDetail = :full, showEdgeIds = true)
+)
+
+nothing # hide
+```
+
+```@raw html
+<div class="graph-figure" style="text-align: center;">
+  <object
+    data="../../gv_inference.svg"
+    type="image/svg+xml"
+    aria-label="Graph figure with inference diagnostics"
+    style="width: 45%; height: auto;">
+    <a href="../../gv_inference.svg">Graph figure with inference diagnostics</a>
+  </object>
+</div>
+```
+
+Variable tooltips include current marginal values when available. Edge tooltips
+include residual values when `residual` is requested.
+
+---
+
 ## Full Option Sketch
 
 This final call collects the option groups in one place. Treat it as a reference
@@ -297,5 +341,18 @@ graphFigure(
         (factor = "f2", stroke = "#f59e0b", fill = "#fef3c7", strokeWidth = 4),
         (edge = 1, stroke = "#7c3aed", strokeWidth = 4)
     ]
+)
+```
+
+When an inference object is available, pass it as the second positional argument
+to add inference-specific diagnostics. The graph-only options above are still
+available, and inference adds `residual` and `variance`:
+
+```julia
+graphFigure(
+    graph,
+    inference;
+    residual = 4,
+    variance = :all
 )
 ```

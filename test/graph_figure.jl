@@ -119,6 +119,76 @@ end
         @test count("stroke-width: 5", svg) > 1
     end
 
+    @testset "Inference residuals" begin
+        inference = sumproduct(graph)
+
+        svg = graphFigure(graph, inference; residual = 1)
+        fractionSvg = graphFigure(graph, inference; residual = 0.5)
+        allSvg = graphFigure(graph, inference; residual = :all)
+        discreteMinSumSvg = graphFigure(graph, minsum(graph); residual = 1)
+        gaussianGraph = graphFigureGaussianTooltipGraph()
+        momentSvg = graphFigure(gaussianGraph, moment(gaussianGraph); residual = 1)
+        canonicalSvg = graphFigure(gaussianGraph, canonical(gaussianGraph); residual = 1)
+        gaussianMinSumSvg = graphFigure(gaussianGraph, minsum(gaussianGraph); residual = 1)
+
+        @test occursin("edge edge-highlight", svg)
+        @test occursin("edge-residual-halo", svg)
+        @test occursin("stroke: #dc2626", svg)
+        @test occursin("stroke-opacity: 0.43", svg)
+        @test occursin("stroke-width: 10", svg)
+        @test occursin(r"Residual\n  value: [0-9]+\.[0-9]{4}e", svg)
+        @test occursin("edge edge-highlight", fractionSvg)
+        @test occursin("edge edge-highlight", allSvg)
+        @test occursin("Residual\n  value:", discreteMinSumSvg)
+        @test occursin("Residual\n  value:", momentSvg)
+        @test occursin("Residual\n  value:", canonicalSvg)
+        @test occursin("Residual\n  value:", gaussianMinSumSvg)
+        @test_throws ErrorException graphFigure(graph, inference; residual = 0)
+        @test_throws ErrorException graphFigure(graph, inference; residual = true)
+        @test_throws ErrorException graphFigure(graph, inference; residual = 1.2)
+        @test_throws ErrorException graphFigure(graph, inference; residual = :latest)
+    end
+
+    @testset "Inference variance" begin
+        gaussianGraph = graphFigureGaussianTooltipGraph()
+        momentInference = moment(gaussianGraph)
+        canonicalInference = canonical(gaussianGraph)
+
+        svg = graphFigure(gaussianGraph, momentInference; variance = 1)
+        fractionSvg = graphFigure(gaussianGraph, momentInference; variance = 0.5)
+        allSvg = graphFigure(gaussianGraph, canonicalInference; variance = :all)
+        combinedSvg = graphFigure(gaussianGraph, momentInference; residual = 1, variance = 1)
+
+        @test occursin("variable-variance-halo", svg)
+        @test occursin("stroke: #f59e0b", svg)
+        @test occursin("variable-variance-halo", fractionSvg)
+        @test occursin("variable-variance-halo", allSvg)
+        @test occursin("edge-residual-halo", combinedSvg)
+        @test occursin("variable-variance-halo", combinedSvg)
+        @test_throws ErrorException graphFigure(gaussianGraph, momentInference; variance = 0)
+        @test_throws ErrorException graphFigure(gaussianGraph, momentInference; variance = true)
+        @test_throws ErrorException graphFigure(gaussianGraph, momentInference; variance = 1.2)
+        @test_throws ErrorException graphFigure(gaussianGraph, momentInference; variance = :latest)
+        @test_throws ErrorException graphFigure(gaussianGraph, minsum(gaussianGraph); variance = 1)
+        @test_throws ErrorException graphFigure(graph, sumproduct(graph); variance = 1)
+    end
+
+    @testset "Inference marginal tooltips" begin
+        inference = sumproduct(graph)
+        svg = graphFigure(graph, inference)
+        fullSvg = graphFigure(graph, inference; label = (tooltipDetail = :full,))
+
+        gaussianGraph = graphFigureGaussianTooltipGraph()
+        gaussianSvg = graphFigure(gaussianGraph, moment(gaussianGraph))
+
+        @test occursin("Marginal\n  most likely:", svg)
+        @test occursin("most likely:", svg)
+        @test occursin("confidence:", svg)
+        @test occursin("probability:\n", fullSvg)
+        @test occursin("Marginal\n  mean:", gaussianSvg)
+        @test occursin("variance:", gaussianSvg)
+    end
+
     @testset "Custom graph style" begin
         svg = graphFigure(
             graph;
@@ -307,19 +377,35 @@ end
             view = (variables = [:x1], hops = 2)
         )
         @test startswith(spacedViewSvg, "<svg")
+
+        inference = sumproduct(graph)
+        residualSvg = graphFigure(tree, inference; residual = 1)
+        @test occursin("edge edge-highlight", residualSvg)
     end
 
     @testset "File output" begin
         path = tempname() * ".svg"
+        residualPath = tempname() * ".svg"
 
         try
             returnedPath = saveGraphFigure(path, graph; label = (placement = :inside,))
+            inference = sumproduct(graph)
+            returnedResidualPath = saveGraphFigure(
+                residualPath,
+                graph,
+                inference;
+                residual = 1
+            )
 
             @test returnedPath == path
+            @test returnedResidualPath == residualPath
             @test isfile(path)
+            @test isfile(residualPath)
             @test startswith(read(path, String), "<svg")
+            @test occursin("edge edge-highlight", read(residualPath, String))
         finally
             rm(path; force = true)
+            rm(residualPath; force = true)
         end
     end
 
